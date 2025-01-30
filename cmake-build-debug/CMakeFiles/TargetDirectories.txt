@@ -1,3 +1,7 @@
 E:/WattsApp/cmake-build-debug/CMakeFiles/WattsApp.dir
+E:/WattsApp/cmake-build-debug/CMakeFiles/strip.dir
+E:/WattsApp/cmake-build-debug/CMakeFiles/hex.dir
+E:/WattsApp/cmake-build-debug/CMakeFiles/eeprom.dir
+E:/WattsApp/cmake-build-debug/CMakeFiles/flash.dir
 E:/WattsApp/cmake-build-debug/CMakeFiles/edit_cache.dir
 E:/WattsApp/cmake-build-debug/CMakeFiles/rebuild_cache.dir
