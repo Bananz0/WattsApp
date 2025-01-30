@@ -15,7 +15,14 @@ void testLight(const uint8_t time_delay) {
         i+=1;
     }
 }
-void initializePorts(char portName, int8_t portType ) { //This is to initialize the ports to a known output/input state
+
+//Define portType as enum
+typedef enum {
+    INPUT = 0x00,
+    OUTPUT = 0xFF
+} PortType;
+
+void initializePorts(const char portName, const PortType portType ) { //This is to initialize the ports to a known output/input state
     /*portType Input = 0x00 , Output = 0xFF*/
     switch (portName) {
         case 'A': DDRA = portType; break;
@@ -28,10 +35,10 @@ void initializePorts(char portName, int8_t portType ) { //This is to initialize 
 
 int main() {
     /*portType Input = 0x00 , Output = 0xFF*/
-    initializePorts('A', 0x00); //Set Port A to Analog Input ( Mains Capacity )
-    initializePorts('B', 0x00); // Set Port B to Digital
-    initializePorts('C', 0x00);
-    initializePorts('D', 0x00);
+    initializePorts('A', OUTPUT); // Set Port A to Analog Output (from SM to TB ( Mains Capacity, Analog Ground Ref for Mains Capacity))
+    initializePorts('B', INPUT); // Set Port B to Analog Input (from TB to SM ( Power Generation Stats ) )
+    initializePorts('C', OUTPUT); // Set Port C to Digital Output ( from SM to TB ( Charge batt, discharge batt, etc...))
+    initializePorts('D', INPUT); // Set Port D to Digital Input (from TB to SM ( Call for Load 1,2,3, ground ref)
 
 
     return 0;
