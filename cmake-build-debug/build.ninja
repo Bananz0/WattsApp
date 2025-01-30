@@ -50,10 +50,9 @@ cmake_ninja_workdir = E$:/WattsApp/cmake-build-debug/
 build cmake_object_order_depends_target_WattsApp: phony || .
 
 build CMakeFiles/WattsApp.dir/src/main.cpp.obj: CXX_COMPILER__WattsApp_unscanned_Debug E$:/WattsApp/src/main.cpp || cmake_object_order_depends_target_WattsApp
-  DEFINES = -DF_CPU=12000000
+  DEFINES = -DBAUD="" -DF_CPU=12000000
   DEP_FILE = CMakeFiles\WattsApp.dir\src\main.cpp.obj.d
-  FLAGS = -mmcu=atmega644p -gstabs -g -ggdb -DF_CPU=12000000 -DBAUD=9600 -Os -lm -lprintf_flt -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -g
-  INCLUDES = -IE:/WattsApp/include
+  FLAGS = -g -mmcu=atmega644p -std=gnu99 -Os -Wall -Wno-main -Wundef -pedantic -Wstrict-prototypes -Werror -Wfatal-errors -Wl,--relax,--gc-sections -g -gdwarf-2 -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -fno-split-wide-types -fno-tree-scev-cprop
   OBJECT_DIR = CMakeFiles\WattsApp.dir
   OBJECT_FILE_DIR = CMakeFiles\WattsApp.dir\src
 
@@ -66,7 +65,8 @@ build CMakeFiles/WattsApp.dir/src/main.cpp.obj: CXX_COMPILER__WattsApp_unscanned
 # Link the executable WattsApp.elf
 
 build WattsApp.elf: CXX_EXECUTABLE_LINKER__WattsApp_Debug CMakeFiles/WattsApp.dir/src/main.cpp.obj
-  FLAGS = -mmcu=atmega644p -gstabs -g -ggdb -DF_CPU=12000000 -DBAUD=9600 -Os -lm -lprintf_flt -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -g
+  FLAGS = -g
+  LINK_FLAGS = -mmcu=atmega644p
   OBJECT_DIR = CMakeFiles\WattsApp.dir
   POST_BUILD = cd .
   PRE_LINK = cd .
@@ -93,9 +93,21 @@ build eeprom: phony CMakeFiles/eeprom strip
 
 
 #############################################
-# Utility command for flash
+# Utility command for upload
 
-build flash: phony CMakeFiles/flash hex
+build upload: phony CMakeFiles/upload hex
+
+
+#############################################
+# Utility command for upload_eeprom
+
+build upload_eeprom: phony CMakeFiles/upload_eeprom eeprom
+
+
+#############################################
+# Utility command for fuses
+
+build fuses: phony CMakeFiles/fuses
 
 
 #############################################
@@ -139,14 +151,28 @@ build CMakeFiles/hex | ${cmake_ninja_workdir}CMakeFiles/hex: CUSTOM_COMMAND || W
 # Custom command for CMakeFiles\eeprom
 
 build CMakeFiles/eeprom | ${cmake_ninja_workdir}CMakeFiles/eeprom: CUSTOM_COMMAND || WattsApp.elf strip
-  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D E:\WattsApp\cmake-build-debug && avr-objcopy -j .eeprom --change-section-lma .eeprom=0 -O ihex WattsApp.elf WattsApp.eeprom"
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D E:\WattsApp\cmake-build-debug && avr-objcopy -j .eeprom --set-section-flags=.eeprom="alloc,load" --change-section-lma .eeprom=0 -O ihex WattsApp.elf WattsApp.eep"
 
 
 #############################################
-# Custom command for CMakeFiles\flash
+# Custom command for CMakeFiles\upload
 
-build CMakeFiles/flash | ${cmake_ninja_workdir}CMakeFiles/flash: CUSTOM_COMMAND || WattsApp.elf hex strip
+build CMakeFiles/upload | ${cmake_ninja_workdir}CMakeFiles/upload: CUSTOM_COMMAND || WattsApp.elf hex strip
   COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D E:\WattsApp\cmake-build-debug && avrdude -c usbasp -p atmega644p -U flash:w:WattsApp.hex"
+
+
+#############################################
+# Custom command for CMakeFiles\upload_eeprom
+
+build CMakeFiles/upload_eeprom | ${cmake_ninja_workdir}CMakeFiles/upload_eeprom: CUSTOM_COMMAND || WattsApp.elf eeprom strip
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D E:\WattsApp\cmake-build-debug && avrdude -c usbasp -p atmega644p -U eeprom:w:WattsApp.eep"
+
+
+#############################################
+# Custom command for CMakeFiles\fuses
+
+build CMakeFiles/fuses | ${cmake_ninja_workdir}CMakeFiles/fuses: CUSTOM_COMMAND
+  COMMAND = C:\WINDOWS\system32\cmd.exe /C "cd /D E:\WattsApp\cmake-build-debug && avrdude -c usbasp -p atmega644p -U lfuse:w::m -U hfuse:w::m -U efuse:w::m -U lock:w::m"
 
 # =============================================================================
 # Target aliases.
@@ -170,14 +196,14 @@ build all: phony WattsApp.elf strip hex
 #############################################
 # Re-run CMake if any of its inputs changed.
 
-build build.ninja: RERUN_CMAKE | C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeASMInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-ASM.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Platform/Generic.cmake CMakeCache.txt CMakeFiles/3.30.5/CMakeASMCompiler.cmake CMakeFiles/3.30.5/CMakeCCompiler.cmake CMakeFiles/3.30.5/CMakeCXXCompiler.cmake CMakeFiles/3.30.5/CMakeSystem.cmake E$:/WattsApp/CMakeLists.txt
+build build.ninja: RERUN_CMAKE | C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Platform/Generic.cmake CMakeCache.txt CMakeFiles/3.30.5/CMakeCCompiler.cmake CMakeFiles/3.30.5/CMakeCXXCompiler.cmake CMakeFiles/3.30.5/CMakeSystem.cmake E$:/WattsApp/CMakeLists.txt
   pool = console
 
 
 #############################################
 # A missing CMake input file is not an error.
 
-build C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeASMInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-ASM.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Platform/Generic.cmake CMakeCache.txt CMakeFiles/3.30.5/CMakeASMCompiler.cmake CMakeFiles/3.30.5/CMakeCCompiler.cmake CMakeFiles/3.30.5/CMakeCXXCompiler.cmake CMakeFiles/3.30.5/CMakeSystem.cmake E$:/WattsApp/CMakeLists.txt: phony
+build C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCXXInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeCommonLanguageInclude.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeGenericSystem.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeInitializeConfigs.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeLanguageInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInformation.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/CMakeSystemSpecificInitialize.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/CMakeCommonCompilerMacros.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-C.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU-CXX.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Compiler/GNU.cmake C$:/Program$ Files/JetBrains/CLion$ 2024.3/bin/cmake/win/x64/share/cmake-3.30/Modules/Platform/Generic.cmake CMakeCache.txt CMakeFiles/3.30.5/CMakeCCompiler.cmake CMakeFiles/3.30.5/CMakeCXXCompiler.cmake CMakeFiles/3.30.5/CMakeSystem.cmake E$:/WattsApp/CMakeLists.txt: phony
 
 
 #############################################

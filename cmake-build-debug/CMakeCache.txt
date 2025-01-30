@@ -233,6 +233,15 @@ CMAKE_TAPI:FILEPATH=CMAKE_TAPI-NOTFOUND
 CMAKE_VERBOSE_MAKEFILE:BOOL=FALSE
 
 //Value Computed by CMake
+My Firmware_BINARY_DIR:STATIC=E:/WattsApp/cmake-build-debug
+
+//Value Computed by CMake
+My Firmware_IS_TOP_LEVEL:STATIC=ON
+
+//Value Computed by CMake
+My Firmware_SOURCE_DIR:STATIC=E:/WattsApp
+
+//Value Computed by CMake
 WattsApp_BINARY_DIR:STATIC=E:/WattsApp/cmake-build-debug
 
 //Value Computed by CMake
