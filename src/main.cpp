@@ -65,9 +65,9 @@ void finalizePorts() {
     //Port D pin defs
     //Digital Inputs
     PORTD = 0xFF;
-    DDRD &= (~_BV(0) /*Call for Load 1*/
-           | ~_BV(1) /*Call for Load 2*/
-           | ~_BV(2) /*Call for Load 3*/);
+    DDRD &= ~(_BV(0) /*Call for Load 1*/
+            | _BV(1) /*Call for Load 2*/
+            | _BV(2) /*Call for Load 3*/);
 }
 
 int main() {
