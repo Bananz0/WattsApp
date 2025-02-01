@@ -2,9 +2,76 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-volatile uint16_t ADCVoltage;   //Global ADC voltage variable and idk if this is good
-volatile uint8_t ADCConversionFlag = 0;
 float Vref = 5.0f;      //Reference Voltage, not sure if 3.3 or 5
+volatile float ADCVoltage;   //Global ADC voltage variable and idk if this is good
+volatile uint8_t ADCConversionFlag = 0;
+
+//ISR ADC
+ISR(ADC_vect){
+    ADCVoltage = (ADC * Vref) / 0x3FF;
+    ADCConversionFlag = 1;
+}
+
+class ADCHandler {
+public:
+    ADCHandler() {}
+    void initializeADC() {
+        //Remember turn it off when sleeping as is recommended by the ADC
+        ADCSRA |= _BV(ADEN)   /*ADC Enable*/
+               | _BV(ADPS2)   /*This and PS1 are the pre scaler Bits*/
+               | _BV(ADPS1)   /*This combination divides by 64 and more at p259*/
+               | _BV(ACIE)    /*Enables the Interrupt for ADC Complete*/
+               | ~_BV(ADATE); /*Auto Trigger Disable*/
+
+        ADMUX &= ~(_BV(REFS0) | _BV(REFS1));  //Set the AREF to VCC, 5v and interal Vref turned off
+    }
+    void setADCChannel(const uint8_t channel) {
+        ADMUX = ((ADMUX & 0xE0)|channel); //Set the lower three bits to n
+    }
+    void readADC() {
+        ADCSRA |= _BV(ADSC); //Start ADC Conversion by setting the ad start convert to high
+        //while (ADCSRA & _BV(ADSC)) {} //This checks and waits for the ADC conversion bit but is blocking. (Disabled because it actually blocks the CPU)
+    }
+    void getVoltage(const uint8_t channel) {
+        setADCChannel(channel);
+        readADC();
+        while (!ADCConversionFlag){}
+        ADCConversionFlag = 0;
+    }
+};
+
+class AnalogueInput {
+public:
+    AnalogueInput() {
+        aDCHandler.initializeADC();        
+    }
+    float turbineCurrentCapacity() { //Read and return turbine capacity current
+        //Read Pin A2 using ADC
+        aDCHandler.getVoltage(2);
+        return ADCVoltage; //Amps 1:1 mapping
+    }
+
+    float pvCurrentCapacity() { //Read and return the PV Capacity current
+        //Read Pin A3 using ADC
+        aDCHandler.getVoltage(3);
+        return ADCVoltage; //Amps 1:1 mapping
+    }
+
+    float busbarCurrent() {
+        //Read Pin A1 using ADC
+        aDCHandler.getVoltage(1);
+        return ADCVoltage; //Amps 1:1 mapping
+    }
+
+    float busbarVoltage() {
+        //Read Pin A0 using ADC (scaled down from 10v)
+        aDCHandler.getVoltage(0);
+        return 100.0f * ADCVoltage; //Volts
+    }
+
+private:
+    ADCHandler aDCHandler;
+};
 
 void signOfLife() {
     PORTB ^= (1 << PB7);
@@ -81,73 +148,18 @@ void finalizePorts() {
             | _BV(2) /*Call for Load 3*/);
 }
 
-//ISR ADC
-ISR(ADC_vect){
-    ADCVoltage = (ADC * Vref) / 0x3FF;
-    ADCConversionFlag = 1;
-}
+void setDAC(const uint8_t channel) {
 
-void initializeADC() {
-    //Remember turn it off when sleeping as is recommended by the ADC
-    ADCSRA |= _BV(ADEN)   /*ADC Enable*/
-           | _BV(ADPS2)   /*This and PS1 are the pre scaler Bits*/
-           | _BV(ADPS1)   /*This combination divides by 64 and more at p259*/
-           | _BV(ACIE)    /*Enables the Interrupt for ADC Complete*/
-           | ~_BV(ADATE); /*Auto Trigger Disable*/
-
-    ADMUX &= ~(_BV(REFS0)
-             | _BV(REFS1));  //Set the AREF to VCC, 5v and interal Vref turned off
-}
-
-void setADCChannel(const uint8_t channel) {
-    ADMUX = ((ADMUX & 0xE0)|channel); //Set the lower three bits to n
-}
-
-void readADC() {
-    ADCSRA |= _BV(ADSC); //Start ADC Conversion by setting the ad start convert to high
-    //while (ADCSRA & _BV(ADSC)) {} //This checks and waits for the ADC conversion bit but is blocking. (Disabled because it actually blocks the CPU)
-}
-
-void getVoltage(const uint8_t channel) {
-    setADCChannel(channel);
-    readADC();
-    while (!ADCConversionFlag){}
-    ADCConversionFlag = 0;
-}
-
-uint16_t turbineCurrentCapacity() { //Read and return turbine capacity current
-    //Read Pin A2 using ADC
-    getVoltage(2);
-    return ADCVoltage; //Amps
-}
-
-uint16_t pvCurrentCapacity() { //Read and return the PV Capacity current
-    //Read Pin A3 using ADC
-    getVoltage(3);
-    return ADCVoltage; //Amps
-}
-
-uint16_t busbarCurrent() {
-    //Read Pin A1 using ADC
-    getVoltage(1);
-    return ADCVoltage; //Amps
-}
-
-uint16_t busbarVoltage() {
-    //Read Pin A0 using ADC (scaled down from 10v)
-    getVoltage(0);
-    return (100 * ADCVoltage); //Volts
 }
 
 void setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
-
-
 
 }
 
 int main() {
     sei();                                              //Enable Global Intterupts
-    initializeADC();                                    //Starts the ADC up
+    AnalogueInput analogueInput;                        //Starts the ADC up in the AI constructor
+    //ADCHandler.initializeADC();
     finalizePorts();
 
     testLight(1);
@@ -156,7 +168,7 @@ int main() {
     while (true) {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
 
-        uint16_t current = pvCurrentCapacity();
+        uint16_t current = analogueInput.pvCurrentCapacity();
         if (current > 3.5) {
             PORTB |= _BV(PB7);
         }
