@@ -1,5 +1,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
+#include <avr/interrupt.h>
 
 void signOfLife(void) {
     PORTB ^= (1 << PB7);
@@ -15,6 +16,14 @@ void testLight(const uint8_t time_delay) {
         PORTB ^= (1 << PB7); // Toggle PB7
         _delay_ms(50);       // Delay 50ms
     }
+}
+
+void testOutputPin(char portName, uint8_t pin) {
+    //Test Pin B0
+    PORTB |= _BV(pin);
+    _delay_ms(1000);
+    PORTB &= ~_BV(pin);
+
 }
 
 //Define portType as enum
@@ -70,12 +79,87 @@ void finalizePorts() {
             | _BV(2) /*Call for Load 3*/);
 }
 
+//ISR ADC
+ISR(ADC_vect){
+
+}
+
+void initializeADC() {
+    //Remember turn it off when sleeping as is recommended by the ADC
+    ADCSRA |= _BV(ADEN)   /*ADC Enable*/
+           | _BV(ADPS2)   /*This and PS1 are the pre scaler Bits*/
+           | _BV(ADPS1)   /*This combination divides by 64 and more at p259*/
+           | _BV(ACIE)    /*Enables the Interrupt for ADC Complete*/
+           | ~_BV(ADATE); /*Auto Trigger Disable*/
+
+    ADMUX &= ~(_BV(REFS0)
+             | _BV(REFS1));  //Set the AREF to VCC, 5v and interal Vref turned off
+}
+
+void setADCChannel(const uint8_t channel) {
+    ADMUX = ((ADMUX & 0xE0)|channel); //Set the lower three bits to n
+}
+
+uint8_t readADC() {
+    ADCSRA |= _BV(ADSC); //Start ADC Conversion by setting the ad start convert to high
+    while (ADCSRA & _BV(ADSC)) {}
+    return ADC;
+}
+uint8_t getADCValue(uint8_t channel) {
+    setADCChannel(channel);
+    return readADC();
+}
+
+int turbineCurrentCapacity() { //Read and return turbine capacity current
+    //Read Pin A2 using ADC
+
+
+
+    return 0; //Amps
+}
+
+int pvCurrentCapacity() { //Read and return the PV Capacity current
+    //Read Pin A3 using ADC
+
+
+
+    return 0; //Amps
+}
+
+int busbarCurrent() {
+    //Read Pin A1 using ADC
+
+
+
+    return 0; //Amps
+}
+
+int busbarVoltage() {
+    //Read Pin A0 using ADC (scaled down from 10v
+
+
+
+    return 0; //Volts
+}
+
+void setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
+
+
+
+}
+
+
+
 int main() {
+    sei();
     finalizePorts();
     testLight(6);
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         signOfLife(); //Blink LED every .5 sec to show sign of life
+        setMainsCapacity(0);
+        testOutputPin('B', 0);
+
 
     }
 }
