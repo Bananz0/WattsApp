@@ -156,18 +156,18 @@ int main() {
     while (true) {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
 
-        testOutputPin('B', 0);
-
-        getVoltage(1);
-
-        while (ADCConversionFlag) {
-            if (ADCVoltage > 3.5 ) {
-                PORTB |= (1 << PB7); //Turn LED ON
-            } else if (ADCVoltage < 1.5) {
-                PORTB &= ~(1 << PB7); //Turn LED OF
-            }
-            ADCConversionFlag = 0;
+        uint16_t current = pvCurrentCapacity();
+        if (current > 3.5) {
+            PORTB |= _BV(PB7);
         }
+        else if (current < 3.5) {
+            PORTB &= ~_BV(PB7);
+        }
+
+
+
+
+
 
     }
 }
