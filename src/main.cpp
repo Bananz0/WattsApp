@@ -2,10 +2,11 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
-volatile float ADCVoltage;   //Global ADC voltage variable and idk if this is good
+volatile uint16_t ADCVoltage;   //Global ADC voltage variable and idk if this is good
+volatile uint8_t ADCConversionFlag = 0;
 float Vref = 5.0f;      //Reference Voltage, not sure if 3.3 or 5
 
-void signOfLife(void) {
+void signOfLife() {
     PORTB ^= (1 << PB7);
     _delay_ms(500);
 }
@@ -15,13 +16,13 @@ void testLight(const uint8_t time_delay) {
     DDRB |= (1 << PB7); // Set PB7 as output
     PORTB &= ~(1 << PB7); // Start with PB7 low
 
-    for (uint8_t i = 0; i < (time_delay * 1000) / 50; i++){
+    for (int i = 0; i < (time_delay * 1000) / 50; i++){
         PORTB ^= (1 << PB7); // Toggle PB7
         _delay_ms(50);       // Delay 50ms
     }
 }
 
-void testOutputPin(char portName, uint8_t pin) {
+void testOutputPin(char portName, const uint8_t pin) {
     //Test Pin B0
     PORTB ^= _BV(pin);
     _delay_ms(100);
@@ -83,9 +84,7 @@ void finalizePorts() {
 //ISR ADC
 ISR(ADC_vect){
     ADCVoltage = (ADC * Vref) / 0x3FF;
-    PORTB |= _BV(0); //Turn B0 on after successfull conversion
-    _delay_ms(100);
-    PORTB &= ~_BV(0); //Turn B0 off
+    ADCConversionFlag = 1;
 }
 
 void initializeADC() {
@@ -104,22 +103,19 @@ void setADCChannel(const uint8_t channel) {
     ADMUX = ((ADMUX & 0xE0)|channel); //Set the lower three bits to n
 }
 
-uint16_t readADC() {
+void readADC() {
     ADCSRA |= _BV(ADSC); //Start ADC Conversion by setting the ad start convert to high
     //while (ADCSRA & _BV(ADSC)) {} //This checks and waits for the ADC conversion bit but is blocking. (Disabled because it actually blocks the CPU)
-    return ADC;
 }
 
 float getVoltage(const uint8_t channel) {
     setADCChannel(channel);
-    uint16_t raw = readADC();
+    readADC();
     return ADCVoltage;
 }
 
 int turbineCurrentCapacity() { //Read and return turbine capacity current
     //Read Pin A2 using ADC
-
-
 
     return 0; //Amps
 }
@@ -127,22 +123,17 @@ int turbineCurrentCapacity() { //Read and return turbine capacity current
 int pvCurrentCapacity() { //Read and return the PV Capacity current
     //Read Pin A3 using ADC
 
-
-
     return 0; //Amps
 }
 
 int busbarCurrent() {
     //Read Pin A1 using ADC
 
-
-
     return 0; //Amps
 }
 
 int busbarVoltage() {
     //Read Pin A0 using ADC (scaled down from 10v
-
 
 
     return 0; //Volts
@@ -153,8 +144,6 @@ void setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM f
 
 
 }
-
-
 
 int main() {
     sei();                                              //Enable Global Intterupts
@@ -167,14 +156,17 @@ int main() {
     while (true) {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
 
-        //testOutputPin('B', 0);
+        testOutputPin('B', 0);
 
         getVoltage(1);
 
-        if (ADCVoltage > 3.5 ) {
-            PORTB |= (1 << PB7); //Turn LED ON
-        } else if (ADCVoltage < 1.5) {
-            PORTB &= ~(1 << PB7); //Turn LED OF
+        while (ADCConversionFlag) {
+            if (ADCVoltage > 3.5 ) {
+                PORTB |= (1 << PB7); //Turn LED ON
+            } else if (ADCVoltage < 1.5) {
+                PORTB &= ~(1 << PB7); //Turn LED OF
+            }
+            ADCConversionFlag = 0;
         }
 
     }
