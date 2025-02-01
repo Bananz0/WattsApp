@@ -2,6 +2,9 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 
+volatile float ADCVoltage;   //Global ADC voltage variable and idk if this is good
+float Vref = 5.0f;      //Reference Voltage, not sure if 3.3 or 5
+
 void signOfLife(void) {
     PORTB ^= (1 << PB7);
     _delay_ms(500);
@@ -20,10 +23,8 @@ void testLight(const uint8_t time_delay) {
 
 void testOutputPin(char portName, uint8_t pin) {
     //Test Pin B0
-    PORTB |= _BV(pin);
-    _delay_ms(1000);
-    PORTB &= ~_BV(pin);
-
+    PORTB ^= _BV(pin);
+    _delay_ms(100);
 }
 
 //Define portType as enum
@@ -81,7 +82,10 @@ void finalizePorts() {
 
 //ISR ADC
 ISR(ADC_vect){
-
+    ADCVoltage = (ADC * Vref) / 0x3FF;
+    PORTB |= _BV(0); //Turn B0 on after successfull conversion
+    _delay_ms(100);
+    PORTB &= ~_BV(0); //Turn B0 off
 }
 
 void initializeADC() {
@@ -100,14 +104,16 @@ void setADCChannel(const uint8_t channel) {
     ADMUX = ((ADMUX & 0xE0)|channel); //Set the lower three bits to n
 }
 
-uint8_t readADC() {
+uint16_t readADC() {
     ADCSRA |= _BV(ADSC); //Start ADC Conversion by setting the ad start convert to high
-    while (ADCSRA & _BV(ADSC)) {}
+    //while (ADCSRA & _BV(ADSC)) {} //This checks and waits for the ADC conversion bit but is blocking. (Disabled because it actually blocks the CPU)
     return ADC;
 }
-uint8_t getADCValue(uint8_t channel) {
+
+float getVoltage(const uint8_t channel) {
     setADCChannel(channel);
-    return readADC();
+    uint16_t raw = readADC();
+    return ADCVoltage;
 }
 
 int turbineCurrentCapacity() { //Read and return turbine capacity current
@@ -151,15 +157,25 @@ void setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM f
 
 
 int main() {
-    sei();
+    sei();                                              //Enable Global Intterupts
+    initializeADC();                                    //Starts the ADC up
     finalizePorts();
-    testLight(6);
+
+    testLight(1);
+
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
-        signOfLife(); //Blink LED every .5 sec to show sign of life
-        setMainsCapacity(0);
-        testOutputPin('B', 0);
+        //signOfLife();                                 //Blink LED every .5 sec to show sign of life
 
+        //testOutputPin('B', 0);
+
+        getVoltage(1);
+
+        if (ADCVoltage > 3.5 ) {
+            PORTB |= (1 << PB7); //Turn LED ON
+        } else if (ADCVoltage < 1.5) {
+            PORTB &= ~(1 << PB7); //Turn LED OF
+        }
 
     }
 }
