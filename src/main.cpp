@@ -108,35 +108,35 @@ void readADC() {
     //while (ADCSRA & _BV(ADSC)) {} //This checks and waits for the ADC conversion bit but is blocking. (Disabled because it actually blocks the CPU)
 }
 
-float getVoltage(const uint8_t channel) {
+void getVoltage(const uint8_t channel) {
     setADCChannel(channel);
     readADC();
-    return ADCVoltage;
+    while (!ADCConversionFlag){}
+    ADCConversionFlag = 0;
 }
 
-int turbineCurrentCapacity() { //Read and return turbine capacity current
+uint16_t turbineCurrentCapacity() { //Read and return turbine capacity current
     //Read Pin A2 using ADC
-
-    return 0; //Amps
+    getVoltage(2);
+    return ADCVoltage; //Amps
 }
 
-int pvCurrentCapacity() { //Read and return the PV Capacity current
+uint16_t pvCurrentCapacity() { //Read and return the PV Capacity current
     //Read Pin A3 using ADC
-
-    return 0; //Amps
+    getVoltage(3);
+    return ADCVoltage; //Amps
 }
 
-int busbarCurrent() {
+uint16_t busbarCurrent() {
     //Read Pin A1 using ADC
-
-    return 0; //Amps
+    getVoltage(1);
+    return ADCVoltage; //Amps
 }
 
-int busbarVoltage() {
-    //Read Pin A0 using ADC (scaled down from 10v
-
-
-    return 0; //Volts
+uint16_t busbarVoltage() {
+    //Read Pin A0 using ADC (scaled down from 10v)
+    getVoltage(0);
+    return (100 * ADCVoltage); //Volts
 }
 
 void setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
