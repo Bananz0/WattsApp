@@ -8,6 +8,7 @@ set(MCU   atmega644p)
 set(F_CPU 16000000)
 set(BAUD  9600)
 add_definitions(-DF_CPU=${F_CPU})
+set(CMAKE_CXX_COMPILER "avr-g++")
 
 # program names
 set(AVRCPP   avr-g++)
