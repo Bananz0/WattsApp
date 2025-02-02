@@ -6,7 +6,7 @@
 
 
 
-float Vref = 3.3;      //Reference Voltage, not sure if 3.3 or 5
+float Vref = 5;      //Reference Voltage, not sure if 3.3 or 5
 volatile float ADCVoltage;   //Global ADC voltage variable and idk if this is good
 volatile uint8_t ADCConversionFlag = 0;
 
@@ -68,8 +68,10 @@ class PWMHandler {
         DDRD |= _BV(7);			        	// Output
     }
     void setOutputVoltage(uint8_t voltage) { //PD6 and PD7 for Amplitude Modulation
+        DDRD |= _BV(7);
         if (voltage > Vref) voltage = Vref;
-        OCR2A = (voltage / Vref) * 255;
+        //OCR2A = (voltage / Vref) * 255;
+        OCR2A = (100 - voltage) * 0xFF / 100;		// Duty cycle
     }
 };
 
@@ -225,7 +227,7 @@ int main() {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
         testOutputPin('B', 0);
         float current = analogueInput.pvCurrentCapacity();
-        analogueOutput.setMainsCapacity(current);
+        analogueOutput.setMainsCapacity(5);
 
 
         if (current < 1) {
@@ -253,6 +255,7 @@ int main() {
         } else if (current > 4 && current < 5) {
             LED(0);
         }
+
         //Print to UART
         printf("%4d : %6.5fV \n",ADC,  current);
 
