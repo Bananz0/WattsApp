@@ -57,7 +57,7 @@ public:
 class PWMHandler {
     public:
     PWMHandler() {}
-    void initializePWM() {
+    void initializePWM() { //Initialize the PWM based on pg197 of the ilMatto datasheet
         TCCR2A = _BV(COM2A0) | _BV(COM2A1);	// Set OC1A on Compare Match
         TCCR2A |= _BV(WGM21) | _BV(WGM20);	// PWM, Fast, 0xFF, BOTTOM
         TCCR2B = _BV(CS20);		        	// clk/1 prescaler
@@ -69,8 +69,7 @@ class PWMHandler {
     }
     void setOutputVoltage(uint8_t voltage) { //PD6 and PD7 for Amplitude Modulation
         DDRD |= _BV(7);
-        if (voltage > Vref) voltage = Vref;
-        OCR2A = (((Vref-voltage)) / Vref) * 255;
+        OCR2A = (((Vref-voltage)) / Vref) * 0xFF;
         //OCR2A = (100 - voltage) * 0xFF / 100;		// Duty cycle
     }
 };
@@ -225,14 +224,10 @@ int main() {
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
+
         testOutputPin('B', 0);
         uint16_t current = analogueInput.pvCurrentCapacity();
-        analogueOutput.setMainsCapacity(current/3);
-
-
-        //Print to UART
-        printf("%4d : %6.5fV \n",ADC,  current);
-
+        analogueOutput.setMainsCapacity(current/2.5 + .5);
 
     }
 }
