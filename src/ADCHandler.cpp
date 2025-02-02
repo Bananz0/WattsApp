@@ -14,7 +14,7 @@ void ADCHandler::initializeADC() {
     ADCSRA |= _BV(ADEN)   /*ADC Enable*/
            | _BV(ADPS2)   /*This and PS1 are the pre scaler Bits*/
            | _BV(ADPS1)   /*This combination divides by 64 and more at p259*/
-           | _BV(ACIE)    /*Enables the Interrupt for ADC Complete*/
+           | _BV(ADIE)    /*Enables the Interrupt for ADC Complete*/
            | ~_BV(ADATE); /*Auto Trigger Disable*/
 
     ADMUX &= ~(_BV(REFS0) | _BV(REFS1));  //Set the AREF to VCC, 5v and interal Vref turned off
