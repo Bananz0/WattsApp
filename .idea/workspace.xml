@@ -33,14 +33,13 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="e29be151-7807-432b-83b6-7e425f2371df" name="Changes" comment="I have tried moving the ADC to classes but i dont think its possible cause of the ADC Conversion Flag">
-      <change afterPath="$PROJECT_DIR$/src/PWMHandler.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/PWMHandler.h" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/globalVariables.cpp" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/src/globalVariables.h" afterDir="false" />
+    <list default="true" id="e29be151-7807-432b-83b6-7e425f2371df" name="Changes" comment="merge conflict fix attempt">
+      <change afterPath="$PROJECT_DIR$/src/debug.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/CMakeLists.txt" beforeDir="false" afterPath="$PROJECT_DIR$/CMakeLists.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ADCHandler.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/ADCHandler.cpp" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/src/ADCHandler.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/ADCHandler.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/debug.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/debug.h" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/globalVariables.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/globalVariables.cpp" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/src/globalVariables.h" beforeDir="false" afterPath="$PROJECT_DIR$/src/globalVariables.h" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/src/main.cpp" beforeDir="false" afterPath="$PROJECT_DIR$/src/main.cpp" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
@@ -48,6 +47,7 @@
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
     <option name="LAST_RESOLUTION" value="IGNORE" />
   </component>
+  <component name="ChangesViewManager" show_ignored="true" />
   <component name="ClangdSettings">
     <option name="formatViaClangd" value="false" />
   </component>
@@ -69,7 +69,9 @@
 }</component>
   <component name="HighlightingSettingsPerFile">
     <setting file="file://$PROJECT_DIR$/src/debug.h" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://E:/WattsApp/src/main.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="file://$PROJECT_DIR$/src/main.cpp" root0="FORCE_HIGHLIGHTING" />
+    <setting file="mock://E:/WattsApp/src/main.cpp" root0="SKIP_HIGHLIGHTING" />
     <setting file="mock://E:/WattsApp/src/main.cpp" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="ProjectApplicationVersion">
@@ -161,7 +163,7 @@
       <workItem from="1738321512047" duration="7796000" />
       <workItem from="1738408430893" duration="29799000" />
       <workItem from="1738479112123" duration="19275000" />
-      <workItem from="1738508486794" duration="10843000" />
+      <workItem from="1738508486794" duration="12527000" />
     </task>
     <task id="LOCAL-00001" summary="actual init">
       <option name="closed" value="true" />
@@ -363,7 +365,31 @@
       <option name="project" value="LOCAL" />
       <updated>1738517871277</updated>
     </task>
-    <option name="localTasksCounter" value="26" />
+    <task id="LOCAL-00026" summary="Moved ADC and PWM to classes successfully incorporating globalVariables.h">
+      <option name="closed" value="true" />
+      <created>1738519794666</created>
+      <option name="number" value="00026" />
+      <option name="presentableId" value="LOCAL-00026" />
+      <option name="project" value="LOCAL" />
+      <updated>1738519794666</updated>
+    </task>
+    <task id="LOCAL-00027" summary="merge conflict fix attempt">
+      <option name="closed" value="true" />
+      <created>1738520329057</created>
+      <option name="number" value="00027" />
+      <option name="presentableId" value="LOCAL-00027" />
+      <option name="project" value="LOCAL" />
+      <updated>1738520329057</updated>
+    </task>
+    <task id="LOCAL-00028" summary="merge conflict fix attempt">
+      <option name="closed" value="true" />
+      <created>1738520357817</created>
+      <option name="number" value="00028" />
+      <option name="presentableId" value="LOCAL-00028" />
+      <option name="project" value="LOCAL" />
+      <updated>1738520357817</updated>
+    </task>
+    <option name="localTasksCounter" value="29" />
     <servers />
   </component>
   <component name="TypeScriptGeneratedFilesManager">
@@ -403,17 +429,8 @@
     <MESSAGE value="still testing for PWM" />
     <MESSAGE value="want to hope that PWM works well" />
     <MESSAGE value="I have tried moving the ADC to classes but i dont think its possible cause of the ADC Conversion Flag" />
-    <option name="LAST_COMMIT_MESSAGE" value="I have tried moving the ADC to classes but i dont think its possible cause of the ADC Conversion Flag" />
-  </component>
-  <component name="XDebuggerManager">
-    <breakpoint-manager>
-      <breakpoints>
-        <line-breakpoint enabled="true" type="com.jetbrains.cidr.execution.debugger.OCBreakpointType">
-          <url>file://$PROJECT_DIR$/src/main.cpp</url>
-          <line>125</line>
-          <option name="timeStamp" value="6" />
-        </line-breakpoint>
-      </breakpoints>
-    </breakpoint-manager>
+    <MESSAGE value="Moved ADC and PWM to classes successfully incorporating globalVariables.h" />
+    <MESSAGE value="merge conflict fix attempt" />
+    <option name="LAST_COMMIT_MESSAGE" value="merge conflict fix attempt" />
   </component>
 </project>

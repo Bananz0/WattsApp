@@ -1,41 +1,30 @@
+#include "globalVariables.h"
+
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
+
 #include "debug.h"
 
+#include "portHandler.h"
 #include "PWMHandler.h"
 #include "ADCHandler.h"
-#include "globalVariables.h"
+
 
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
-#define F_CPU 12000000
-
-
-volatile uint32_t Counter = 0;//Global Counter variable
-
-
-void LED(uint8_t lightStatus) { //Turn LED ON/OFF/Toggle
-    if (lightStatus == 1) {
-        PORTB |= _BV(7);
-    } else if (lightStatus == 0) {
-        PORTB &= ~_BV(7);
-    } else if (lightStatus == 2) {
-        PORTB ^= _BV(7);
-    }
-}
-
-//Define portType as enum
-typedef enum {
-    INPUT = 0x00,
-    OUTPUT = 0xFF
-} PortType;
+// #define F_CPU 12000000 This is already defined in the CMake
 
 //ISR ADC
 ISR(ADC_vect){
     ADCVoltage = (float)(ADC * Vref) / 0x3FF;
     ADCConversionFlag = 1;
+}
+//Counter ADC
+ISR(TIMER1_COMPA_vect) {
+    Counter++;
+    //Time Interrupt
 }
 
 // Timer initialization function
@@ -45,12 +34,6 @@ void initializeTimer1() {
     TIMSK1 |= (1 << OCIE1A);
     TCCR1B |= (1 << CS11) | (1 << CS10);
 }
-
-ISR(TIMER1_COMPA_vect) {
-    Counter++;
-    //Time Interrupt
-}
-
 
 class AnalogueInput {
 public:
@@ -138,82 +121,7 @@ private:
     bool load1Status, load2Status, load3Status;
 
 
-}; //Third RJ45 Port C
-
-void signOfLife() {
-    PORTB ^= (1 << PB7);
-    _delay_ms(500);
-}
-
-// void testUART (int n)
-// {
-//     printf("Hello World! %d \n" , n);
-//     ugetchar0();
-// }
-
-//Function to test light for a specific time delay (seconds)
-void testLight(const uint8_t time_delay) {
-    DDRB |= (1 << PB7); // Set PB7 as output
-    PORTB &= ~(1 << PB7); // Start with PB7 low
-
-    for (int i = 0; i < (time_delay * 1000) / 50; i++){
-        PORTB ^= (1 << PB7); // Toggle PB7
-        _delay_ms(50);       // Delay 50ms
-    }
-}
-
-void testOutputPin(char portName, const uint8_t pin) {
-    //Test Pin B0
-    PORTB ^= _BV(pin);
-    _delay_ms(100);
-}
-
-void initializePorts(const char portName, const PortType portType ) { //This is to initialize the ports to a known output/input state
-    /*portType Input = 0x00 , Output = 0xFF*/
-    switch (portName) {
-        case 'A': DDRA = portType; break;
-        case 'B': DDRB = portType; break;
-        case 'C': DDRC = portType; break;
-        case 'D': DDRD = portType; break;
-        default: break; // Invalid port name
-    }
-}
-
-void finalizePorts() {
-    /*portType Input = 0x00 , Output = 0xFF*/
-    initializePorts('A', INPUT); // Set Port A to Analog Output (from SM to TB ( Mains Capacity, Analog Ground Ref for Mains Capacity))
-    initializePorts('B', OUTPUT); // Set Port B to Analog Input (from TB to SM ( Power Generation Stats ) )
-    initializePorts('C', OUTPUT); // Set Port C to Digital Output ( from SM to TB ( Charge batt, discharge batt, eetc...))
-    initializePorts('D', INPUT); // Set Port D to Digital Input (from TB to SM ( Call for Load 1,2,3, ground ref)
-
-    //Port A pin defs
-    //Will need to use ADC
-    //Redundant but set 4 pins as explicit inputs
-    DDRA &= ~(_BV(0) /*Busbar Voltage*/
-           | _BV(1) /*Busbar Current*/
-           | _BV(2) /*Wind Turbine Capacity*/
-           | _BV(3) /*PV Capacity*/);
-
-    //Port B pin defs
-    //Analog Output
-    DDRB |= _BV(0); //Mains Capacity (0-10v)
-
-
-    //Port C pin defs
-    //Digital Outputs
-    DDRC |= (_BV(0) /*Charge Battery*/
-         | _BV(1) /*Discharge Battery*/
-         | _BV(2) /*Load 1 Switch*/
-         | _BV(3) /*Load 2 Switch*/
-         | _BV(4) /*Load 3 Switch*/); //this took way tooo long bruh
-
-    //Port D pin defs
-    //Digital Inputs
-    PORTD = 0xFF;
-    DDRD &= ~(_BV(0) /*Call for Load 1*/
-            | _BV(1) /*Call for Load 2*/
-            | _BV(2) /*Call for Load 3*/);
-}
+}; //Third RJ45 Port C (2 to 7)
 
 int main() {
     sei();                                              //Enable Global interrupts
@@ -221,8 +129,6 @@ int main() {
     AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor
 
     finalizePorts();
-
-    init_debug_uart0();
 
     testLight(1);
 

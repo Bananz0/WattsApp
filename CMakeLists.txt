@@ -48,7 +48,10 @@ set(LIB_SRC_FILES
         src/PWMHandler.cpp
         src/PWMHandler.h
         src/globalVariables.h
-        src/globalVariables.cpp)
+        src/globalVariables.cpp
+        src/debug.cpp
+        src/portHandler.cpp
+        src/portHandler.h)
 set(LIB_INC_PATH)
 file(GLOB LIBRARIES "${LIB_DIR_PATH}/*")
 foreach(subdir ${LIBRARIES})
@@ -87,7 +90,10 @@ include_directories(${INC_PATH} ${LIB_INC_PATH})
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_SRC_FILES}
         src/PWMHandler.cpp
         src/PWMHandler.h
-        src/globalVariables.h)
+        src/globalVariables.h
+        src/debug.cpp
+        src/portHandler.cpp
+        src/portHandler.h)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 
 # Compiling targets
