@@ -70,8 +70,8 @@ class PWMHandler {
     void setOutputVoltage(uint8_t voltage) { //PD6 and PD7 for Amplitude Modulation
         DDRD |= _BV(7);
         if (voltage > Vref) voltage = Vref;
-        //OCR2A = (voltage / Vref) * 255;
-        OCR2A = (100 - voltage) * 0xFF / 100;		// Duty cycle
+        OCR2A = (((Vref-voltage)) / Vref) * 255;
+        //OCR2A = (100 - voltage) * 0xFF / 100;		// Duty cycle
     }
 };
 
@@ -227,7 +227,7 @@ int main() {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
         testOutputPin('B', 0);
         float current = analogueInput.pvCurrentCapacity();
-        analogueOutput.setMainsCapacity(5);
+        analogueOutput.setMainsCapacity(0);
 
 
         if (current < 1) {
