@@ -11,7 +11,6 @@
 #include "PWMHandler.h"
 #include "ADCHandler.h"
 
-
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
 // #define F_CPU 12000000 This is already defined in the CMake
@@ -84,15 +83,19 @@ private:
 class DigitalInput {
     public:
     DigitalInput() {
+        //Explicitly set PIN C0, C1 and C2 as inputs.
+        DDRC &= ~(_BV(0) | _BV(1) | _BV(2));
+        //Enable Pull Up resistors
+        PORTC |= (_BV(0) | _BV(1) | _BV(2));
     }
     bool readLoad1() { //Pin C0
-
+        return (PINC & (1 << PINC0));
     }
     bool readLoad2() { //Pin C1
-
+        return (PINC & (1 << PINC1));
     }
     bool readLoad3() { //Pin C2
-
+        return (PINC & (1 << PINC2));
     }
 
 };  //Third RJ45 Port C (0 to 2)
@@ -100,22 +103,28 @@ class DigitalInput {
 class DigitalOutput {
 public:
     DigitalOutput() : load1Status(false), load2Status(false), load3Status(false) {
+        //Explicitly set Pin C3 - C7 as outputs
+        DDRC |= _BV(3)
+              | _BV(4)
+              | _BV(5)
+              | _BV(6)
+              | _BV(7);
 
     }
     void chargeBattery() { //Pin C3
-
+        PORTC |= (1 << PORTC3); //Set PC3 to High
     }
     void dischargeBattery() { //Pin C4
-
+        PORTC &= ~(1 << PORTC4); //Set PC4 to Low
     }
     void loadSwitch1() { //Pin C5
-
+        PORTC ^= (1 << PORTC5); //Toggle switch 1
     }
     void loadSwitch2() { //Pin C6
-
+        PORTC ^= (1 << PORTC6); //Toggle switch 2
     }
     void loadSwitch3() { //Pin C7
-
+        PORTC ^= (1 << PORTC7); //Toggle switch 3
     }
 private:
     bool load1Status, load2Status, load3Status;
@@ -137,6 +146,7 @@ int main() {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
 
         testOutputPin('B', 0);
+
         uint16_t current = analogueInput.busbarCurrent();
         analogueOutput.setMainsCapacity(current/2.5f + .5f);
 
