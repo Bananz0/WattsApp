@@ -15,17 +15,6 @@
 #define PRESCALER 64
 // #define F_CPU 12000000 This is already defined in the CMake
 
-//ISR ADC
-ISR(ADC_vect){
-    ADCVoltage = (float)(ADC * Vref) / 0x3FF;
-    ADCConversionFlag = 1;
-}
-//Counter ADC
-ISR(TIMER1_COMPA_vect) {
-    Counter++;
-    //Time Interrupt
-}
-
 // Timer initialization function
 void initializeTimer1() {
     TCCR1B |= (1 << WGM12);
@@ -87,15 +76,22 @@ class DigitalInput {
         DDRC &= ~(_BV(0) | _BV(1) | _BV(2));
         //Enable Pull Up resistors
         PORTC |= (_BV(0) | _BV(1) | _BV(2));
+        //Enable Pin Change Registers
+        PCICR |= _BV(PCIE2); //Pin change regiser for PortC
+        //Enable specific pin change mask for the port c
+        PCMSK2 |= _BV(PCINT16)|_BV(PCINT17)| _BV(PCINT18); ;
     }
-    bool readLoad1() { //Pin C0
+    bool readLoad1Call() { //Pin C0 Call for Load 1 (1 - on 0 - off)
         return (PINC & (1 << PINC0));
     }
-    bool readLoad2() { //Pin C1
+    bool readLoad2Call() { //Pin C1 Call for Load 2 (1 - on 0 - off)
         return (PINC & (1 << PINC1));
     }
-    bool readLoad3() { //Pin C2
+    bool readLoad3Call() { //Pin C2 Call for Load 3 (1 - on 0 - off)
         return (PINC & (1 << PINC2));
+    }
+    void checkLoadCallChanges() {
+
     }
 
 };  //Third RJ45 Port C (0 to 2)
@@ -132,10 +128,29 @@ private:
 
 }; //Third RJ45 Port C (2 to 7)
 
+AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor
+AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor
+DigitalInput digitalInput;                          //Start the Digital ISR
+DigitalOutput digitalOutput;                        //very basic
+
+//ADC ISR
+ISR(ADC_vect){
+    ADCVoltage = (float)(ADC * Vref) / 0x3FF;
+    ADCConversionFlag = 1;
+}
+//Counter ISR
+ISR(TIMER1_COMPA_vect) {
+    Counter++;
+    //Time Interrupt
+}
+//Pin Change ISR
+ISR(PCINT2_vect) {
+    // Read Load Calls 1, 2 and 3
+    digitalInput.checkLoadCallChanges();
+}
+
 int main() {
     sei();                                              //Enable Global interrupts
-    AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor
-    AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor
 
     finalizePorts();
 
