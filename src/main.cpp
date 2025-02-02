@@ -15,6 +15,7 @@
 
 volatile uint32_t Counter = 0;//Global Counter variable
 
+
 void LED(uint8_t lightStatus) { //Turn LED ON/OFF/Toggle
     if (lightStatus == 1) {
         PORTB |= _BV(7);
