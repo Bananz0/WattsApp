@@ -4,11 +4,16 @@
 #include <stdio.h>
 #include "debug.h"
 
+#define TARGET_TIME_MS 100
+#define PRESCALER 64
+#define F_CPU 12000000
 
 
 float Vref = 3.3;      //Reference Voltage, 3.3v
 volatile float ADCVoltage;   //Global ADC voltage variable and idk if this is good
 volatile uint8_t ADCConversionFlag = 0;
+
+volatile uint32_t Counter = 0;//Global Counter variable
 
 void LED(uint8_t lightStatus) { //Turn LED ON/OFF/Toggle
     if (lightStatus == 1) {
@@ -24,6 +29,19 @@ void LED(uint8_t lightStatus) { //Turn LED ON/OFF/Toggle
 ISR(ADC_vect){
     ADCVoltage = (float)(ADC * Vref) / 0x3FF;
     ADCConversionFlag = 1;
+}
+
+// Timer initialization function
+void initializeTimer1() {
+    TCCR1B |= (1 << WGM12);
+    OCR1A = (F_CPU / (PRESCALER * 1000)) * TARGET_TIME_MS - 1;
+    TIMSK1 |= (1 << OCIE1A);
+    TCCR1B |= (1 << CS11) | (1 << CS10);
+}
+
+ISR(TIMER1_COMPA_vect) {
+    Counter++;
+    //Time Interrupt
 }
 
 class ADCHandler {
