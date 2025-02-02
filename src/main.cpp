@@ -9,9 +9,9 @@
 #define F_CPU 12000000
 
 
-float Vref = 3.3;      //Reference Voltage, 3.3v
+float Vref = 3.3;            //Reference Voltage, 3.3v
 volatile float ADCVoltage;   //Global ADC voltage variable and idk if this is good
-volatile uint8_t ADCConversionFlag = 0;
+volatile float ADCConversionFlag = 0;
 
 volatile uint32_t Counter = 0;//Global Counter variable
 
@@ -24,6 +24,12 @@ void LED(uint8_t lightStatus) { //Turn LED ON/OFF/Toggle
         PORTB ^= _BV(7);
     }
 }
+
+//Define portType as enum
+typedef enum {
+    INPUT = 0x00,
+    OUTPUT = 0xFF
+} PortType;
 
 //ISR ADC
 ISR(ADC_vect){
@@ -75,21 +81,20 @@ public:
 class PWMHandler {
     public:
     PWMHandler() {}
-    void initializePWM() {
-        TCCR2A = _BV(COM2A0) | _BV(COM2A1);	// Set OC1A on Compare Match
-        TCCR2A |= _BV(WGM21) | _BV(WGM20);	// PWM, Fast, 0xFF, BOTTOM
-        TCCR2B = _BV(CS20);		        	// clk/1 prescaler
+    void initializePWM() { //Initialize the PWM based on pg155 of the ilMatto datasheet
+        TCCR2A |=  _BV(COM2A1)    /* Clear OC2A on Compare Match*/
+               |   _BV(WGM21)     /* Fast PWM mode */
+               |   _BV(WGM20);	  /* 0xFF, BOTTOM */
+        TCCR2A &= ~_BV(COM2A0);   /* Set OC2A at bottom*/
+        TCCR2B = _BV(CS20);		        	// No Prescaling
         ASSR = 0;			            	// I/O clock
         TIMSK2 = 0;			            	// No interrupts
         TCNT2 = 0x00;	        			// Counter 1
-        OCR2A = 0xFF;			         	// Compare register
-        DDRD |= _BV(7);			        	// Output
+        OCR2A = 0xFF;			         	// Compare Value
     }
     void setOutputVoltage(uint8_t voltage) { //PD6 and PD7 for Amplitude Modulation
         DDRD |= _BV(7);
-        if (voltage > Vref) voltage = Vref;
-        OCR2A = (((Vref-voltage)) / Vref) * 255;
-        //OCR2A = (100 - voltage) * 0xFF / 100;		// Duty cycle
+        OCR2A = (voltage / Vref) * 0xFF;
     }
 };
 
@@ -140,12 +145,46 @@ private:
 };//Second RJ45 Port D
 
 class DigitalInput {
+    public:
+    DigitalInput() {
+    }
+    bool readLoad1() { //Pin C0
 
-};  //Third RJ45 Port C
+    }
+    bool readLoad2() { //Pin C1
+
+    }
+    bool readLoad3() { //Pin C2
+
+    }
+
+};  //Third RJ45 Port C (0 to 2)
 
 class DigitalOutput {
+public:
+    DigitalOutput() : load1Status(false), load2Status(false), load3Status(false) {
 
-}; //Fourth RJ45 Port C
+    }
+    void chargeBattery() { //Pin C3
+
+    }
+    void dischargeBattery() { //Pin C4
+
+    }
+    void loadSwitch1() { //Pin C5
+
+    }
+    void loadSwitch2() { //Pin C6
+
+    }
+    void loadSwitch3() { //Pin C7
+
+    }
+private:
+    bool load1Status, load2Status, load3Status;
+
+
+}; //Third RJ45 Port C
 
 void signOfLife() {
     PORTB ^= (1 << PB7);
@@ -174,12 +213,6 @@ void testOutputPin(char portName, const uint8_t pin) {
     PORTB ^= _BV(pin);
     _delay_ms(100);
 }
-
-//Define portType as enum
-typedef enum {
-    INPUT = 0x00,
-    OUTPUT = 0xFF
-} PortType;
 
 void initializePorts(const char portName, const PortType portType ) { //This is to initialize the ports to a known output/input state
     /*portType Input = 0x00 , Output = 0xFF*/
@@ -228,7 +261,6 @@ void finalizePorts() {
             | _BV(2) /*Call for Load 3*/);
 }
 
-
 int main() {
     sei();                                              //Enable Global interrupts
     AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor
@@ -243,14 +275,10 @@ int main() {
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
+
         testOutputPin('B', 0);
-        uint16_t current = analogueInput.pvCurrentCapacity();
-        analogueOutput.setMainsCapacity(current/3);
-
-
-        //Print to UART
-        printf("%4d : %6.5fV \n",ADC,  current);
-
+        uint16_t current = analogueInput.busbarCurrent();
+        analogueOutput.setMainsCapacity(current/2.5f + .5f);
 
     }
 }
