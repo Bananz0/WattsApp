@@ -61,7 +61,7 @@ int main() {
         testOutputPin('B', 0);
 
         uint16_t current = analogueInput.busbarCurrent();
-        analogueOutput.setMainsCapacity(current/2.5f + .5f);
+        analogueOutput.setMainsCapacity(current);
 
     }
 }
