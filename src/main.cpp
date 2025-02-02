@@ -2,17 +2,27 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
-//#include "debug.h"
+#include "debug.h"
 
 
 
-float Vref = 5.0f;      //Reference Voltage, not sure if 3.3 or 5
+float Vref = 3.3;      //Reference Voltage, not sure if 3.3 or 5
 volatile float ADCVoltage;   //Global ADC voltage variable and idk if this is good
 volatile uint8_t ADCConversionFlag = 0;
 
+void LED(uint8_t lightStatus) { //Turn LED ON/OFF/Toggle
+    if (lightStatus == 1) {
+        PORTB |= _BV(7);
+    } else if (lightStatus == 0) {
+        PORTB &= ~_BV(7);
+    } else if (lightStatus == 2) {
+        PORTB ^= _BV(7);
+    }
+}
+
 //ISR ADC
 ISR(ADC_vect){
-    ADCVoltage = (ADC * Vref) / 0x3FF;
+    ADCVoltage = (float)(ADC * Vref) / 0x3FF;
     ADCConversionFlag = 1;
 }
 
@@ -48,15 +58,18 @@ class PWMHandler {
     public:
     PWMHandler() {}
     void initializePWM() {
-        // Configure PWM
-        TCCR0A = (1 << COM0A1) | (1 << WGM00) | (1 << WGM01); // Fast PWM mode
-        TCCR0B = (1 << CS01);  // Prescaler 8
+        TCCR2A = _BV(COM2A0) | _BV(COM2A1);	// Set OC1A on Compare Match
+        TCCR2A |= _BV(WGM21) | _BV(WGM20);	// PWM, Fast, 0xFF, BOTTOM
+        TCCR2B = _BV(CS20);		        	// clk/1 prescaler
+        ASSR = 0;			            	// I/O clock
+        TIMSK2 = 0;			            	// No interrupts
+        TCNT2 = 0x00;	        			// Counter 1
+        OCR2A = 0xFF;			         	// Compare register
+        DDRD |= _BV(7);			        	// Output
     }
-    void setOutputVoltage(uint8_t voltage) {
-        if (voltage < 0) voltage = 0;
+    void setOutputVoltage(uint8_t voltage) { //PD6 and PD7 for Amplitude Modulation
         if (voltage > Vref) voltage = Vref;
-        auto dutyCycle = (uint8_t )((voltage / Vref) * 255); // Calculate PWM duty cycle
-        OCR0A = dutyCycle; // Set PWM duty cycle
+        OCR2A = (voltage / Vref) * 255;
     }
 };
 
@@ -197,10 +210,13 @@ void finalizePorts() {
 
 
 int main() {
-    sei();                                              //Enable Global Intterupts
-    AnalogueInput analogueInput;                        //Starts the ADC up in the AI constructor
-    //ADCHandler.initializeADC();
+    sei();                                              //Enable Global interrupts
+    AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor
+    AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor
+
     finalizePorts();
+
+    init_debug_uart0();
 
     testLight(1);
 
@@ -209,16 +225,36 @@ int main() {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
         testOutputPin('B', 0);
         float current = analogueInput.pvCurrentCapacity();
-        if (current > 3.5f) {
-            PORTB |= _BV(PB7);
+        analogueOutput.setMainsCapacity(current);
+
+
+        if (current < 1) {
+            LED(1);
+            _delay_ms(500);
+            LED(0);
+            _delay_ms(500);
+            LED(1);
+            _delay_ms(500);
+            LED(0);
+
+        } else if (current > 1 && current < 2) {
+            LED(0);
+        } else if (current > 2 && current < 3) {
+            LED(1);
+            _delay_ms(500);
+            LED(0);
+            _delay_ms(500);
+            LED(0);
+            _delay_ms(500);
+            LED(1);
+
+        } else if (current > 3 && current < 4) {
+            LED(0);
+        } else if (current > 4 && current < 5) {
+            LED(0);
         }
-        else if (current < 3.5f) {
-            PORTB &= ~_BV(PB7);
-        }
-
-
-
-
+        //Print to UART
+        printf("%4d : %6.5fV \n",ADC,  current);
 
 
     }
