@@ -51,7 +51,15 @@ set(LIB_SRC_FILES
         src/globalVariables.cpp
         src/debug.cpp
         src/portHandler.cpp
-        src/portHandler.h)
+        src/portHandler.h
+        src/AnalogueInput.cpp
+        src/AnalogueInput.h
+        src/AnalogueOutput.cpp
+        src/AnalogueOutput.h
+        src/DigitalInput.cpp
+        src/DigitalInput.h
+        src/DigitalOutput.cpp
+        src/DigitalOutput.h)
 set(LIB_INC_PATH)
 file(GLOB LIBRARIES "${LIB_DIR_PATH}/*")
 foreach(subdir ${LIBRARIES})
@@ -93,7 +101,15 @@ add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_SRC_FILES}
         src/globalVariables.h
         src/debug.cpp
         src/portHandler.cpp
-        src/portHandler.h)
+        src/portHandler.h
+        src/AnalogueInput.cpp
+        src/AnalogueInput.h
+        src/AnalogueOutput.cpp
+        src/AnalogueOutput.h
+        src/DigitalInput.cpp
+        src/DigitalInput.h
+        src/DigitalOutput.cpp
+        src/DigitalOutput.h)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 
 # Compiling targets

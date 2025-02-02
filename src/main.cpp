@@ -8,8 +8,11 @@
 #include "debug.h"
 
 #include "portHandler.h"
-#include "PWMHandler.h"
-#include "ADCHandler.h"
+
+#include "AnalogueInput.h"
+#include "AnalogueOutput.h"
+#include "DigitalInput.h"
+#include "DigitalOutput.h"
 
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
@@ -22,111 +25,6 @@ void initializeTimer1() {
     TIMSK1 |= (1 << OCIE1A);
     TCCR1B |= (1 << CS11) | (1 << CS10);
 }
-
-class AnalogueInput {
-public:
-    AnalogueInput() {
-        aDCHandler.initializeADC();
-    }
-    float turbineCurrentCapacity() { //Read and return turbine capacity current
-        //Read Pin A2 using ADC
-        aDCHandler.getVoltage(2);
-        return ADCVoltage; //Amps 1:1 mapping
-    }
-
-    float pvCurrentCapacity() { //Read and return the PV Capacity current
-        //Read Pin A3 using ADC
-        aDCHandler.getVoltage(3);
-        return ADCVoltage; //Amps 1:1 mapping
-    }
-
-    float busbarCurrent() {
-        //Read Pin A1 using ADC
-        aDCHandler.getVoltage(1);
-        return ADCVoltage; //Amps 1:1 mapping
-    }
-
-    float busbarVoltage() {
-        //Read Pin A0 using ADC (scaled down from 10v)
-        aDCHandler.getVoltage(0);
-        return 100.0f * ADCVoltage; //Volts
-    }
-
-private:
-    ADCHandler aDCHandler;
-}; //First RJ45 Port A
-
-class AnalogueOutput {
-    public:
-    AnalogueOutput() {
-        pWMHandler.initializePWM();
-    }
-    void setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
-        pWMHandler.setOutputVoltage(mainsCapacity);
-    }
-private:
-    PWMHandler pWMHandler;
-
-};//Second RJ45 Port D
-
-class DigitalInput {
-    public:
-    DigitalInput() {
-        //Explicitly set PIN C0, C1 and C2 as inputs.
-        DDRC &= ~(_BV(0) | _BV(1) | _BV(2));
-        //Enable Pull Up resistors
-        PORTC |= (_BV(0) | _BV(1) | _BV(2));
-        //Enable Pin Change Registers
-        PCICR |= _BV(PCIE2); //Pin change regiser for PortC
-        //Enable specific pin change mask for the port c
-        PCMSK2 |= _BV(PCINT16)|_BV(PCINT17)| _BV(PCINT18); ;
-    }
-    bool readLoad1Call() { //Pin C0 Call for Load 1 (1 - on 0 - off)
-        return (PINC & (1 << PINC0));
-    }
-    bool readLoad2Call() { //Pin C1 Call for Load 2 (1 - on 0 - off)
-        return (PINC & (1 << PINC1));
-    }
-    bool readLoad3Call() { //Pin C2 Call for Load 3 (1 - on 0 - off)
-        return (PINC & (1 << PINC2));
-    }
-    void checkLoadCallChanges() {
-
-    }
-
-};  //Third RJ45 Port C (0 to 2)
-
-class DigitalOutput {
-public:
-    DigitalOutput() : load1Status(false), load2Status(false), load3Status(false) {
-        //Explicitly set Pin C3 - C7 as outputs
-        DDRC |= _BV(3)
-              | _BV(4)
-              | _BV(5)
-              | _BV(6)
-              | _BV(7);
-
-    }
-    void chargeBattery() { //Pin C3
-        PORTC |= (1 << PORTC3); //Set PC3 to High
-    }
-    void dischargeBattery() { //Pin C4
-        PORTC &= ~(1 << PORTC4); //Set PC4 to Low
-    }
-    void loadSwitch1() { //Pin C5
-        PORTC ^= (1 << PORTC5); //Toggle switch 1
-    }
-    void loadSwitch2() { //Pin C6
-        PORTC ^= (1 << PORTC6); //Toggle switch 2
-    }
-    void loadSwitch3() { //Pin C7
-        PORTC ^= (1 << PORTC7); //Toggle switch 3
-    }
-private:
-    bool load1Status, load2Status, load3Status;
-
-
-}; //Third RJ45 Port C (2 to 7)
 
 AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor
 AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor
