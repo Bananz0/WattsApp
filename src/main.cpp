@@ -6,7 +6,7 @@
 
 
 
-float Vref = 5;      //Reference Voltage, not sure if 3.3 or 5
+float Vref = 3.3;      //Reference Voltage, 3.3v
 volatile float ADCVoltage;   //Global ADC voltage variable and idk if this is good
 volatile uint8_t ADCConversionFlag = 0;
 
@@ -78,7 +78,7 @@ class PWMHandler {
 class AnalogueInput {
 public:
     AnalogueInput() {
-        aDCHandler.initializeADC();        
+        aDCHandler.initializeADC();
     }
     float turbineCurrentCapacity() { //Read and return turbine capacity current
         //Read Pin A2 using ADC
@@ -119,11 +119,11 @@ class AnalogueOutput {
 private:
     PWMHandler pWMHandler;
 
-};//Second RJ45 Port B
+};//Second RJ45 Port D
 
 class DigitalInput {
 
-};  //Third RJ45 Port D
+};  //Third RJ45 Port C
 
 class DigitalOutput {
 
@@ -226,35 +226,9 @@ int main() {
     while (true) {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
         testOutputPin('B', 0);
-        float current = analogueInput.pvCurrentCapacity();
-        analogueOutput.setMainsCapacity(0);
+        uint16_t current = analogueInput.pvCurrentCapacity();
+        analogueOutput.setMainsCapacity(current/3);
 
-
-        if (current < 1) {
-            LED(1);
-            _delay_ms(500);
-            LED(0);
-            _delay_ms(500);
-            LED(1);
-            _delay_ms(500);
-            LED(0);
-
-        } else if (current > 1 && current < 2) {
-            LED(0);
-        } else if (current > 2 && current < 3) {
-            LED(1);
-            _delay_ms(500);
-            LED(0);
-            _delay_ms(500);
-            LED(0);
-            _delay_ms(500);
-            LED(1);
-
-        } else if (current > 3 && current < 4) {
-            LED(0);
-        } else if (current > 4 && current < 5) {
-            LED(0);
-        }
 
         //Print to UART
         printf("%4d : %6.5fV \n",ADC,  current);
