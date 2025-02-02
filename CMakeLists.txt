@@ -44,7 +44,11 @@ file(GLOB SRC_FILES "${SRC_PATH}/*.cpp"
         "${SRC_PATH}/*.sx"
         "${SRC_PATH}/*.asm")
 
-set(LIB_SRC_FILES)
+set(LIB_SRC_FILES
+        src/PWMHandler.cpp
+        src/PWMHandler.h
+        src/globalVariables.h
+        src/globalVariables.cpp)
 set(LIB_INC_PATH)
 file(GLOB LIBRARIES "${LIB_DIR_PATH}/*")
 foreach(subdir ${LIBRARIES})
@@ -80,7 +84,10 @@ set(CMAKE_ASM_FLAGS   "${CFLAGS}")
 
 # Project setup
 include_directories(${INC_PATH} ${LIB_INC_PATH})
-add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_SRC_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_SRC_FILES}
+        src/PWMHandler.cpp
+        src/PWMHandler.h
+        src/globalVariables.h)
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 
 # Compiling targets

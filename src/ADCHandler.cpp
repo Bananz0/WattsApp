@@ -4,7 +4,12 @@
 
 #include "ADCHandler.h"
 
-void initializeADC() {
+ADCHandler::ADCHandler() {
+
+}
+
+
+void ADCHandler::initializeADC() {
     //Remember turn it off when sleeping as is recommended by the ADC
     ADCSRA |= _BV(ADEN)   /*ADC Enable*/
            | _BV(ADPS2)   /*This and PS1 are the pre scaler Bits*/
@@ -14,15 +19,14 @@ void initializeADC() {
 
     ADMUX &= ~(_BV(REFS0) | _BV(REFS1));  //Set the AREF to VCC, 5v and interal Vref turned off
 }
-void setADCChannel(const uint8_t channel) {
+void ADCHandler::setADCChannel(const uint8_t channel) {
     ADMUX = ((ADMUX & 0xE0)|channel); //Set the lower three bits to n
 }
-void readADC() {
+void ADCHandler::readADC() {
     ADCSRA |= _BV(ADSC); //Start ADC Conversion by setting the ad start convert to high
     //while (ADCSRA & _BV(ADSC)) {} //This checks and waits for the ADC conversion bit but is blocking. (Disabled because it actually blocks the CPU)
 }
-void getVoltage(const uint8_t channel) {
-    uint16_t ADCConversionFlag;
+void ADCHandler::getVoltage(const uint8_t channel) {
 
     setADCChannel(channel);
     readADC();
