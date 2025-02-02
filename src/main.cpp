@@ -1,6 +1,10 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
+#include <stdio.h>
+//#include "debug.h"
+
+
 
 float Vref = 5.0f;      //Reference Voltage, not sure if 3.3 or 5
 volatile float ADCVoltage;   //Global ADC voltage variable and idk if this is good
@@ -40,6 +44,22 @@ public:
     }
 };
 
+class PWMHandler {
+    public:
+    PWMHandler() {}
+    void initializePWM() {
+        // Configure PWM
+        TCCR0A = (1 << COM0A1) | (1 << WGM00) | (1 << WGM01); // Fast PWM mode
+        TCCR0B = (1 << CS01);  // Prescaler 8
+    }
+    void setOutputVoltage(uint8_t voltage) {
+        if (voltage < 0) voltage = 0;
+        if (voltage > Vref) voltage = Vref;
+        auto dutyCycle = (uint8_t )((voltage / Vref) * 255); // Calculate PWM duty cycle
+        OCR0A = dutyCycle; // Set PWM duty cycle
+    }
+};
+
 class AnalogueInput {
 public:
     AnalogueInput() {
@@ -71,12 +91,39 @@ public:
 
 private:
     ADCHandler aDCHandler;
-};
+}; //First RJ45 Port A
+
+class AnalogueOutput {
+    public:
+    AnalogueOutput() {
+        pWMHandler.initializePWM();
+    }
+    void setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
+        pWMHandler.setOutputVoltage(mainsCapacity);
+    }
+private:
+    PWMHandler pWMHandler;
+
+};//Second RJ45 Port B
+
+class DigitalInput {
+
+};  //Third RJ45 Port D
+
+class DigitalOutput {
+
+}; //Fourth RJ45 Port C
 
 void signOfLife() {
     PORTB ^= (1 << PB7);
     _delay_ms(500);
 }
+
+// void testUART (int n)
+// {
+//     printf("Hello World! %d \n" , n);
+//     ugetchar0();
+// }
 
 //Function to test light for a specific time delay (seconds)
 void testLight(const uint8_t time_delay) {
@@ -148,13 +195,6 @@ void finalizePorts() {
             | _BV(2) /*Call for Load 3*/);
 }
 
-void setDAC(const uint8_t channel) {
-
-}
-
-void setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
-
-}
 
 int main() {
     sei();                                              //Enable Global Intterupts
@@ -167,12 +207,12 @@ int main() {
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
-
-        uint16_t current = analogueInput.pvCurrentCapacity();
-        if (current > 3.5) {
+        testOutputPin('B', 0);
+        float current = analogueInput.pvCurrentCapacity();
+        if (current > 3.5f) {
             PORTB |= _BV(PB7);
         }
-        else if (current < 3.5) {
+        else if (current < 3.5f) {
             PORTB &= ~_BV(PB7);
         }
 
