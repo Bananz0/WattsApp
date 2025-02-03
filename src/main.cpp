@@ -35,6 +35,7 @@ DigitalOutput digitalOutput;                        //very basic
 ISR(ADC_vect){
     ADCVoltage = (ADC * Vref) / 0x3FF;
     ADCConversionFlag = true;
+    LED(1);
 }
 //Counter ISR
 ISR(TIMER1_COMPA_vect) {

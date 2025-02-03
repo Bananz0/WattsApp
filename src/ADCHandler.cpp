@@ -1,8 +1,9 @@
 //
 // Created by glenm on 2/2/2025.
 //
-
+#pragma once
 #include "ADCHandler.h"
+#include "debug.h"
 
 ADCHandler::ADCHandler() {
 
@@ -29,4 +30,5 @@ void ADCHandler::getVoltage(const uint8_t channel) {
     readADC();
     while (!ADCConversionFlag){}
     ADCConversionFlag = false;
+    LED(0);
 }
