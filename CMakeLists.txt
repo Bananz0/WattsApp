@@ -5,7 +5,7 @@ set(PROG_TYPE usbasp)
 
 # Variables regarding the AVR chip
 set(MCU   atmega644p)
-set(F_CPU 16000000)
+set(F_CPU 12000000)
 set(BAUD  9600)
 add_definitions(-DF_CPU=${F_CPU})
 set(CMAKE_CXX_COMPILER "avr-g++")
@@ -78,7 +78,7 @@ foreach(subdir ${LIBRARIES})
 endforeach()
 
 # Compiler flags
-set(CSTANDARD "-std=gnu++11")
+set(CSTANDARD "-std=c11")
 set(CDEBUG    "-gstabs -g -ggdb")
 set(CWARN     "-Wall -Wstrict-prototypes -Wl,--gc-sections -Wl,--relax")
 set(CTUNING   "-fpermissive -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ffunction-sections -fdata-sections")
@@ -110,6 +110,7 @@ add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_SRC_FILES}
         src/DigitalInput.h
         src/DigitalOutput.cpp
         src/DigitalOutput.h)
+
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 
 # Compiling targets
