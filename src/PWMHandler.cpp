@@ -20,5 +20,5 @@ void PWMHandler::initializePWM() { //Initialize the PWM based on pg155 of the il
 
 void PWMHandler::setOutputVoltage(uint8_t voltage) { //PD6 and PD7 for Amplitude Modulation
     DDRD |= _BV(7);
-    OCR2A = (voltage / Vref) * 0xFF;
+    OCR2A = ((voltage * 1000)/ Vref ) * 0xFF;
 }
