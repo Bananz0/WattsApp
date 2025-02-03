@@ -14,8 +14,8 @@
 class PWMHandler {
 public:
     PWMHandler();
-    void initializePWM();
-    void setOutputVoltage(uint8_t voltage);
+    static void initializePWM();
+    static void setOutputVoltage(uint8_t voltage);
 };
 
 #endif //PWMHANDLER_H

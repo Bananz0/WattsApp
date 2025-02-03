@@ -5,7 +5,7 @@ set(PROG_TYPE usbasp)
 
 # Variables regarding the AVR chip
 set(MCU   atmega644p)
-set(F_CPU 16000000)
+set(F_CPU 12000000)
 set(BAUD  9600)
 add_definitions(-DF_CPU=${F_CPU})
 set(CMAKE_CXX_COMPILER "avr-g++")
