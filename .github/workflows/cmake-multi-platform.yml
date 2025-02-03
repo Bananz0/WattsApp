@@ -3,7 +3,7 @@ name: Build and Release AVR Hex
 on:
   push:
     tags:
-      - 'v*'  # Triggers when version tags like v1.0.0 are pushed
+      - 'v*'
 
 jobs:
   build-and-release:
@@ -14,7 +14,14 @@ jobs:
     - name: Install AVR toolchain
       run: |
         sudo apt-get update
-        sudo apt-get install -y avr-libc avr-gcc gcc-avr binutils-avr
+        sudo apt-get install -y software-properties-common
+        sudo add-apt-repository -y universe
+        sudo apt-get update
+        sudo apt-get install -y \
+          gcc-avr \
+          avr-libc \
+          binutils-avr \
+          avrdude
 
     - name: Configure CMake
       run: cmake -B build -S .
