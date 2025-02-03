@@ -5,36 +5,37 @@ on:
     tags:
       - 'v*'
 
+permissions:
+  contents: write
+  releases: write
+  id-token: write
+
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+      - uses: actions/checkout@v4
 
-    - name: Install AVR toolchain
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y software-properties-common
-        sudo add-apt-repository -y universe
-        sudo apt-get update
-        sudo apt-get install -y \
-          gcc-avr \
-          avr-libc \
-          binutils-avr \
-          avrdude
+      - name: Install AVR toolchain
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y software-properties-common
+          sudo add-apt-repository -y universe
+          sudo apt-get update
+          sudo apt-get install -y gcc-avr avr-libc binutils-avr avrdude
 
-    - name: Configure CMake
-      run: cmake -B build -S .
+      - name: Configure CMake
+        run: cmake -B build -S .
 
-    - name: Build Hex File
-      run: cmake --build build --target hex
+      - name: Build Hex File
+        run: cmake --build build --target hex
 
-    - name: Create Release with Hex Asset
-      uses: softprops/action-gh-release@v1
-      with:
-        files: build/WattsApp.hex
-        tag_name: ${{ github.ref_name }}
-        name: ${{ github.ref_name }}
-        generate_release_notes: true
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Create Release with Hex Asset
+        uses: softprops/action-gh-release@v1
+        with:
+          files: build/WattsApp.hex
+          tag_name: ${{ github.ref_name }}
+          name: Release ${{ github.ref_name }}
+          generate_release_notes: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  # Automatic token
