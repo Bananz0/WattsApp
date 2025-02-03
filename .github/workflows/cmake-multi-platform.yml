@@ -1,0 +1,33 @@
+name: Build and Release AVR Hex
+
+on:
+  push:
+    tags:
+      - 'v*'  # Triggers when version tags like v1.0.0 are pushed
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install AVR toolchain
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y avr-libc avr-gcc gcc-avr binutils-avr
+
+    - name: Configure CMake
+      run: cmake -B build -S .
+
+    - name: Build Hex File
+      run: cmake --build build --target hex
+
+    - name: Create Release with Hex Asset
+      uses: softprops/action-gh-release@v1
+      with:
+        files: build/WattsApp.hex
+        tag_name: ${{ github.ref_name }}
+        name: ${{ github.ref_name }}
+        generate_release_notes: true
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
