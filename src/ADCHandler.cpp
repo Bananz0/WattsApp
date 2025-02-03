@@ -7,8 +7,6 @@
 ADCHandler::ADCHandler() {
 
 }
-
-
 void ADCHandler::initializeADC() {
     //Remember turn it off when sleeping as is recommended by the ADC
     ADCSRA |= _BV(ADEN)   /*ADC Enable*/
@@ -27,9 +25,8 @@ void ADCHandler::readADC() {
     //while (ADCSRA & _BV(ADSC)) {} //This checks and waits for the ADC conversion bit but is blocking. (Disabled because it actually blocks the CPU)
 }
 void ADCHandler::getVoltage(const uint8_t channel) {
-
     setADCChannel(channel);
     readADC();
     while (!ADCConversionFlag){}
-    ADCConversionFlag = 0;
+    ADCConversionFlag = false;
 }
