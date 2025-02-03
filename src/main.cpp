@@ -14,6 +14,8 @@
 #include "DigitalInput.h"
 #include "DigitalOutput.h"
 
+#include "pictor.h"
+
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
 // #define F_CPU 12000000 This is already defined in the CMake
@@ -28,10 +30,10 @@ void initializeTimer1() {
     TCCR1B |= (1 << CS11) | (1 << CS10);
 }
 
-AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor
-AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor
-DigitalInput digitalInput;                          //Start the Digital ISR
-DigitalOutput digitalOutput;                        //very basic
+AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor    PORTA1
+//AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor   PORTD7
+DigitalInput digitalInput;                          //Start the Digital ISR                                     PORTC0-2
+DigitalOutput digitalOutput;                        //very basic                                                PORTC3-7
 
 //ADC ISR
 ISR(ADC_vect){
@@ -76,7 +78,7 @@ int main() {
         testOutputPin('B', 0);
 
         uint16_t current = AnalogueInput::busbarCurrent();
-        analogueOutput.setMainsCapacity(current);
+        //analogueOutput.setMainsCapacity(current);
 
     }
 }
