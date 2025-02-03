@@ -18,7 +18,7 @@ public:
     static void loadSwitch3();
 private:
     bool load1Status, load2Status, load3Status;
-}; //Third RJ45 Port C (2 to 7)
+}; //Third RJ45 Port C (2 - 7)
 
 
 
