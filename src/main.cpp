@@ -64,21 +64,24 @@ ISR(PCINT2_vect) {
 }
 
 int main() {
-    testLight(1);                              //Boot Light
-    sei();                                              //Enable Global interrupts
-
     finalizePorts();
+    testLight(10);                              //Boot Light
+    sei();                                               //Enable Global interrupts
 
+
+
+    uint16_t current = AnalogueInput::busbarCurrent();    //testing ADC
+    //analogueOutput.setMainsCapacity(current);           //Testing PWM
+
+
+    //testOutputPin('B', 0);
 
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
-        //signOfLife();                                 //Blink LED every .5 sec to show sign of life
+        //signOfLife();                                   //Blink LED every .5 sec to show sign of life
 
-        //testOutputPin('B', 0);
 
-        uint16_t current = AnalogueInput::busbarCurrent();
-        //analogueOutput.setMainsCapacity(current);
 
     }
 }
