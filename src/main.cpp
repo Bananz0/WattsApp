@@ -39,7 +39,6 @@ DigitalOutput digitalOutput;                        //very basic                
 ISR(ADC_vect){
     ADCVoltage = (ADC * Vref) / 0x3FF;
     ADCConversionFlag = true;
-    LED(1);
 }
 //Counter ISR
 ISR(TIMER1_COMPA_vect) {
@@ -65,17 +64,18 @@ ISR(PCINT2_vect) {
 }
 
 int main() {
+    testLight(1);                              //Boot Light
     sei();                                              //Enable Global interrupts
 
     finalizePorts();
 
-    testLight(1);
+
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         //signOfLife();                                 //Blink LED every .5 sec to show sign of life
 
-        testOutputPin('B', 0);
+        //testOutputPin('B', 0);
 
         uint16_t current = AnalogueInput::busbarCurrent();
         //analogueOutput.setMainsCapacity(current);

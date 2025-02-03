@@ -29,5 +29,4 @@ void ADCHandler::getVoltage(const uint8_t channel) {
     readADC();
     while (!ADCConversionFlag){}
     ADCConversionFlag = false;
-    LED(0);
 }
