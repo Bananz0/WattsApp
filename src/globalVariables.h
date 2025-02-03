@@ -10,7 +10,6 @@
 extern uint16_t Vref;                            //Reference Voltage, 3.3v
 extern volatile uint16_t ADCVoltage;             //Global - extern - ADC voltage variable and idk if this is good
 extern volatile bool ADCConversionFlag;
-extern volatile uint32_t Counter;
 
 
 #endif //GLOBALVARIABLES_H
