@@ -18,6 +18,8 @@
 #define PRESCALER 64
 // #define F_CPU 12000000 This is already defined in the CMake
 
+volatile uint32_t Counter=0;//Only used for time interrupt
+
 // Timer initialization function
 void initializeTimer1() {
     TCCR1B |= (1 << WGM12);
@@ -40,6 +42,18 @@ ISR(ADC_vect){
 ISR(TIMER1_COMPA_vect) {
     Counter++;
     //Time Interrupt
+    if (Counter % 10 == 0) {
+        //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
+        float windTurbineCapacity = analogueInput.turbineCurrentCapacity();
+        float pvCapacity = analogueInput.pvCurrentCapacity();
+        float totalRenewablePower = windTurbineCapacity + pvCapacity;
+
+        //Calculate average power and total energy consumption based on bus voltage and bus current (analogue output)
+        float busbarVoltage = analogueInput.busbarVoltage();
+        float busbarCurrent = analogueInput.busbarCurrent();
+        float averagePower = busbarVoltage * busbarCurrent;
+        float totalEnergy = averagePower * TARGET_TIME_MS / 1000;
+    }
 }
 //Pin Change ISR
 ISR(PCINT2_vect) {
