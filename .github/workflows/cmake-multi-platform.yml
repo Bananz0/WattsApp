@@ -1,14 +1,13 @@
-name: AVR Release Build
+name: Build and Release AVR Hex
 
 on:
   push:
     tags:
-      - 'v*'  # Trigger on new version tags (e.g., v1.0.0)
+      - 'v*'  # Triggers when version tags like v1.0.0 are pushed
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-
     steps:
     - uses: actions/checkout@v4
 
@@ -23,12 +22,12 @@ jobs:
     - name: Build Hex File
       run: cmake --build build --target hex
 
-    - name: Create Release and Upload Hex
+    - name: Create Release with Hex Asset
       uses: softprops/action-gh-release@v1
       with:
-        files: |
-          build/WattsApp.hex
+        files: build/WattsApp.hex
         tag_name: ${{ github.ref_name }}
-        name: Release ${{ github.ref_name }}
+        name: ${{ github.ref_name }}
+        generate_release_notes: true
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
