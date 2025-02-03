@@ -33,8 +33,8 @@ DigitalOutput digitalOutput;                        //very basic
 
 //ADC ISR
 ISR(ADC_vect){
-    ADCVoltage = (float)(ADC * Vref) / 0x3FF;
-    ADCConversionFlag = 1;
+    ADCVoltage = (ADC * Vref) / 0x3FF;
+    ADCConversionFlag = true;
 }
 //Counter ISR
 ISR(TIMER1_COMPA_vect) {
@@ -60,7 +60,7 @@ int main() {
 
         testOutputPin('B', 0);
 
-        uint16_t current = analogueInput.busbarCurrent();
+        uint16_t current = AnalogueInput::busbarCurrent();
         analogueOutput.setMainsCapacity(current);
 
     }

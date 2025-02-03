@@ -10,13 +10,13 @@
 class AnalogueInput {
 public:
     AnalogueInput();
-    float turbineCurrentCapacity();
+    static uint16_t turbineCurrentCapacity();
 
-    float pvCurrentCapacity();
+    static uint16_t pvCurrentCapacity();
 
-    float busbarCurrent();
+    static uint16_t busbarCurrent();
 
-    float busbarVoltage();
+    static uint16_t busbarVoltage();
 
 private:
     ADCHandler aDCHandler;
