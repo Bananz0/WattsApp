@@ -61,11 +61,11 @@ typedef struct{//Sprite type 8, 9, A & B
 static uint8_t pictorRot = 0;
 
 //	DATA PORTS -- don't use port B if you intend to use USB!
-#define CTRLPORT	PORTA
-#define CTRLDDR		DDRA
-#define DATAPORT	PORTC
-#define DATADDR		DDRC
-#define DATAPINS	PINC
+#define CTRLPORT	PORTB
+#define CTRLDDR		DDRB
+#define DATAPORT	PORTD
+#define DATADDR		DDRD
+#define DATAPINS	PIND
 
 //	CONRTOL BITS
 #define BACKLIGHT	0b00000010
