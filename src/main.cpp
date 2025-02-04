@@ -5,7 +5,6 @@
 #include <avr/interrupt.h>
 #include <stdio.h>
 #include <string.h>
-#include <string>
 
 #include "debug.h"
 
@@ -15,6 +14,8 @@
 #include "AnalogueOutput.h"
 #include "DigitalInput.h"
 #include "DigitalOutput.h"
+
+#include "DisplayHandler.h"
 
 #include "../lib/pictor.h"
 #include "../fonts/OryxB.h"
@@ -74,26 +75,14 @@ int main() {
     testLight(10);                              //Boot Light
     sei();                                               //Enable Global interrupts
 
-    pictorInit(0);                                 //Initialize without vysyc
+    //Initialize the display
+    pictorInit(0);
     pictorSetRotation(0);
-
-    char printString[5];
-
-
-
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         //signOfLife();                                   //Blink LED every .5 sec to show sign of life
-
-        uint16_t current = AnalogueInput::busbarCurrent();    //testing ADC
-
-
-
-        itoa(ADCVoltage,printString,10);
-        pictorDrawS(reinterpret_cast<const unsigned char *>("TEAM L"), (point){128,8}, WHITE, BLACK, Mash,2);
-        pictorDrawS(printString, (point){128,24}, RED, BLACK, Mash,4);
-
+        uint16_t current = analogueInput.busbarCurrent();
 
 
 
