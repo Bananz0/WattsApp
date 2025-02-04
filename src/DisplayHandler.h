@@ -5,7 +5,6 @@
 #ifndef DISPLAYHANDLER_H
 #define DISPLAYHANDLER_H
 
-//#include "pictor.h"
 
 class DisplayHandler {
     public:

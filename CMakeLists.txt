@@ -7,6 +7,7 @@ set(PROG_TYPE usbasp)
 set(MCU   atmega644p)
 set(F_CPU 12000000)
 set(BAUD  9600)
+set(PICTOR_FASTMODE)
 add_definitions(-DF_CPU=${F_CPU})
 set(CMAKE_CXX_COMPILER "avr-g++")
 
@@ -30,9 +31,7 @@ project (WattsApp C CXX ASM)
 
 # Important project paths
 set(BASE_PATH    "${CMAKE_SOURCE_DIR}")
-set(INC_PATH     "${BASE_PATH}/include")
 set(SRC_PATH     "${BASE_PATH}/src")
-set(LIB_DIR_PATH "${BASE_PATH}/lib")
 
 # Files to be compiled
 file(GLOB_RECURSE SRC_FILES
@@ -45,26 +44,6 @@ file(GLOB_RECURSE SRC_FILES
         "${SRC_PATH}/*.sx"
         "${SRC_PATH}/*.asm"
 )
-
-# Gather library sources from lib/
-file(GLOB LIBRARIES "${LIB_DIR_PATH}/*")
-foreach(subdir ${LIBRARIES})
-    if(IS_DIRECTORY ${subdir})
-        list(APPEND LIB_INC_PATH "${subdir}")
-        file(GLOB_RECURSE lib_src
-                "${subdir}/*.cpp"
-                "${subdir}/*.cc"
-                "${subdir}/*.c"
-                "${subdir}/*.cxx"
-                "${subdir}/*.S"
-                "${subdir}/*.s"
-                "${subdir}/*.sx"
-                "${subdir}/*.asm"
-        )
-        list(APPEND LIB_SRC_FILES ${lib_src})
-    endif()
-endforeach()
-
 
 # Compiler flags
 
@@ -83,9 +62,9 @@ set(CMAKE_CXX_FLAGS "${CXXFLAGS}")
 set(CMAKE_ASM_FLAGS   "${CFLAGS}")
 
 # Project setup
-include_directories(${INC_PATH} ${SRC_PATH} ${LIB_INC_PATH})
+include_directories(${INC_PATH} ${SRC_PATH})
 
-add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_SRC_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 

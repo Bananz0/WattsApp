@@ -14,7 +14,11 @@
 #include "DigitalInput.h"
 #include "DigitalOutput.h"
 
-#include <DisplayHandler.h>
+#include "../lib/pictor.h"
+#include "../fonts/OryxB.h"
+#include "../fonts/Mash.h"
+#include "sprite_ghost.h"
+#include "sprite_check.h"
 
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
@@ -68,6 +72,7 @@ int main() {
     testLight(10);                              //Boot Light
     sei();                                               //Enable Global interrupts
 
+    pictorInit(1);
 
 
     uint16_t current = AnalogueInput::busbarCurrent();    //testing ADC
