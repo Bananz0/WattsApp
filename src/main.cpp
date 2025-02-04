@@ -14,7 +14,7 @@
 #include "DigitalInput.h"
 #include "DigitalOutput.h"
 
-#include "pictor.h"
+#include <DisplayHandler.h>
 
 #define TARGET_TIME_MS 100
 #define PRESCALER 64

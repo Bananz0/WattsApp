@@ -29,87 +29,63 @@ set(CMAKE_ASM_COMPILER   ${AVRC})
 project (WattsApp C CXX ASM)
 
 # Important project paths
-set(BASE_PATH    "${${PROJECT_NAME}_SOURCE_DIR}")
+set(BASE_PATH    "${CMAKE_SOURCE_DIR}")
 set(INC_PATH     "${BASE_PATH}/include")
 set(SRC_PATH     "${BASE_PATH}/src")
 set(LIB_DIR_PATH "${BASE_PATH}/lib")
 
 # Files to be compiled
-file(GLOB SRC_FILES "${SRC_PATH}/*.cpp"
+file(GLOB_RECURSE SRC_FILES
+        "${SRC_PATH}/*.cpp"
         "${SRC_PATH}/*.cc"
         "${SRC_PATH}/*.c"
         "${SRC_PATH}/*.cxx"
         "${SRC_PATH}/*.S"
         "${SRC_PATH}/*.s"
         "${SRC_PATH}/*.sx"
-        "${SRC_PATH}/*.asm")
+        "${SRC_PATH}/*.asm"
+)
 
-set(LIB_SRC_FILES
-        src/PWMHandler.cpp
-        src/PWMHandler.h
-        src/globalVariables.h
-        src/globalVariables.cpp
-        src/debug.cpp
-        src/portHandler.cpp
-        src/portHandler.h
-        src/AnalogueInput.cpp
-        src/AnalogueInput.h
-        src/AnalogueOutput.cpp
-        src/AnalogueOutput.h
-        src/DigitalInput.cpp
-        src/DigitalInput.h
-        src/DigitalOutput.cpp
-        src/DigitalOutput.h)
-set(LIB_INC_PATH)
+# Gather library sources from lib/
 file(GLOB LIBRARIES "${LIB_DIR_PATH}/*")
 foreach(subdir ${LIBRARIES})
-    file(GLOB lib_files "${subdir}/*.cpp"
-            "${subdir}/*.cc"
-            "${subdir}/*.c"
-            "${subdir}/*.cxx"
-            "${subdir}/*.S"
-            "${subdir}/*.s"
-            "${subdir}/*.sx"
-            "${subdir}/*.asm")
     if(IS_DIRECTORY ${subdir})
-        list(APPEND LIB_INC_PATH  "${subdir}")
+        list(APPEND LIB_INC_PATH "${subdir}")
+        file(GLOB_RECURSE lib_src
+                "${subdir}/*.cpp"
+                "${subdir}/*.cc"
+                "${subdir}/*.c"
+                "${subdir}/*.cxx"
+                "${subdir}/*.S"
+                "${subdir}/*.s"
+                "${subdir}/*.sx"
+                "${subdir}/*.asm"
+        )
+        list(APPEND LIB_SRC_FILES ${lib_src})
     endif()
-    list(APPEND LIB_SRC_FILES "${lib_files}")
 endforeach()
 
+
 # Compiler flags
-set(CSTANDARD "-std=c11")
+
 set(CDEBUG    "-gstabs -g -ggdb")
 set(CWARN     "-Wall -Wstrict-prototypes -Wl,--gc-sections -Wl,--relax")
-set(CTUNING   "-fpermissive -funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ffunction-sections -fdata-sections")
+set(CTUNING   "-funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ffunction-sections -fdata-sections")
 set(COPT      "-Os -lm -lprintf_flt")
 set(CMCU      "-mmcu=${MCU}")
 set(CDEFS     "-DF_CPU=${F_CPU} -DBAUD=${BAUD}")
 
-set(CFLAGS   "${CMCU} ${CDEBUG} ${CDEFS} ${COPT} ${CWARN} ${CSTANDARD} ${CTUNING}")
-set(CXXFLAGS "${CMCU} ${CDEBUG} ${CDEFS} ${COPT} ${CTUNING} ")
+set(CFLAGS   "${CMCU} ${CDEBUG} ${CDEFS} ${COPT} ${CWARN} ${CTUNING}")
+set(CXXFLAGS "${CMCU} ${CDEBUG} ${CDEFS} ${COPT} ${CTUNING} -fpermissive")
 
 set(CMAKE_C_FLAGS   "${CFLAGS}")
 set(CMAKE_CXX_FLAGS "${CXXFLAGS}")
 set(CMAKE_ASM_FLAGS   "${CFLAGS}")
 
 # Project setup
-include_directories(${INC_PATH} ${LIB_INC_PATH})
-add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_SRC_FILES}
-        src/PWMHandler.cpp
-        src/PWMHandler.h
-        src/globalVariables.h
-        src/debug.cpp
-        src/portHandler.cpp
-        src/portHandler.h
-        src/AnalogueInput.cpp
-        src/AnalogueInput.h
-        src/AnalogueOutput.cpp
-        src/AnalogueOutput.h
-        src/DigitalInput.cpp
-        src/DigitalInput.h
-        src/DigitalOutput.cpp
-        src/DigitalOutput.h)
+include_directories(${INC_PATH} ${SRC_PATH} ${LIB_INC_PATH})
+
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_SRC_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 
