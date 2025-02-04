@@ -4,6 +4,8 @@
 #include <util/delay.h>
 #include <avr/interrupt.h>
 #include <stdio.h>
+#include <string.h>
+#include <string>
 
 #include "debug.h"
 
@@ -72,18 +74,27 @@ int main() {
     testLight(10);                              //Boot Light
     sei();                                               //Enable Global interrupts
 
-    pictorInit(1);
+    pictorInit(0);                                 //Initialize without vysyc
+    pictorSetRotation(0);
 
-    uint16_t current = AnalogueInput::busbarCurrent();    //testing ADC
-    //analogueOutput.setMainsCapacity(current);           //Testing PWM
+    char printString[5];
 
 
-    //testOutputPin('B', 0);
 
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         //signOfLife();                                   //Blink LED every .5 sec to show sign of life
+
+        uint16_t current = AnalogueInput::busbarCurrent();    //testing ADC
+
+
+
+        itoa(ADCVoltage,printString,10);
+        pictorDrawS(reinterpret_cast<const unsigned char *>("TEAM L"), (point){128,8}, WHITE, BLACK, Mash,2);
+        pictorDrawS(printString, (point){128,24}, RED, BLACK, Mash,4);
+
+
 
 
 
