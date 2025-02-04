@@ -31,6 +31,6 @@ void testLight(const uint8_t time_delay) {
 
 void testOutputPin(char portName, const uint8_t pin) {
     //Test Pin B0
-    PORTB ^= _BV(pin);
-    _delay_ms(100);
+    PORTC ^= _BV(pin);
+    _delay_ms(1000);
 }

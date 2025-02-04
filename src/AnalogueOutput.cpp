@@ -7,6 +7,6 @@
 AnalogueOutput::AnalogueOutput() {
     PWMHandler::initializePWM();
 }
-void AnalogueOutput::setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
+void AnalogueOutput::setMainsCapacity(float mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
     PWMHandler::setOutputVoltage(mainsCapacity);
 }

@@ -15,7 +15,9 @@ class PWMHandler {
 public:
     PWMHandler();
     static void initializePWM();
-    static void setOutputVoltage(uint8_t voltage);
+    static void initializeTimer1();
+    static void initializeTimer2();
+    static void setOutputVoltage(float voltage);
 };
 
 #endif //PWMHANDLER_H
