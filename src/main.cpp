@@ -74,7 +74,6 @@ int main() {
 
     pictorInit(1);
 
-
     uint16_t current = AnalogueInput::busbarCurrent();    //testing ADC
     //analogueOutput.setMainsCapacity(current);           //Testing PWM
 
