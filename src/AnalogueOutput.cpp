@@ -5,8 +5,8 @@
 #include "AnalogueOutput.h"
 
 AnalogueOutput::AnalogueOutput() {
-    pWMHandler.initializePWM();
+    PWMHandler::initializePWM();
 }
 void AnalogueOutput::setMainsCapacity(uint16_t mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
-    pWMHandler.setOutputVoltage(mainsCapacity);
+    PWMHandler::setOutputVoltage(mainsCapacity);
 }

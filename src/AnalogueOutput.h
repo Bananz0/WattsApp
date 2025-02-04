@@ -9,7 +9,7 @@
 class AnalogueOutput {
 public:
     AnalogueOutput();
-    void setMainsCapacity(uint16_t mainsCapacity);
+    static void setMainsCapacity(uint16_t mainsCapacity);
 private:
     PWMHandler pWMHandler;
 
