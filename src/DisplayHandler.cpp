@@ -4,10 +4,3 @@
 
 #include "DisplayHandler.h"
 
-DisplayHandler::DisplayHandler() {
-
-}
-void DisplayHandler::startDisplay(bool vsync) {
-    //pictorInit(vsync);
-}
-
