@@ -3,8 +3,6 @@
 #include <avr/io.h>
 #include <util/delay.h>
 #include <avr/interrupt.h>
-#include <stdio.h>
-#include <string.h>
 
 #include "debug.h"
 
@@ -26,6 +24,75 @@
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
 // #define F_CPU 12000000 This is already defined in the CMake
+
+
+point topLeft = {0, 0};
+point bottomRight = {319, 239};
+
+
+
+DisplayHandler::DisplayHandler() {
+
+}
+
+DisplayHandler::~DisplayHandler() {
+}
+
+void DisplayHandler::drawRectangle() {
+}
+
+void DisplayHandler::drawCircle() {
+}
+
+void DisplayHandler::drawTriangle() {
+}
+
+void DisplayHandler::drawEllipse() {
+}
+
+void DisplayHandler::drawBitmap() {
+}
+
+void DisplayHandler::drawPicture() {
+}
+
+void DisplayHandler::drawBootLogo() {
+}
+
+void DisplayHandler::startDisplay(bool vsync) {
+   pictorInit(vsync);
+    if (vsync)  pictorFrame();
+    pictorCanvasSet(topLeft, bottomRight);
+}
+void DisplayHandler::stopDisplay() {
+
+}
+void DisplayHandler::setBacklight(state State) {
+    pictorBacklightState(State);
+}
+void DisplayHandler::toggleBacklight() {
+    pictorBacklightState(-1);
+}
+void DisplayHandler::setOrientation(orientation rotation) {
+    pictorSetRotation(rotation);
+}
+void DisplayHandler::clearScreen() {
+    //set screen to black
+}
+void DisplayHandler::drawText() {
+
+}
+void DisplayHandler::drawUIsimple() {
+    uint16_t lineColor = encode656Colour(0, 255, 0);  // Green color for the line
+    point start = {10, 200};
+    point end = {200, 200};
+    pictorDrawLine(start, end, lineColor);  // Draw a green line
+    pictorDrawBox(topLeft, bottomRight, lineColor);
+}
+
+
+
+
 
 volatile uint32_t Counter=0;//Only used for time interrupt
 
@@ -72,11 +139,11 @@ ISR(PCINT2_vect) {
 
 int main() {
     finalizePorts();
-    testLight(10);                              //Boot Light
+    testLight(1);                              //Boot Light
     sei();                                               //Enable Global interrupts
 
-    //Initialize the display
-    pictorInit(0);
+    //Initialize the display - will refractor this to DisplayHandler
+    pictorInit(1);
     pictorSetRotation(0);
 
     // ReSharper disable once CppDFAEndlessLoop

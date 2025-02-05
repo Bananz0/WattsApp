@@ -17,10 +17,35 @@ public:
     static void startDisplay(bool vsync);
     static void stopDisplay();
     static void setBacklight(state State);
+    static void toggleBacklight();
     static void setOrientation(orientation rotation);
     static void clearScreen();
 
+    //Drawing Elements
+    static void drawRectangle();
+    static void drawCircle();
+    static void drawTriangle();
+    static void drawEllipse();
+
+
+    //Text elements
+    static void drawText();
+    static void drawBitmap();
+    static void drawPicture();
+
+    //UI Elements (hopefully)
+    static void drawUIsimple();
+    static void drawBootLogo();
+
+
+
+
+
 private:
+    // point topLeft;
+    // point bottomRight;
+    // CANNOT USE THIS HERE CASUE FUCKING PICTOR DOESNT FOLLOW FUCKING C STANDARDS
+    // done in main function as is the class ffs
 
 
 };
