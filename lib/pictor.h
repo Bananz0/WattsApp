@@ -9,6 +9,10 @@
  *	This licence can be found at http://creativecommons.org/licenses/
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #ifndef PICTOR
 #define PICTOR
 
@@ -109,15 +113,15 @@ uint16_t encode656Colour(const uint8_t Red, const uint8_t Green, const uint8_t B
 // BASE LCD CMDS
 //===============
 //	Sends a command byte to the screen.
-inline void pictorCmdWrite(const uint8_t Cmd);
+void pictorCmdWrite(const uint8_t Cmd);
 //	Sends a data byte to the screen.
-inline void pictorByteWrite(const uint8_t Data);
+void pictorByteWrite(const uint8_t Data);
 //	Sends two data bytes to the screen.
-inline void pictorWordWrite(uint16_t Value);
+void pictorWordWrite(uint16_t Value);
 //	Returns a data byte read from the screen.
-inline uint8_t pictorByteRead();
+uint8_t pictorByteRead();
 //	Returns a word from two data bytes read from the screen.
-inline uint16_t pictorWordRead();
+uint16_t pictorWordRead();
 //	Sets the state of the back-light, 1 = ON, 0 = OFF, -1 = TOGGLE
 void pictorBacklightState(const int8_t State);
 //	Toggles the VSYNC pin to update the screen in VSYNC mode
@@ -182,8 +186,8 @@ void pictorInit(const uint8_t Mode);
 // Dump the entire of ram and program memory to the screen
 void pictorMemDump();
 
-#include "pictor.c"
+#endif
 
-//#include <avr/pgmspace.h>
-
+#ifdef __cplusplus
+}
 #endif

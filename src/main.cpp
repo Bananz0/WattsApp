@@ -15,83 +15,9 @@
 
 #include "DisplayHandler.h"
 
-#include "../lib/pictor.h"
-#include "../fonts/OryxB.h"
-#include "../fonts/Mash.h"
-#include "sprite_ghost.h"
-#include "sprite_check.h"
-
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
 // #define F_CPU 12000000 This is already defined in the CMake
-
-
-point topLeft = {0, 0};
-point bottomRight = {319, 239};
-
-
-
-DisplayHandler::DisplayHandler() {
-
-}
-
-DisplayHandler::~DisplayHandler() {
-}
-
-void DisplayHandler::drawRectangle() {
-}
-
-void DisplayHandler::drawCircle() {
-}
-
-void DisplayHandler::drawTriangle() {
-}
-
-void DisplayHandler::drawEllipse() {
-}
-
-void DisplayHandler::drawBitmap() {
-}
-
-void DisplayHandler::drawPicture() {
-}
-
-void DisplayHandler::drawBootLogo() {
-}
-
-void DisplayHandler::startDisplay(bool vsync) {
-   pictorInit(vsync);
-    if (vsync)  pictorFrame();
-    pictorCanvasSet(topLeft, bottomRight);
-}
-void DisplayHandler::stopDisplay() {
-
-}
-void DisplayHandler::setBacklight(state State) {
-    pictorBacklightState(State);
-}
-void DisplayHandler::toggleBacklight() {
-    pictorBacklightState(-1);
-}
-void DisplayHandler::setOrientation(orientation rotation) {
-    pictorSetRotation(rotation);
-}
-void DisplayHandler::clearScreen() {
-    //set screen to black
-}
-void DisplayHandler::drawText() {
-
-}
-void DisplayHandler::drawUIsimple() {
-    uint16_t lineColor = encode656Colour(0, 255, 0);  // Green color for the line
-    point start = {10, 200};
-    point end = {200, 200};
-    pictorDrawLine(start, end, lineColor);  // Draw a green line
-    pictorDrawBox(topLeft, bottomRight, lineColor);
-}
-
-
-
 
 
 volatile uint32_t Counter=0;//Only used for time interrupt
@@ -108,6 +34,8 @@ AnalogueInput analogueInput;                        //Starts the ADC up in the A
 //AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor   PORTD7
 DigitalInput digitalInput;                          //Start the Digital ISR                                     PORTC0-2
 DigitalOutput digitalOutput;                        //very basic                                                PORTC3-7
+
+DisplayHandler display;
 
 //ADC ISR
 ISR(ADC_vect){

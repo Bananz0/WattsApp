@@ -32,6 +32,7 @@ project (WattsApp C CXX ASM)
 # Important project paths
 set(BASE_PATH    "${CMAKE_SOURCE_DIR}")
 set(SRC_PATH     "${BASE_PATH}/src")
+set(LIB_PATH     "${BASE_PATH}/lib")
 
 # Files to be compiled
 file(GLOB_RECURSE SRC_FILES
@@ -43,6 +44,17 @@ file(GLOB_RECURSE SRC_FILES
         "${SRC_PATH}/*.s"
         "${SRC_PATH}/*.sx"
         "${SRC_PATH}/*.asm"
+)
+
+file(GLOB_RECURSE LIB_FILES
+        "${LIB_PATH}/*.cpp"
+        "${LIB_PATH}/*.cc"
+        "${LIB_PATH}/*.c"
+        "${LIB_PATH}/*.cxx"
+        "${LIB_PATH}/*.S"
+        "${LIB_PATH}/*.s"
+        "${LIB_PATH}/*.sx"
+        "${LIB_PATH}/*.asm"
 )
 
 # Compiler flags
@@ -62,9 +74,9 @@ set(CMAKE_CXX_FLAGS "${CXXFLAGS}")
 set(CMAKE_ASM_FLAGS   "${CFLAGS}")
 
 # Project setup
-include_directories(${INC_PATH} ${SRC_PATH})
+include_directories(${INC_PATH} ${SRC_PATH} ${LIB_PATH})
 
-add_executable(${PROJECT_NAME} ${SRC_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 

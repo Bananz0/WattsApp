@@ -116,7 +116,7 @@ void pictorArrayWrite(const uint8_t* Data, const uint16_t Count){
 }
 
 void pictorWordArrayWrite(const uint8_t Cmd, const uint16_t* Data, const uint16_t Count) {
-#ifndef PICTOR_FASTMODE	
+#ifndef PICTOR_FASTMODE
 	uint8_t I = 0;
 	pictorCmdWrite(Cmd);
 	while (I < Count) {
@@ -578,14 +578,14 @@ void pictorDrawSpriteType_(const void* Sprite, const point Pos, const uint8_t ty
 	point I;
 	uint16_t _palette[16];
 	uint16_t* Palette =_palette;
-	
-	//void pointer typecasting needed 
+
+	//void pointer typecasting needed
 	//3 pointers added for the sprite type to avoid continual casting
 	sprite* SpriteReg = NULL;
 	spriteMono* SpriteMono = NULL;
 	spriteEncoded* SpriteIndex = NULL;
 	spritePalette* SpritePacked = NULL;
-	
+
 	switch(type) {
 		case 0x0B:
 		case 0x0A:
@@ -621,10 +621,10 @@ void pictorDrawSpriteType_(const void* Sprite, const point Pos, const uint8_t ty
 			j2 = I.Y * I.X;
 			break;
 	}
-	
+
 	pictorCanvasSet(Pos,(point){(Pos.X + I.X) - 1, (Pos.Y + I.Y) - 1});
 	pictorCmdWrite(0x2C);
-	
+
 	switch(type) {
 		case 0x0B:
 			Buffer = (uint8_t*) SpritePacked->palette;
@@ -709,7 +709,7 @@ void pictorDrawSpriteType_(const void* Sprite, const point Pos, const uint8_t ty
 				datL = pgm_read_byte(byteCur++);
 				colour = (uint8_t) ((datL>>4) & 0x0F);//fetch and break bytes into colour and number
 				number = (uint8_t) (datL & 0x0F);
-				
+
 				if (number == 0) {//single pixel of colour
 					pictorWordWrite(Palette[colour]);//write colour
 				} else if (number > j) {//overflow avoidance
@@ -734,7 +734,7 @@ void pictorDrawSpriteType_(const void* Sprite, const point Pos, const uint8_t ty
 				colour = (uint8_t) ((*byteCur>>4) & 0x0F);//fetch and break bytes into colour and number
 				number = (uint8_t) (*byteCur & 0x0F);
 				byteCur++;
-				
+
 				if (number == 0) {//single pixel of colour
 					pictorWordWrite(Palette[colour]);//write colour
 				} else if (number > j) {//overflow avoidance
@@ -756,7 +756,7 @@ void pictorDrawSpriteType_(const void* Sprite, const point Pos, const uint8_t ty
 				byteCur++;
 				colour = (uint8_t) ((datL>>4) & 0x0F);//fetch and break bytes into colour and number
 				number = (uint8_t) (datL & 0x0F);
-				
+
 				if (number == 0) {//single pixel of colour
 					pictorWordWrite(Palette[colour]);//write colour
 				} else if (number > j) {//overflow avoidance
@@ -777,7 +777,7 @@ void pictorDrawSpriteType_(const void* Sprite, const point Pos, const uint8_t ty
 				colour = (uint8_t) ((*byteCur>>4) & 0x0F);//fetch and break bytes into colour and number
 				number = (uint8_t) (*byteCur & 0x0F);
 				byteCur++;
-				
+
 				if (number == 0) {//single pixel of colour
 					pictorWordWrite(Palette[colour]);//write colour
 				} else if (number > j) {//overflow avoidance
@@ -841,7 +841,7 @@ void pictorDrawSpriteType(const void* Sprite, const point Pos, const uint8_t typ
 	} else if (!Scale) {
 		return;//if scale is 0 then nothing to draw
 	}
-	
+
 	uint8_t* byteStart;
 	uint8_t* byteCur;
 	uint8_t datH, datL;//only used for types 1,3,5,7
@@ -852,14 +852,14 @@ void pictorDrawSpriteType(const void* Sprite, const point Pos, const uint8_t typ
 	point J, I;
 	uint16_t _palette[16];
 	uint16_t* Palette = _palette;
-	
-	//void pointer typecasting needed 
+
+	//void pointer typecasting needed
 	//4 pointers added for the sprite type to avoid continual casting
 	sprite* SpriteReg = NULL;
 	spriteMono* SpriteMono = NULL;
 	spriteEncoded* SpriteIndex = NULL;
 	spritePalette* SpritePacked = NULL;
-	
+
 	switch(type) {
 		case 0x0B:
 		case 0x0A:
@@ -894,10 +894,10 @@ void pictorDrawSpriteType(const void* Sprite, const point Pos, const uint8_t typ
 			byteCur = (uint8_t*)(SpriteReg->RGB);
 			break;
 	}
-	
+
 	pictorCanvasSet(Pos,(point){(Pos.X + (I.X * Scale)) - 1, (Pos.Y + (I.Y * Scale)) - 1});
 	pictorCmdWrite(0x2C);
-	
+
 	switch(type) {
 		case 0x0B:
 			byteStart = (uint8_t*) SpritePacked->palette;
