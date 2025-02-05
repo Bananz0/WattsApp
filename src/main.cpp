@@ -143,8 +143,12 @@ int main() {
     sei();                                               //Enable Global interrupts
 
     //Initialize the display - will refractor this to DisplayHandler
-    pictorInit(1);
-    pictorSetRotation(0);
+    // pictorInit(1);
+    // pictorSetRotation(0);
+
+    display.startDisplay(false);
+    display.setOrientation(DisplayHandler::PORTRAIT);
+
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {

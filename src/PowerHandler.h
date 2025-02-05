@@ -11,10 +11,10 @@ class PowerHandler {
 public:
   PowerHandler();
   ~PowerHandler();
-  static void enterSleep();
-  static void exitSleep();
-  static void manageBacklight(bool backlight);
-  static void manageWiFiPower(bool enable);
+  void enterSleep();
+  void exitSleep();
+  void manageBacklight(bool backlight);
+  void manageWiFiPower(bool enable);
 
 
 };

@@ -10,44 +10,35 @@
 class DisplayHandler {
 public:
     typedef enum {PORTRAIT = 0, LANDSCAPE = 1, PORTRAIT_INV = 2, LANDSCAPE_INV = 3} orientation;
-    typedef enum {ON = 1, OFF = 0} state;
 
     DisplayHandler();
     ~DisplayHandler();
-    static void startDisplay(bool vsync);
-    static void stopDisplay();
-    static void setBacklight(state State);
-    static void toggleBacklight();
-    static void setOrientation(orientation rotation);
-    static void clearScreen();
+    void startDisplay(bool vsync);
+    void stopDisplay();
+ //   void setBacklight(state State);
+    void toggleBacklight();
+    void setOrientation(orientation rotation);
+    void clearScreen();
 
     //Drawing Elements
-    static void drawRectangle();
-    static void drawCircle();
-    static void drawTriangle();
-    static void drawEllipse();
+    void drawRectangle();
+    void drawCircle();
+    void drawTriangle();
+    void drawEllipse();
 
 
     //Text elements
-    static void drawText();
-    static void drawBitmap();
-    static void drawPicture();
+    void drawText(char text[]);
+    void drawBitmap();
+    void drawPicture();
 
     //UI Elements (hopefully)
-    static void drawUIsimple();
-    static void drawBootLogo();
-
-
-
+    void drawUIsimple();
+    void drawBootLogo();
 
 
 private:
-    // point topLeft;
-    // point bottomRight;
-    // CANNOT USE THIS HERE CASUE FUCKING PICTOR DOESNT FOLLOW FUCKING C STANDARDS
-    // done in main function as is the class ffs
-
-
+    point topLeft, bottomRight, bottomLeft, topRight;
 };
 
 

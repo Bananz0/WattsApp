@@ -14,10 +14,10 @@
 class PWMHandler {
 public:
     PWMHandler();
-    static void initializePWM();
-    static void initializeTimer1();
-    static void initializeTimer2();
-    static void setOutputVoltage(float voltage);
+    void initializePWM();
+    void initializeTimer1();
+    void initializeTimer2();
+    void setOutputVoltage(float voltage);
 };
 
 #endif //PWMHANDLER_H

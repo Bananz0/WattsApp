@@ -11,9 +11,9 @@ class TimeHandler {
   public:
     TimeHandler();
     ~TimeHandler();
-    static bool syncTime();
-    static bool getTime();
-    static void updateTime();
+    bool syncTime();
+    bool getTime();
+    void updateTime();
 
 
 

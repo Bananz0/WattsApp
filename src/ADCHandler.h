@@ -14,10 +14,10 @@
 class ADCHandler {
 public:
     ADCHandler();
-    static void initializeADC();
-    static void setADCChannel(const uint8_t channel);
-    static void readADC();
-    static void getVoltage(const uint8_t channel);
+    void initializeADC();
+    void setADCChannel(const uint8_t channel);
+    void readADC();
+    void getVoltage(const uint8_t channel);
 private:
 
 };
