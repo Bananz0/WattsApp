@@ -15,7 +15,9 @@ void ADCHandler::initializeADC() {
            | _BV(ADIE)    /*Enables the Interrupt for ADC Complete*/
            | ~_BV(ADATE); /*Auto Trigger Disable*/
 
-    ADMUX &= ~(_BV(REFS0) | _BV(REFS1));  //Set the AREF to VCC, 5v and interal Vref turned off
+    // | _BV(REFS1));  //Set the AREF to VCC, 5v and interal Vref turned off
+    ADMUX &= ~_BV(REFS0);
+    ADMUX |= _BV(REFS1);
 }
 void ADCHandler::setADCChannel(const uint8_t channel) {
     ADMUX = ((ADMUX & 0xE0)|channel); //Set the lower three bits to n
