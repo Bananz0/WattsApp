@@ -6,16 +6,19 @@
 #define DISPLAYHANDLER_H
 #include <stdint.h>
 #include "pictor.h"
+#include "Mash.h"
+#include "OryxB.h"
 
 class DisplayHandler {
 public:
     typedef enum {PORTRAIT = 0, LANDSCAPE = 1, PORTRAIT_INV = 2, LANDSCAPE_INV = 3} orientation;
+    typedef enum {LIGHT = 1, DIM = 0}state;
 
     DisplayHandler();
     ~DisplayHandler();
     void startDisplay(bool vsync);
     void stopDisplay();
- //   void setBacklight(state State);
+    void setBacklight(state State);
     void toggleBacklight();
     void setOrientation(orientation rotation);
     void clearScreen();
@@ -39,6 +42,9 @@ public:
 
 private:
     point topLeft, bottomRight, bottomLeft, topRight;
+
+    uint16_t primaryColour, secondaryColour, backgroundColour, fontColour, accentColour, errorColour,
+            successColour, lineColour, shapeColour;
 };
 
 

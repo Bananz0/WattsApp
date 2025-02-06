@@ -19,7 +19,6 @@
 #define PRESCALER 64
 // #define F_CPU 12000000 This is already defined in the CMake
 
-
 volatile uint32_t Counter=0;//Only used for time interrupt
 
 // Timer initialization function
@@ -70,21 +69,26 @@ int main() {
     testLight(1);                              //Boot Light
     sei();                                               //Enable Global interrupts
 
-    //Initialize the display - will refractor this to DisplayHandler
-    // pictorInit(1);
-    // pictorSetRotation(0);
-
     display.startDisplay(false);
-    display.setOrientation(DisplayHandler::PORTRAIT);
+    display.setBacklight(DisplayHandler::LIGHT);
+    display.setOrientation(DisplayHandler::LANDSCAPE);
+
+    point center = {120,160};
 
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         //signOfLife();                                   //Blink LED every .5 sec to show sign of life
-        uint16_t current = analogueInput.busbarCurrent();
+        float current = analogueInput.busbarCurrent();
+        current = current / 10.0f;
+        char textBuffer[8];
+
+        int wholePart = (int)current;
+        int decimalPart = (int)((current - wholePart) * 10); // One decimal place
+        snprintf(textBuffer, sizeof(textBuffer), "%d.%d", wholePart, decimalPart);
 
 
-
+        display.drawText(textBuffer);
 
     }
 }

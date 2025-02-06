@@ -33,6 +33,7 @@ project (WattsApp C CXX ASM)
 set(BASE_PATH    "${CMAKE_SOURCE_DIR}")
 set(SRC_PATH     "${BASE_PATH}/src")
 set(LIB_PATH     "${BASE_PATH}/lib")
+set(FONT_PATH    "${BASE_PATH}/fonts")
 
 # Files to be compiled
 file(GLOB_RECURSE SRC_FILES
@@ -57,6 +58,10 @@ file(GLOB_RECURSE LIB_FILES
         "${LIB_PATH}/*.asm"
 )
 
+file(GLOB_RECURSE FONT_FILES
+        "${FONT_FILES}/*.h"
+)
+
 # Compiler flags
 
 set(CDEBUG    "-gstabs -g -ggdb")
@@ -74,9 +79,9 @@ set(CMAKE_CXX_FLAGS "${CXXFLAGS}")
 set(CMAKE_ASM_FLAGS   "${CFLAGS}")
 
 # Project setup
-include_directories(${INC_PATH} ${SRC_PATH} ${LIB_PATH})
+include_directories(${INC_PATH} ${SRC_PATH} ${LIB_PATH} ${FONT_PATH})
 
-add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_FILES} ${FONT_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 

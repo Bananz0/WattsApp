@@ -4,8 +4,11 @@
 
 #include "DisplayHandler.h"
 
-DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRight() {
-
+DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRight(),
+                                   primaryColour(0x0052CC), secondaryColour(0x505A64),
+                                   backgroundColour(0xFFFFFF),fontColour(0x1A1A1A),
+                                   accentColour(0x006F7A), errorColour(0xD32F2F),
+                                   successColour(0xCFD8DC), lineColour(0x263238), shapeColour(0x263238) {
 }
 
 DisplayHandler::~DisplayHandler() {
@@ -19,9 +22,9 @@ void DisplayHandler::startDisplay(bool vsync) {
 void DisplayHandler::stopDisplay() {
 
 }
-// void DisplayHandler::setBacklight(state State) {
-//     pictorBacklightState(State);
-// }
+void DisplayHandler::setBacklight(state State) {
+    pictorBacklightState(State);
+}
 void DisplayHandler::toggleBacklight() {
     pictorBacklightState(-1);
 }
@@ -30,16 +33,17 @@ void DisplayHandler::setOrientation(orientation rotation) {
 }
 void DisplayHandler::clearScreen() {
     //set screen to black
+    pictorDrawAll(BLACK);
 }
-void DisplayHandler::drawText(char text[]) {
-
+void DisplayHandler::drawText(char message[]) {
+    point textPos = {50, 50};
+    pictorDrawS((unsigned char*)message, textPos, fontColour, backgroundColour, Mash, 5);  // Draw the message with scale 1
 }
 void DisplayHandler::drawUIsimple() {
-    uint16_t lineColor = encode656Colour(0, 255, 0);  // Green color for the line
     point start = {10, 200};
     point end = {200, 200};
-    pictorDrawLine(start, end, lineColor);  // Draw a green line
-    pictorDrawBox(topLeft, bottomRight, lineColor);
+    pictorDrawLine(start, end, lineColour);  // Draw a green line
+    pictorDrawBox(topLeft, bottomRight, lineColour);
 }
 
 void DisplayHandler::drawRectangle() {

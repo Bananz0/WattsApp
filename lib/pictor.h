@@ -90,20 +90,64 @@ static uint8_t pictorRot = 0;
 #define PICTOR_MAX	(point){239,319}
 #define PICTOR_SIZE	(point){240,320}
 
-//	COLOURS		  RRRRRGGGGGGBBBBB
-#define BLACK	0b0000000000000000
-#define WHITE	0b1111111111111111
-#define RED		0b1111100000000000
-#define ORANGE	0b1111101011100000
-#define YELLOW	0b1111111111100000
-#define GREEN	0b0000011111100000
-#define CYAN	0b0000011111111111
-#define BLUE	0b0000000000011111
-#define MAGENTA	0b1111100000011111
-//	COLOUR MODIFIERS
-#define PALE	0b1000010000010000 |
-#define DEEP	0b0111001111001110 &
-#define DARK	0b0011000111000110 &
+// //	COLOURS		  RRRRRGGGGGGBBBBB
+// #define BLACK	0b0000000000000000
+// #define WHITE	0b1111111111111111
+// #define RED		0b1111100000000000
+// #define ORANGE	0b1111101011100000
+// #define YELLOW	0b1111111111100000
+// #define GREEN	0b0000011111100000
+// #define CYAN	0b0000011111111111
+// #define BLUE	0b0000000000011111
+// #define MAGENTA	0b1111100000011111
+// //	COLOUR MODIFIERS
+// #define PALE	0b1000010000010000 |
+// #define DEEP	0b0111001111001110 &
+// #define DARK	0b0011000111000110 &
+
+// Original base colors with 5 bits each for RGB (15 bits total)
+#define BLACK           0b0000000000000000  // 0,0,0
+#define WHITE           0b1111111111111111  // 31,31,31
+#define RED             0b1111100000000000  // 31,0,0
+#define DARK_RED        0b1000000000000000  // 16,0,0
+#define LIGHT_RED       0b1111110000010000  // 31,1,0
+#define ORANGE          0b1111101011100000  // 31,23,0
+#define DARK_ORANGE     0b1011000111000000  // 22,14,0
+#define LIGHT_ORANGE    0b1111111100000000  // 31,31,0
+#define YELLOW          0b1111111111100000  // 31,31,0
+#define DARK_YELLOW     0b1011011011000000  // 22,22,0
+#define LIGHT_YELLOW    0b1111111111110011  // 31,31,3
+#define GREEN           0b0000011111100000  // 0,31,0
+#define DARK_GREEN      0b0000001100000000  // 0,12,0
+#define LIGHT_GREEN     0b1000111111111000  // 16,31,8
+#define CYAN            0b0000011111111111  // 0,31,31
+#define DARK_CYAN       0b0000001101101100  // 0,13,12
+#define LIGHT_CYAN      0b1000111111111111  // 16,31,31
+#define BLUE            0b0000000000011111  // 0,0,31
+#define DARK_BLUE       0b0000000000001000  // 0,0,8
+#define LIGHT_BLUE      0b1000000000111111  // 16,0,31
+#define MAGENTA         0b1111100000011111  // 31,0,31
+#define DARK_MAGENTA    0b1000000000001000  // 16,0,8
+#define LIGHT_MAGENTA   0b1111111000111111  // 31,8,31
+#define PURPLE          0b0111100000011110  // 15,0,14
+#define PINK            0b1111101111101111  // 31,29,15
+#define BROWN           0b1000010000000000  // 16,4,0
+#define GRAY            0b1000010000100001  // 16,4,1
+#define DARK_GRAY       0b0100001000010000  // 8,2,0
+#define LIGHT_GRAY      0b1100110011001100  // 25,12,12
+
+// Color modifiers (using bitwise operations)
+#define PALE           0b1000010000010000 |  // Adds a gray tint
+#define DEEP           0b0111001111001110 &  // Intensifies while preserving midtones
+#define DARK           0b0011000111000110 &  // Reduces overall brightness
+#define BRIGHT         0b1110111110111110 |  // Increases overall brightness
+#define SATURATE       0b1110011110011110 |  // Enhances color intensity
+#define DESATURATE     0b0111101111101111 &  // Moves color toward gray
+
+// Suggested additional modifiers
+#define WARM           0b1111101000100000 |  // Adds warm tint
+#define COOL           0b0000001111111111 &  // Adds cool tint
+
 
 
 //	Create a colour encoded in 656-RGB from individual RGB bytes.
