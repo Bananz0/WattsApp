@@ -87,7 +87,6 @@ int main() {
         int decimalPart = (int)((current - wholePart) * 10); // One decimal place
         snprintf(textBuffer, sizeof(textBuffer), "%d.%d", wholePart, decimalPart);
 
-
         display.drawText(textBuffer);
 
     }
