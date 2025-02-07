@@ -8,6 +8,9 @@ This project includes code and resources from third-party sources. The following
 - **Author(s):** [Terra Barber](https://github.com/TBTerra), [Will Barber](https://github.com/WillB97), [Alexandru Tiniuc](https://github.com/tiniuclx).
 - **Used for:** This library was used for vector graphics on the Il Matto (AVR ATmega644p)
 
+### 2. [avr-uart](https://github.com/andygock/avr-uart)
+- **Author(s):** [Andy Gock](https://github.com/andygock)
+- **Used for:** An interrupt driven UART Library for 8-bit AVR microcontrollers.
 
 ## License Compliance
 

@@ -1,5 +1,7 @@
 #include "pictor.h"
 
+#include <stdio.h>
+
 uint16_t encode656Colour(const uint8_t Red, const uint8_t Green, const uint8_t Blue) {
 	uint16_t Colour = Red & 0xF8;	//	00000000RRRRR000
 	Colour <<= 5;					//	000RRRRR00000000
@@ -1496,4 +1498,25 @@ void pictorMemDump(){
 		data = pgm_read_dword(ptr);
 		pictorWordWrite(data);
 	}
+}
+
+void pictorDrawF(const double Number,const point Pos,const uint16_t ForegroundColour,const uint16_t BackgroundColour,const font* Font, uint8_t scale, uint8_t len) {
+	char  NumberString[7];
+	/* %.2f format specifier can be adjusted to any num of dp by changing the number*/
+	sprintf(NumberString,"%.2f", Number);
+	point Pos2 = Pos;
+	if(len)
+	{
+		uint8_t i =
+	0;
+		while(NumberString[i])i++;
+		while(i<len){
+			pictorDrawC(32,
+	  Pos2, ForegroundColour, BackgroundColour, Font, scale);
+			Pos2.X += scale*8;
+			i++;
+		}
+	}
+	pictorDrawS((unsigned char*)NumberString, Pos2, ForegroundColour,
+	BackgroundColour, Font, scale);
 }

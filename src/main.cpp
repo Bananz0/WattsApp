@@ -18,7 +18,6 @@
 
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
-// #define F_CPU 12000000 This is already defined in the CMake
 
 volatile uint32_t Counter=0;//Only used for time interrupt
 
@@ -75,20 +74,20 @@ int main() {
     display.setOrientation(DisplayHandler::LANDSCAPE);
 
     point center = {120,160};
+    point bottom = {10,160};
+    point top = {10,10};
+
+
 
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         //signOfLife();                                   //Blink LED every .5 sec to show sign of life
-        float current = analogueInput.busbarCurrent();
-        current = current / 10.0f;
-        char textBuffer[8];
-
-        int wholePart = (int)current;
-        int decimalPart = (int)((current - wholePart) * 10); // One decimal place
-        snprintf(textBuffer, sizeof(textBuffer), "%d.%d", wholePart, decimalPart);
-
-        display.drawText(textBuffer);
-
+        float glen = 2.2f;
+        //display.drawText(textBuffer);
+        pictorDrawF(glen,center,display.fontColour,display.backgroundColour,Mash,2,4);
+        pictorDrawF(glen,bottom,display.fontColour,display.backgroundColour,Mash,2,4);
+        pictorDrawD(glen,top,display.fontColour,display.backgroundColour,Mash,2,4);
+        display.drawUIsimple();
     }
 }

@@ -40,6 +40,7 @@ void DisplayHandler::clearScreen() {
     pictorDrawAll(BLACK);
 }
 void DisplayHandler::drawText(char message[]) {
+    //Will expand to handle any char string decimal or number
     point textPos = {50, 50};
     pictorDrawS((unsigned char*)message, textPos, fontColour, backgroundColour, Mash, 3);  // Draw the message with scale 1
 }

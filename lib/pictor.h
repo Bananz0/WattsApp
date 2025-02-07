@@ -203,6 +203,8 @@ void pictorDrawD(const int16_t Number, const point Pos, const uint16_t Foregroun
 //	Draws a Value in hex onto the screen at Pos with two colours of Font.
 uint8_t pictorDrawX(const uint8_t Value, const point Pos, const uint16_t ForegroundColour, const uint16_t BackgroundColour, const font* Font, uint8_t scale);
 
+void pictorDrawF(const double Number,const point Pos,const uint16_t ForegroundColour,const uint16_t BackgroundColour,const font* Font, uint8_t scale, uint8_t len) ;
+
 //=================
 // LCD DRAW SHAPES
 //=================
