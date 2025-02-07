@@ -12,7 +12,7 @@ void PWMHandler::initializePWM() { //Initialize the PWM based on pg155 of the il
     //Using PD5
     initializeTimer1();
     //Using PD7
-    initializeTimer2();
+    //initializeTimer2();
 
 }
 

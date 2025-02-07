@@ -13,9 +13,9 @@ class DisplayHandler {
 public:
     typedef enum {PORTRAIT = 0, LANDSCAPE = 1, PORTRAIT_INV = 2, LANDSCAPE_INV = 3} orientation;
     typedef enum {LIGHT = 1, DIM = 0}state;
-    point topLeft, bottomRight, bottomLeft, topRight;
-    uint16_t primaryColour, secondaryColour, backgroundColour, fontColour, accentColour, errorColour,
-        successColour, lineColour, shapeColour;
+    point topLeft, bottomRight, bottomLeft, topRight, top ,center ,bottom; ;
+    uint16_t primaryColour, secondaryColour, backgroundColour, fontColour,
+             accentColour, errorColour,successColour, lineColour, shapeColour;
 
     DisplayHandler();
     ~DisplayHandler();
@@ -25,6 +25,8 @@ public:
     void toggleBacklight();
     void setOrientation(orientation rotation);
     void clearScreen();
+    void screenOn();
+    void screenOff();
 
     //Drawing Elements
     void drawRectangle();
@@ -43,6 +45,12 @@ public:
     //UI Elements (hopefully)
     void drawUIsimple();
     void drawBootLogo();
+
+    //Pages maybe?
+    void showBusbarScreen();
+    void showPVScreen();
+    void showTurbineScreen();
+    void showBatteryScreen();
 
 
 private:

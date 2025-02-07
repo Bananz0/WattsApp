@@ -19,7 +19,12 @@
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
 
-volatile uint32_t Counter=0;//Only used for time interrupt
+AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor    PORTA1
+//AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor   PORTD7
+DigitalInput digitalInput;                          //Start the Digital ISR                                     PORTC0-2
+DigitalOutput digitalOutput;                        //very basic                                                PORTC3-7
+
+DisplayHandler display;
 
 // Timer initialization function
 void initializeTimer1() {
@@ -29,12 +34,21 @@ void initializeTimer1() {
     TCCR1B |= (1 << CS11) | (1 << CS10);
 }
 
-AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor    PORTA1
-//AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor   PORTD7
-DigitalInput digitalInput;                          //Start the Digital ISR                                     PORTC0-2
-DigitalOutput digitalOutput;                        //very basic                                                PORTC3-7
+void updateStats(uint8_t frequency) {
+    //Time Interrupt
+    if (Counter % 10 == 0) {
+        //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
+        windTurbineCapacity = analogueInput.turbineCurrentCapacity();
+        pvCapacity = analogueInput.pvCurrentCapacity();
+        totalRenewablePower = windTurbineCapacity + pvCapacity;
 
-DisplayHandler display;
+        //Calculate average power and total energy consumption based on bus voltage and bus current (analogue output)
+        busbarVoltage = analogueInput.busbarVoltage();
+        busbarCurrent = analogueInput.busbarCurrent();
+        averagePower = busbarVoltage * busbarCurrent;
+        totalEnergy = averagePower * TARGET_TIME_MS / 1000;
+    }
+}
 
 //ADC ISR
 ISR(ADC_vect){
@@ -43,20 +57,8 @@ ISR(ADC_vect){
 }
 //Counter ISR
 ISR(TIMER1_COMPA_vect) {
+    PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
     Counter++;
-    //Time Interrupt
-    if (Counter % 10 == 0) {
-        //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
-        float windTurbineCapacity = analogueInput.turbineCurrentCapacity();
-        float pvCapacity = analogueInput.pvCurrentCapacity();
-        float totalRenewablePower = windTurbineCapacity + pvCapacity;
-
-        //Calculate average power and total energy consumption based on bus voltage and bus current (analogue output)
-        float busbarVoltage = analogueInput.busbarVoltage();
-        float busbarCurrent = analogueInput.busbarCurrent();
-        float averagePower = busbarVoltage * busbarCurrent;
-        float totalEnergy = averagePower * TARGET_TIME_MS / 1000;
-    }
 }
 //Pin Change ISR
 ISR(PCINT2_vect) {
@@ -68,24 +70,19 @@ int main() {
     finalizePorts();
     testLight(1);                              //Boot Light
     sei();                                               //Enable Global interrupts
+    initializeTimer1();
 
     display.startDisplay(false);
+    display.clearScreen();
     display.setBacklight(DisplayHandler::LIGHT);
     display.setOrientation(DisplayHandler::LANDSCAPE);
-
-    point center = {120,160};
-    point bottom = {10,160};
-    point top = {10,10};
-    pictorDrawAll(WHITE);
-
-
+    //display.screenOff();
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
+        updateStats(0);
         //signOfLife();                                   //Blink LED every .5 sec to show sign of life
-        float busbar = analogueInput.busbarCurrent();
-        display.drawText("Busbar \nCurrent:");
-        pictorDrawF(busbar,center,display.fontColour,display.backgroundColour,Mash,4,4);
-        display.drawUIsimple();
+        display.showBusbarScreen();
+
     }
 }

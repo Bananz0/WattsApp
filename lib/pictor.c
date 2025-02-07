@@ -33,7 +33,7 @@ inline void pictorWordWrite(uint16_t Value) {
 	pictorByteWrite( (uint8_t)(Value & 0xFF) );
 }
 
-inline uint8_t pictorByteRead() {
+inline uint8_t pictorByteRead(void) {
 	uint8_t Data;
 	CTRLPORT &=  READ;
 	Data   =  DATAPINS;
@@ -41,7 +41,7 @@ inline uint8_t pictorByteRead() {
 	return Data;
 }
 
-inline uint16_t pictorWordRead() {
+inline uint16_t pictorWordRead(void) {
 	return ( ( (uint16_t)pictorByteRead() ) << 8 ) + pictorByteRead();
 }
 
@@ -574,9 +574,9 @@ void pictorDrawSpriteType_(const void* Sprite, const point Pos, const uint8_t ty
 	uint8_t datH, datL;//only used for types 1,3,5,7
 	uint8_t number=0, colour=0;//only used for types 4-7
 	uint8_t mask = 0x80;//only used for types 2-3
-	uint8_t HighFCol, LowFCol, HighBCol, LowBCol;//only used for types 2-3
+	uint8_t HighFCol=0, LowFCol=0, HighBCol=0, LowBCol=0;//only used for types 2-3
 	uint8_t ProgMem = (type & _BV(0)), k = 0;
-	uint16_t j = 0, j2;
+	uint16_t j = 0, j2 = 0;
 	point I;
 	uint16_t _palette[16];
 	uint16_t* Palette =_palette;
@@ -850,7 +850,7 @@ void pictorDrawSpriteType(const void* Sprite, const point Pos, const uint8_t typ
 	uint8_t number=0, lastCol, lastNum, endNum=0xFF, colour=0;//only used for types 4-7
 	uint8_t maskStart, mask = 0x80;//only used for types 2-3
 	uint8_t ProgMem = (type & _BV(0));
-	uint8_t HighFCol, LowFCol, HighBCol, LowBCol;//only used for types 2-3
+	uint8_t HighFCol =0, LowFCol=0, HighBCol=0, LowBCol=0;//only used for types 2-3
 	point J, I;
 	uint16_t _palette[16];
 	uint16_t* Palette = _palette;

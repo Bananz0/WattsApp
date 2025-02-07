@@ -163,13 +163,13 @@ void pictorByteWrite(const uint8_t Data);
 //	Sends two data bytes to the screen.
 void pictorWordWrite(uint16_t Value);
 //	Returns a data byte read from the screen.
-uint8_t pictorByteRead();
+uint8_t pictorByteRead(void);
 //	Returns a word from two data bytes read from the screen.
-uint16_t pictorWordRead();
+uint16_t pictorWordRead(void);
 //	Sets the state of the back-light, 1 = ON, 0 = OFF, -1 = TOGGLE
 void pictorBacklightState(const int8_t State);
 //	Toggles the VSYNC pin to update the screen in VSYNC mode
-void pictorFrame();
+void pictorFrame(void);
 
 //================
 // LCD ARRAY CMDS
@@ -230,7 +230,7 @@ void pictorDrawCircle(const point Centre, const uint8_t Radius, const uint16_t C
 void pictorInit(const uint8_t Mode);
 
 // Dump the entire of ram and program memory to the screen
-void pictorMemDump();
+void pictorMemDump(void);
 
 #endif
 
