@@ -38,15 +38,17 @@ void updateStats(uint8_t frequency) {
     //Time Interrupt
     if (Counter % 10 == 0) {
         //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
-        windTurbineCapacity = analogueInput.turbineCurrentCapacity();
-        pvCapacity = analogueInput.pvCurrentCapacity();
-        totalRenewablePower = windTurbineCapacity + pvCapacity;
+        energyStats.windTurbineCapacity = analogueInput.turbineCurrentCapacity();
+        energyStats.pvCapacity = analogueInput.pvCurrentCapacity();
+
+        energyStats.totalRenewablePower = energyStats.windTurbineCapacity + energyStats.pvCapacity;
 
         //Calculate average power and total energy consumption based on bus voltage and bus current (analogue output)
-        busbarVoltage = analogueInput.busbarVoltage();
-        busbarCurrent = analogueInput.busbarCurrent();
-        averagePower = busbarVoltage * busbarCurrent;
-        totalEnergy = averagePower * TARGET_TIME_MS / 1000;
+        energyStats.busbarVoltage = analogueInput.busbarVoltage();
+        energyStats.busbarCurrent = analogueInput.busbarCurrent();
+        energyStats.busbarPower = energyStats.busbarVoltage * energyStats.busbarCurrent;
+
+        energyStats.totalEnergy = energyStats.averagePower * TARGET_TIME_MS / 1000;
     }
 }
 

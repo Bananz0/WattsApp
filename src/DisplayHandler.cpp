@@ -7,6 +7,8 @@
 
 #include <stdio.h>
 
+///Will implement carousel for switching between the different screens later TODO
+
 DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRight(), top(), center(), bottom(),
                                    primaryColour(WHITE), secondaryColour(BLUE),
                                    backgroundColour(BLACK),fontColour(0x1A1A1A),
@@ -40,9 +42,9 @@ void DisplayHandler::showBusbarScreen() {
     char text2[40];
     char text3[40];
 
-    sprintf(text, "BUSBAR \nCurrent: \n%.2fA", busbarCurrent);
-    sprintf(text2, "BUSBAR \nVolatage: \n%.2fV", busbarVoltage);
-    sprintf(text3, "BUSBAR \nPower: \n%.2fVA", busbarVoltage*busbarCurrent);
+    sprintf(text, "BUSBAR \nCurrent: \n%.2fA", energyStats.busbarCurrent);
+    sprintf(text2, "BUSBAR \nVolatage: \n%.2fV", energyStats.busbarVoltage);
+    sprintf(text3, "BUSBAR \nPower: \n%.2fVA", energyStats.busbarPower);
 
     pictorDrawS((unsigned char*)text,top, BLUE,backgroundColour,OryxB,3);
     pictorDrawS((unsigned char*)text2,center, RED,backgroundColour,OryxB,3);
