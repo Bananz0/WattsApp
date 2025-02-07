@@ -1,3 +1,6 @@
+#include <time.h>
+#include <TimeHandler.h>
+
 #include "globalVariables.h"
 
 #include <avr/io.h>
@@ -16,23 +19,15 @@
 
 #include "DisplayHandler.h"
 
-#define TARGET_TIME_MS 100
-#define PRESCALER 64
+//Moved all timer functions to PWMHandler for central management
 
 AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor    PORTA1
-//AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor   PORTD7
+AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor   PORTD7
 DigitalInput digitalInput;                          //Start the Digital ISR                                     PORTC0-2
 DigitalOutput digitalOutput;                        //very basic                                                PORTC3-7
 
 DisplayHandler display;
-
-// Timer initialization function
-void initializeTimer1() {
-    TCCR1B |= (1 << WGM12);
-    OCR1A = (F_CPU / (PRESCALER * 1000)) * TARGET_TIME_MS - 1;
-    TIMSK1 |= (1 << OCIE1A);
-    TCCR1B |= (1 << CS11) | (1 << CS10);
-}
+TimeHandler timeHandler;
 
 void updateStats(uint8_t frequency) {
     //Time Interrupt
@@ -48,7 +43,9 @@ void updateStats(uint8_t frequency) {
         energyStats.busbarCurrent = analogueInput.busbarCurrent();
         energyStats.busbarPower = energyStats.busbarVoltage * energyStats.busbarCurrent;
 
-        energyStats.totalEnergy = energyStats.averagePower * TARGET_TIME_MS / 1000;
+        energyStats.totalEnergy = energyStats.averagePower * 100 / 1000;
+
+        timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
     }
 }
 
@@ -61,6 +58,7 @@ ISR(ADC_vect){
 ISR(TIMER1_COMPA_vect) {
     PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
     Counter++;
+    utc++;
 }
 //Pin Change ISR
 ISR(PCINT2_vect) {
@@ -72,7 +70,6 @@ int main() {
     finalizePorts();
     testLight(1);                              //Boot Light
     sei();                                               //Enable Global interrupts
-    initializeTimer1();
 
     display.startDisplay(false);
     display.clearScreen();
@@ -86,8 +83,17 @@ int main() {
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         updateStats(0);
+
         //signOfLife();                                   //Blink LED every .5 sec to show sign of life
-        display.showBusbarScreen();
+        //display.showBusbarScreen();
+
+
+        pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.center,WHITE,RED, Mash,2);
+
+
+        //display.drawText(timeString);
+
+        _delay_ms(100);
 
     }
 }

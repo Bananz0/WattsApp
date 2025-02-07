@@ -5,7 +5,8 @@
 #ifndef TIMEHANDLER_H
 #define TIMEHANDLER_H
 
-
+#include "time.h"
+#include "globalVariables.h"
 
 class TimeHandler {
   public:
@@ -14,9 +15,11 @@ class TimeHandler {
     bool syncTime();
     bool getTime();
     void updateTime();
+    char* returnTime();
+    uint32_t returnUNIXTime();
 
-
-
+private:
+    char timeString[20];
 };
 
 

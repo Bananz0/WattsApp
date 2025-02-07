@@ -15,3 +15,6 @@ volatile EnergyStats energyStats;
 volatile LoadStats loadStats;
 
 volatile uint32_t Counter = 0;
+volatile uint32_t utc = 0;
+
+volatile tm* timeUTC;

@@ -4,6 +4,7 @@
 
 #pragma once
 #include <stdio.h>
+#include <time.h>
 #ifndef GLOBALVARIABLES_H
 #define GLOBALVARIABLES_H
 
@@ -38,5 +39,8 @@ extern volatile EnergyStats energyStats;
 extern volatile LoadStats loadStats;
 
 extern volatile uint32_t Counter;
+extern volatile uint32_t utc;
+
+extern volatile tm* timeUTC;
 
 #endif //GLOBALVARIABLES_H
