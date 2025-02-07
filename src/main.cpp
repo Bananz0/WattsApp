@@ -76,18 +76,16 @@ int main() {
     point center = {120,160};
     point bottom = {10,160};
     point top = {10,10};
-
+    pictorDrawAll(WHITE);
 
 
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         //signOfLife();                                   //Blink LED every .5 sec to show sign of life
-        float glen = 2.2f;
-        //display.drawText(textBuffer);
-        pictorDrawF(glen,center,display.fontColour,display.backgroundColour,Mash,2,4);
-        pictorDrawF(glen,bottom,display.fontColour,display.backgroundColour,Mash,2,4);
-        pictorDrawD(glen,top,display.fontColour,display.backgroundColour,Mash,2,4);
+        float busbar = analogueInput.busbarCurrent();
+        display.drawText("Busbar \nCurrent:");
+        pictorDrawF(busbar,center,display.fontColour,display.backgroundColour,Mash,4,4);
         display.drawUIsimple();
     }
 }
