@@ -28,6 +28,7 @@ struct EnergyStats {
     volatile float busbarPower;
     volatile float averagePower;
     volatile float totalEnergy;
+    volatile float batteryCapacity;
 };
 struct LoadStats {
 

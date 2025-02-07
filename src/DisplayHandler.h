@@ -45,6 +45,7 @@ public:
     //UI Elements (hopefully)
     void drawUIsimple();
     void drawBootLogo();
+    void drawBootSequence();
 
     //Pages maybe?
     void showBusbarScreen();

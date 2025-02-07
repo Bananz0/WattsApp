@@ -102,10 +102,8 @@ void DisplayHandler::drawText(char message[]) {
 }
 
 void DisplayHandler::drawUIsimple() {
-    point start = {10, 200};
-    point end = {200, 200};
-    pictorDrawLine(start, end, lineColour);  // Draw a green line
-    pictorDrawBox(topLeft, bottomRight, lineColour);
+
+
 }
 
 void DisplayHandler::drawRectangle() {
@@ -127,4 +125,24 @@ void DisplayHandler::drawPicture() {
 }
 
 void DisplayHandler::drawBootLogo() {
+    pictorDrawBox(topLeft,topRight,WHITE);
+}
+
+void DisplayHandler::drawBootSequence() {
+    unsigned char bootName[] = "WattsApp";
+    unsigned char bootVersion[] = "v1.0.0";
+    unsigned char bootAuthors[] = "TEAM L";
+
+    pictorDrawBox(topLeft,bottomRight,WHITE);
+
+    point teamPos = {10, 10};
+    point bootNamePos = {10, 80};
+    point bootVersionPos = {100, 200};
+
+    pictorDrawS(bootAuthors,teamPos,WHITE,RED, Mash,6);
+    pictorDrawS(bootName,bootNamePos,WHITE,RED, Mash,4);
+    pictorDrawS(bootVersion,bootVersionPos,WHITE,RED, Mash,4);
+
+    _delay_ms(5000);
+    clearScreen();
 }

@@ -80,6 +80,9 @@ int main() {
     display.setOrientation(DisplayHandler::LANDSCAPE);
     //display.screenOff();
 
+    //Boot and Initialization
+    display.drawBootSequence();
+
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         updateStats(0);
