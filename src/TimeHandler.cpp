@@ -25,7 +25,7 @@ void TimeHandler::updateTime() {
 }
 
 char * TimeHandler::returnTime() {
-    snprintf(timeString, sizeof(timeString), "Time: %02d:%02d:%02d",1, timeUTC->tm_hour,timeUTC->tm_min, timeUTC->tm_sec);
+    snprintf(timeString, sizeof(timeString), "Time: %02d:%02d:%02d",timeUTC->tm_hour,timeUTC->tm_min, timeUTC->tm_sec);
     return timeString;
 }
 
