@@ -13,7 +13,7 @@ class DisplayHandler {
 public:
     typedef enum {PORTRAIT = 0, LANDSCAPE = 1, PORTRAIT_INV = 2, LANDSCAPE_INV = 3} orientation;
     typedef enum {LIGHT = 1, DIM = 0}state;
-    point topLeft, bottomRight, bottomLeft, topRight, top ,center ,bottom, screenCenter; ;
+
     uint16_t primaryColour, secondaryColour, backgroundColour, fontColour,
              accentColour, errorColour,successColour, lineColour, shapeColour;
 
@@ -55,6 +55,14 @@ public:
 
 
 private:
+    point topLeft, bottomRight, bottomLeft, topRight, top ,center ,bottom, screenCenter
+    ,currentPos, voltPos, powerPos, titlePos, teamPos ,bootNamePos ,bootVersionPos;
+
+    char bootName[10],bootVersion[10], bootAuthors[10];
+    char title[40], voltStatus[40], currentStatus[40], batteryStatus[40], powerStatus[40];
+
+
+
 
 
 

@@ -6,7 +6,8 @@
 #include "globalVariables.h"
 
 #include <stdio.h>
-//#include "../assets/fan.h"
+#include <string.h>
+#include "../assets/stripe_assets.h"
 
 ///Will implement carousel for switching between the different screens later TODO
 
@@ -33,6 +34,19 @@ DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRi
 
     screenCenter.X = 160; screenCenter.Y = 120;
 
+    titlePos.X = 10; titlePos.Y = 5;
+    voltPos.X = 10; voltPos.Y = 90;
+    currentPos.X = 10; currentPos.Y = 140;
+    powerPos.X = 10; powerPos.Y = 190;
+
+    teamPos = {10, 10};
+    bootNamePos = {10, 160};
+    bootVersionPos = {100, 200};
+
+    sprintf(bootName, "WattsApp");
+    sprintf(bootVersion, "v1.0.0");
+    sprintf(bootAuthors, "TEAM\nL");
+
 }
 
 void DisplayHandler::drawArc() {
@@ -42,20 +56,21 @@ void DisplayHandler::drawSquircle() {
 }
 
 void DisplayHandler::showBusbarScreen() {
-    char text[40];
-    char text2[40];
-    char text3[40];
 
-    sprintf(text, "BUSBAR \nCurrent: \n%.2fA", (double)energyStats.busbarCurrent);
-    sprintf(text2, "BUSBAR \nVolatage: \n%.2fV", (double)energyStats.busbarVoltage);
-    sprintf(text3, "BUSBAR \nPower: \n%.2fVA", (double)energyStats.busbarPower);
+    sprintf(title, "BUSBAR\nSTATUS");
+    sprintf(currentStatus, "Current: \n%00.2fA", (double)energyStats.busbarCurrent);
+    sprintf(voltStatus, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
+    sprintf(powerStatus, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
 
-    pictorDrawS((unsigned char*)text,top, BLUE,backgroundColour,OryxB,3);
-    pictorDrawS((unsigned char*)text2,center, RED,backgroundColour,OryxB,3);
-    pictorDrawS((unsigned char*)text3,bottom, DARK_GREEN,backgroundColour,OryxB,3);
+    pictorDrawS((unsigned char*)title ,titlePos, BLUE,backgroundColour,OryxB,5);
+    pictorDrawS((unsigned char*)currentStatus,currentPos, BLUE,backgroundColour,OryxB,3);
+    pictorDrawS((unsigned char*)voltStatus,voltPos, RED,backgroundColour,OryxB,3);
+    pictorDrawS((unsigned char*)powerStatus,powerPos, DARK_GREEN,backgroundColour,OryxB,3);
 }
 
+
 void DisplayHandler::showPVScreen() {
+
 }
 
 void DisplayHandler::showTurbineScreen() {
@@ -109,7 +124,6 @@ void DisplayHandler::drawUIsimple() {
 
 
 }
-
 void DisplayHandler::drawRectangle() {
 }
 
@@ -133,19 +147,10 @@ void DisplayHandler::drawBootLogo() {
 }
 
 void DisplayHandler::drawBootSequence() {
-    unsigned char bootName[] = "WattsApp";
-    unsigned char bootVersion[] = "v1.0.0";
-    unsigned char bootAuthors[] = "TEAM L";
 
-    pictorDrawBox(topLeft,bottomRight,BLACK);
-
-    point teamPos = {10, 10};
-    point bootNamePos = {10, 80};
-    point bootVersionPos = {100, 200};
-
-    pictorDrawS(bootAuthors,teamPos,WHITE,RED, Mash,6);
-    pictorDrawS(bootName,bootNamePos,WHITE,RED, Mash,4);
-    pictorDrawS(bootVersion,bootVersionPos,WHITE,RED, Mash,4);
+    pictorDrawS(bootAuthors,teamPos,RED,BLACK, Mash,7);
+    pictorDrawS(bootName,bootNamePos,GREEN,BLACK, Mash,4);
+    pictorDrawS(bootVersion,bootVersionPos,BLUE,BLACK, Mash,4);
 
     _delay_ms(5000);
     clearScreen();
