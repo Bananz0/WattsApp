@@ -13,7 +13,7 @@ class DisplayHandler {
 public:
     typedef enum {PORTRAIT = 0, LANDSCAPE = 1, PORTRAIT_INV = 2, LANDSCAPE_INV = 3} orientation;
     typedef enum {LIGHT = 1, DIM = 0}state;
-    point topLeft, bottomRight, bottomLeft, topRight, top ,center ,bottom; ;
+    point topLeft, bottomRight, bottomLeft, topRight, top ,center ,bottom, screenCenter; ;
     uint16_t primaryColour, secondaryColour, backgroundColour, fontColour,
              accentColour, errorColour,successColour, lineColour, shapeColour;
 

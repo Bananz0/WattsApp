@@ -6,14 +6,15 @@
 #include "globalVariables.h"
 
 #include <stdio.h>
+//#include "../assets/fan.h"
 
 ///Will implement carousel for switching between the different screens later TODO
 
 DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRight(), top(), center(), bottom(),
                                    primaryColour(WHITE), secondaryColour(BLUE),
-                                   backgroundColour(BLACK),fontColour(0x1A1A1A),
-                                   accentColour(ORANGE), errorColour(0xD32F2F),
-                                   successColour(0xCFD8DC), lineColour(0x263238), shapeColour(0x263238)
+                                   backgroundColour(BLACK),fontColour(DARK GRAY),
+                                   accentColour(ORANGE), errorColour(BRIGHT RED),
+                                   successColour(LIGHT_GREEN), lineColour(BROWN), shapeColour(GRAY)
                                     {
     // topLeft = {0,0};
     // bottomLeft = {0,240};
@@ -29,6 +30,9 @@ DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRi
     top.X = 10; top.Y = 10;
     center.X = 10; center.Y = 85;
     bottom.X = 10; bottom.Y = 160;
+
+    screenCenter.X = 160; screenCenter.Y = 120;
+
 }
 
 void DisplayHandler::drawArc() {
@@ -42,9 +46,9 @@ void DisplayHandler::showBusbarScreen() {
     char text2[40];
     char text3[40];
 
-    sprintf(text, "BUSBAR \nCurrent: \n%.2fA", energyStats.busbarCurrent);
-    sprintf(text2, "BUSBAR \nVolatage: \n%.2fV", energyStats.busbarVoltage);
-    sprintf(text3, "BUSBAR \nPower: \n%.2fVA", energyStats.busbarPower);
+    sprintf(text, "BUSBAR \nCurrent: \n%.2fA", (double)energyStats.busbarCurrent);
+    sprintf(text2, "BUSBAR \nVolatage: \n%.2fV", (double)energyStats.busbarVoltage);
+    sprintf(text3, "BUSBAR \nPower: \n%.2fVA", (double)energyStats.busbarPower);
 
     pictorDrawS((unsigned char*)text,top, BLUE,backgroundColour,OryxB,3);
     pictorDrawS((unsigned char*)text2,center, RED,backgroundColour,OryxB,3);
@@ -133,7 +137,7 @@ void DisplayHandler::drawBootSequence() {
     unsigned char bootVersion[] = "v1.0.0";
     unsigned char bootAuthors[] = "TEAM L";
 
-    pictorDrawBox(topLeft,bottomRight,WHITE);
+    pictorDrawBox(topLeft,bottomRight,BLACK);
 
     point teamPos = {10, 10};
     point bootNamePos = {10, 80};
