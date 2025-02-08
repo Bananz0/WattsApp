@@ -30,23 +30,19 @@ DisplayHandler display;
 TimeHandler timeHandler;
 
 void updateStats(uint8_t frequency) {
-    //Time Interrupt
-    if (Counter % 10 == 0) {
-        //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
-        energyStats.windTurbineCapacity = analogueInput.turbineCurrentCapacity();
-        energyStats.pvCapacity = analogueInput.pvCurrentCapacity();
+    //Time Interrupt - Moved the div/10 to main
+    //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
+    energyStats.windTurbineCapacity = analogueInput.turbineCurrentCapacity();
+    energyStats.pvCapacity = analogueInput.pvCurrentCapacity();
 
-        energyStats.totalRenewablePower = energyStats.windTurbineCapacity + energyStats.pvCapacity;
+    energyStats.totalRenewablePower = energyStats.windTurbineCapacity + energyStats.pvCapacity;
 
-        //Calculate average power and total energy consumption based on bus voltage and bus current (analogue output)
-        energyStats.busbarVoltage = analogueInput.busbarVoltage();
-        energyStats.busbarCurrent = analogueInput.busbarCurrent();
-        energyStats.busbarPower = energyStats.busbarVoltage * energyStats.busbarCurrent;
+    //Calculate average power and total energy consumption based on bus voltage and bus current (analogue output)
+    energyStats.busbarVoltage = analogueInput.busbarVoltage();
+    energyStats.busbarCurrent = analogueInput.busbarCurrent();
+    energyStats.busbarPower = energyStats.busbarVoltage * energyStats.busbarCurrent;
 
-        energyStats.totalEnergy = energyStats.averagePower * 100 / 1000;
-
-        timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
-    }
+    energyStats.totalEnergy = energyStats.averagePower * 100 / 1000;
 }
 
 //ADC ISR
@@ -56,7 +52,7 @@ ISR(ADC_vect){
 }
 //Counter ISR
 ISR(TIMER1_COMPA_vect) {
-    PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
+   // PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
     Counter++;
     utc++;
 }
@@ -82,18 +78,20 @@ int main() {
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
-        updateStats(0);
+        timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
+        if (Counter >= 10) {
+            updateStats(0);
+            Counter = 0;
+        }
 
         //signOfLife();                                   //Blink LED every .5 sec to show sign of life
-        //display.showBusbarScreen();
+        display.showBusbarScreen();
 
-
-        pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.center,WHITE,RED, Mash,2);
+        point timePos = {200,10};
+        pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),timePos,WHITE,RED, Mash,1);
 
 
         //display.drawText(timeString);
-
-        _delay_ms(100);
 
     }
 }
