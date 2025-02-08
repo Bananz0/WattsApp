@@ -14,6 +14,11 @@ public:
     typedef enum {PORTRAIT = 0, LANDSCAPE = 1, PORTRAIT_INV = 2, LANDSCAPE_INV = 3} orientation;
     typedef enum {LIGHT = 1, DIM = 0}state;
 
+
+
+    point timePos;
+
+
     uint16_t primaryColour, secondaryColour, backgroundColour, fontColour,
              accentColour, errorColour,successColour, lineColour, shapeColour;
 
@@ -52,20 +57,19 @@ public:
     void showPVScreen();
     void showTurbineScreen();
     void showBatteryScreen();
+    void showLoadsScreen();
+    void showErrorScreen();
+
+    void carouselScreen(uint8_t timeInterval);
 
 
 private:
     point topLeft, bottomRight, bottomLeft, topRight, top ,center ,bottom, screenCenter
-    ,currentPos, voltPos, powerPos, titlePos, teamPos ,bootNamePos ,bootVersionPos;
+    ,currentPos, voltPos, powerPos, titlePos, teamPos ,bootNamePos ,bootVersionPos,
+    solarCapacityPos, batteryCapacityPos,turbineCapacityPos;
 
     char bootName[10],bootVersion[10], bootAuthors[10];
-    char title[40], voltStatus[40], currentStatus[40], batteryStatus[40], powerStatus[40];
-
-
-
-
-
-
+    char title[40], text2[40], text1[40], batteryStatus[40], text3[40];
 };
 
 

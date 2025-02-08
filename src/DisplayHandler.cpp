@@ -17,16 +17,16 @@ DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRi
                                    accentColour(ORANGE), errorColour(BRIGHT RED),
                                    successColour(LIGHT_GREEN), lineColour(BROWN), shapeColour(GRAY)
                                     {
-    // topLeft = {0,0};
-    // bottomLeft = {0,240};
-    // topRight = {320,0};
-    // bottomRight = {320,240};
+    topLeft = {0,0};
+    bottomLeft = {0,240};
+    topRight = {320,0};
+    bottomRight = {320,240};
 
 
-    bottomRight.X = 320; bottomRight.Y = 240;
-    bottomLeft.X = 0; bottomLeft.Y = 240;
-    topLeft.X = 0; topLeft.Y = 0;
-    topRight.X = 320; topRight.Y = 0;
+    // bottomRight.X = 320; bottomRight.Y = 240;
+    // bottomLeft.X = 0; bottomLeft.Y = 240;
+    // topLeft.X = 0; topLeft.Y = 0;
+    // topRight.X = 320; topRight.Y = 0;
 
     top.X = 10; top.Y = 10;
     center.X = 10; center.Y = 85;
@@ -34,73 +34,150 @@ DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRi
 
     screenCenter.X = 160; screenCenter.Y = 120;
 
+    //Common Settings
     titlePos.X = 10; titlePos.Y = 5;
+    timePos = {205,230};
+    //Busbar Settings
     voltPos.X = 10; voltPos.Y = 90;
     currentPos.X = 10; currentPos.Y = 140;
     powerPos.X = 10; powerPos.Y = 190;
+    //PV Settings
+    solarCapacityPos.X = 10; solarCapacityPos.Y = 150;
+    //Turbine Settings
+    turbineCapacityPos = {10,190};
+
+
 
     teamPos = {10, 10};
     bootNamePos = {10, 160};
-    bootVersionPos = {100, 200};
+    bootVersionPos = {10, 200};
 
     sprintf(bootName, "WattsApp");
     sprintf(bootVersion, "v1.0.0");
-    sprintf(bootAuthors, "TEAM\nL");
+    sprintf(bootAuthors, "TEAM\n L");
 
+     screenPage = BUSBAR_SCREEN;
 }
 
-void DisplayHandler::drawArc() {
+void DisplayHandler::carouselScreen(uint8_t timeInterval) { //May move away from this
+    switch (screenPage) {
+        case BOOT_SCREEN:
+            drawBootSequence();
+        break;
+        case PV_SCREEN:
+            showPVScreen();
+        break;
+        case LOADS_SCREEN:
+            showLoadsScreen();
+        break;
+        case BUSBAR_SCREEN:
+            showBusbarScreen();
+        break;
+        case BATTERY_SCREEN:
+            showBatteryScreen();
+        break;
+        case ERROR_SCREEN:
+            showErrorScreen();
+        break;
+        default:
+            drawBootSequence();
+        break;
+    }
 }
 
-void DisplayHandler::drawSquircle() {
+
+void DisplayHandler::drawBootSequence() {
+    pictorDrawS(reinterpret_cast<const unsigned char *>(bootAuthors),teamPos,RED,BLACK, Mash,7);
+    pictorDrawS(reinterpret_cast<const unsigned char *>(bootName),bootNamePos,GREEN,BLACK, Mash,4);
+    pictorDrawS(reinterpret_cast<const unsigned char *>(bootVersion),bootVersionPos,BLUE,BLACK, Mash,4);
+
+    _delay_ms(5000);
+    clearScreen();
 }
 
 void DisplayHandler::showBusbarScreen() {
-
     sprintf(title, "BUSBAR\nSTATUS");
-    sprintf(currentStatus, "Current: \n%00.2fA", (double)energyStats.busbarCurrent);
-    sprintf(voltStatus, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
-    sprintf(powerStatus, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
+    sprintf(text1, "Current: \n%00.2f A", (double)energyStats.busbarCurrent);
+    sprintf(text2, "Volatage: \n%00.2f V", (double)energyStats.busbarVoltage);
+    sprintf(text3, "Power: \n%0000.2f VA", (double)energyStats.busbarPower);
 
-    pictorDrawS((unsigned char*)title ,titlePos, BLUE,backgroundColour,OryxB,5);
-    pictorDrawS((unsigned char*)currentStatus,currentPos, BLUE,backgroundColour,OryxB,3);
-    pictorDrawS((unsigned char*)voltStatus,voltPos, RED,backgroundColour,OryxB,3);
-    pictorDrawS((unsigned char*)powerStatus,powerPos, DARK_GREEN,backgroundColour,OryxB,3);
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, BLUE,backgroundColour,OryxB,3);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text2),voltPos, RED,backgroundColour,OryxB,3);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text3),powerPos, DARK_GREEN,backgroundColour,OryxB,3);
 }
 
-
 void DisplayHandler::showPVScreen() {
+    sprintf(title, "SOLAR\nSTATUS");
+    sprintf(text1, "Solar\nCapacity: \n%00.2f A", (double)energyStats.busbarCurrent);
+    //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
+    //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
 
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text1),solarCapacityPos, YELLOW,backgroundColour,OryxB,3);
+
+    //pictorDrawS(reinterpret_cast<unsigned char *>(text2),voltPos, RED,backgroundColour,OryxB,3);
+    //pictorDrawS(reinterpret_cast<unsigned char *>(text3),powerPos, DARK_GREEN,backgroundColour,OryxB,3);
 }
 
 void DisplayHandler::showTurbineScreen() {
+    sprintf(title, "TURBINE\nSTATUS");
+    sprintf(text1, "Turbine\nCapacity: \n%00.2f A", (double)energyStats.busbarCurrent);
+    //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
+    //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
+
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
+    //pictorDrawS(reinterpret_cast<unsigned char *>(text2),voltPos, RED,backgroundColour,OryxB,3);
+    //pictorDrawS(reinterpret_cast<unsigned char *>(text3),powerPos, DARK_GREEN,backgroundColour,OryxB,3);
 }
 
 void DisplayHandler::showBatteryScreen() {
+    sprintf(title, "BATTERY\nSTATUS");
+    sprintf(text1, "Current: \n%00.2f AH", (double)energyStats.busbarCurrent);
+    //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
+    //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
+
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
+    //pictorDrawS(reinterpret_cast<unsigned char *>(text2),voltPos, RED,backgroundColour,OryxB,3);
+    //pictorDrawS(reinterpret_cast<unsigned char *>(text3),powerPos, DARK_GREEN,backgroundColour,OryxB,3);
 }
 
-DisplayHandler::~DisplayHandler() {
+void DisplayHandler::showErrorScreen() {
+
 }
+
+void DisplayHandler::showLoadsScreen() {
+
+}
+
+DisplayHandler::~DisplayHandler() = default;
 
 void DisplayHandler::startDisplay(bool vsync) {
     pictorInit(vsync);
     if (vsync)  pictorFrame();
     pictorCanvasSet(topLeft, bottomRight);
 }
+
 void DisplayHandler::stopDisplay() { //Should be used when turning off the Il Matto / Reset as it clears the screen contents
     clearScreen();
     screenOff();
 
 }
+
 void DisplayHandler::setBacklight(state State) {
     pictorBacklightState(State);
 }
+
 void DisplayHandler::toggleBacklight() {
     pictorBacklightState(-1);
 }
+
 void DisplayHandler::setOrientation(orientation rotation) {
     pictorSetRotation(rotation);
 }
+
 void DisplayHandler::clearScreen() {
     //set screen to black
     pictorDrawAll(BLACK);
@@ -124,6 +201,7 @@ void DisplayHandler::drawUIsimple() {
 
 
 }
+
 void DisplayHandler::drawRectangle() {
 }
 
@@ -142,16 +220,12 @@ void DisplayHandler::drawBitmap() {
 void DisplayHandler::drawPicture() {
 }
 
-void DisplayHandler::drawBootLogo() {
-    pictorDrawBox(topLeft,topRight,WHITE);
+void DisplayHandler::drawArc() {
 }
 
-void DisplayHandler::drawBootSequence() {
+void DisplayHandler::drawSquircle() {
+}
 
-    pictorDrawS(bootAuthors,teamPos,RED,BLACK, Mash,7);
-    pictorDrawS(bootName,bootNamePos,GREEN,BLACK, Mash,4);
-    pictorDrawS(bootVersion,bootVersionPos,BLUE,BLACK, Mash,4);
+void DisplayHandler::drawBootLogo() {
 
-    _delay_ms(5000);
-    clearScreen();
 }

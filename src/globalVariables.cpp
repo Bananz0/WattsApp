@@ -18,3 +18,6 @@ volatile uint32_t Counter = 0;
 volatile uint32_t utc = 0;
 
 volatile tm* timeUTC;
+
+volatile Screen screenPage, nextScreenPage, prevScreenPage;
+volatile bool emergencyScreen = false;

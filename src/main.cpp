@@ -79,20 +79,17 @@ int main() {
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
-        point timePos = {205,230};
-        pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),timePos,WHITE,RED, Mash,1);
+        pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
         if (Counter >= 10) {
             updateStats(0);
             Counter = 0;
         }
+        //cycle through the screens somehwo
 
-        //signOfLife();                                   //Blink LED every .5 sec to show sign of life
-        display.showBusbarScreen();
-
-
+        display.carouselScreen(0);
 
 
-        //display.drawText(timeString);
+
 
     }
 }
