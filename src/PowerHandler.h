@@ -15,8 +15,6 @@ public:
   void exitSleep();
   void manageBacklight(bool backlight);
   void manageWiFiPower(bool enable);
-
-
 };
 
 
