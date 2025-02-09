@@ -60,6 +60,9 @@ DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRi
 }
 
 void DisplayHandler::carouselScreen(uint8_t timeInterval) { //May move away from this
+    prevScreenPage = screenPage;
+    nextScreenPage = static_cast<Screen>((screenPage + 1) % NUM_SCREENS);
+    screenPage = nextScreenPage;
     switch (screenPage) {
         case BOOT_SCREEN:
             drawBootSequence();
