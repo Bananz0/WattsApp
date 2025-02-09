@@ -56,17 +56,17 @@ DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRi
     sprintf(bootVersion, "v1.0.0");
     sprintf(bootAuthors, "TEAM\n L");
 
-     screenPage = BUSBAR_SCREEN;
+    screenPage = BUSBAR_SCREEN;
 }
 
-void DisplayHandler::carouselScreen(uint8_t timeInterval) { //May move away from this
+void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
     prevScreenPage = screenPage;
-    nextScreenPage = static_cast<Screen>((screenPage + 1) % NUM_SCREENS);
+    if (prevScreenPage != screen) {
+        clearScreen();
+    }
+    nextScreenPage = screen;
     screenPage = nextScreenPage;
     switch (screenPage) {
-        case BOOT_SCREEN:
-            drawBootSequence();
-        break;
         case PV_SCREEN:
             showPVScreen();
         break;
@@ -79,11 +79,10 @@ void DisplayHandler::carouselScreen(uint8_t timeInterval) { //May move away from
         case BATTERY_SCREEN:
             showBatteryScreen();
         break;
-        case ERROR_SCREEN:
-            showErrorScreen();
-        break;
+        case TURBINE_SCREEN:
+            showTurbineScreen();
         default:
-            drawBootSequence();
+            showErrorScreen();
         break;
     }
 }

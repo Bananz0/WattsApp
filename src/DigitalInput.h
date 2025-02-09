@@ -4,6 +4,7 @@
 #pragma once
 #ifndef DIGITALINPUT_H
 #define DIGITALINPUT_H
+#include "globalVariables.h"
 #include <avr/io.h>
 
 class DigitalInput {

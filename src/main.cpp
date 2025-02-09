@@ -54,7 +54,7 @@ ISR(ADC_vect){
 ISR(TIMER1_COMPA_vect) {
    // PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
     Counter++;
-    utc++;
+    //utc++;
 }
 //Pin Change ISR
 ISR(PCINT2_vect) {
@@ -76,23 +76,34 @@ int main() {
     //Boot and Initialization
     display.drawBootSequence();
 
+    uint16_t displayDuration = 4;
+    uint16_t updateCounter = 0;
+    Screen screen;
+    uint8_t lastScreenUpdateSecond = -1;
+
+
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
+        if (Counter  % 10 == 0) {
+            utc++;
+            testOutputPin('C',6);
+        };
         timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
         pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
         updateCounter = Counter;
-        displayCounter = Counter;
 
-        if (Counter % displayDuration == 0) {
+        if (updateCounter % 10 == 0) {
             updateStats(0);
-            Counter = 0;
+            updateCounter = 0;
         }
-        //cycle through the screens somehwo
 
-        display.carouselScreen(0);
+        //cycle through the screens somehwow
+        if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
+            screen = static_cast<Screen>((screenPage + 1) % 5);
+            lastScreenUpdateSecond = timeUTC->tm_sec;
+        }
 
-
-
+        display.carouselScreen(screen);
 
     }
 }

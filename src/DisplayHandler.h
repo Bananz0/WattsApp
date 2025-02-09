@@ -4,6 +4,7 @@
 
 #ifndef DISPLAYHANDLER_H
 #define DISPLAYHANDLER_H
+#include <globalVariables.h>
 #include <stdint.h>
 #include "pictor.h"
 #include "Mash.h"
@@ -60,7 +61,7 @@ public:
     void showLoadsScreen();
     void showErrorScreen();
 
-    void carouselScreen(uint8_t timeInterval);
+    void carouselScreen(Screen screen);
 
 
 private:
