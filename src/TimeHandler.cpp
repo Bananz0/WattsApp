@@ -6,6 +6,12 @@
 
 
 TimeHandler::TimeHandler() {
+    timeUTC->tm_hour = 12;
+    timeUTC->tm_min = 00;
+    timeUTC->tm_sec = 00;
+    timeUTC->tm_mday = 9;
+    timeUTC->tm_mon = 02;
+    timeUTC->tm_year = 2024;
 }
 
 TimeHandler::~TimeHandler() {
