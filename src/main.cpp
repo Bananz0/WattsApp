@@ -80,7 +80,10 @@ int main() {
     while (true) {
         timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
         pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
-        if (Counter >= 10) {
+        updateCounter = Counter;
+        displayCounter = Counter;
+
+        if (Counter % displayDuration == 0) {
             updateStats(0);
             Counter = 0;
         }
