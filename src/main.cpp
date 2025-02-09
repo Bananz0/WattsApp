@@ -99,11 +99,14 @@ int main() {
 
         //cycle through the screens somehwow
         if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
-            screen = static_cast<Screen>((screenPage + 1) % 5);
+            screen = static_cast<Screen>((screenPage + 1) % SCREENCOUNT );
             lastScreenUpdateSecond = timeUTC->tm_sec;
         }
 
         display.carouselScreen(screen);
+
+        //Implement Labview Algorithm
+
 
     }
 }

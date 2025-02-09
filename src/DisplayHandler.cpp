@@ -81,8 +81,11 @@ void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
         break;
         case TURBINE_SCREEN:
             showTurbineScreen();
-        default:
+        break;
+        case ERROR_SCREEN:
             showErrorScreen();
+        break;
+        default:
         break;
     }
 }
@@ -147,10 +150,20 @@ void DisplayHandler::showBatteryScreen() {
 }
 
 void DisplayHandler::showErrorScreen() {
-
+    sprintf(title, "ERROR\nSTATUS");
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
 }
 
 void DisplayHandler::showLoadsScreen() {
+    sprintf(title, "LOADS\nSTATUS");
+    // sprintf(text1, "Current: \n%00.2f AH", (double)energyStats.busbarCurrent);
+    //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
+    //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
+
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
+    // pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
+    //pictorDrawS(reinterpret_cast<unsigned char *>(text2),voltPos, RED,backgroundColour,OryxB,3);
+    //pictorDrawS(reinterpret_cast<unsigned char *>(text3),powerPos, DARK_GREEN,backgroundColour,OryxB,3);
 
 }
 
