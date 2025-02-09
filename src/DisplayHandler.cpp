@@ -162,7 +162,7 @@ void DisplayHandler::startDisplay(bool vsync) {
     pictorCanvasSet(topLeft, bottomRight);
 }
 
-void DisplayHandler::stopDisplay() { //Should be used when turning off the Il Matto / Reset as it clears the screen contents
+void DisplayHandler::stopDisplay() { //Should be used when turning off the Il Matto/Reset as it clears the screen contents
     clearScreen();
     screenOff();
 
