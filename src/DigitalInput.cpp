@@ -36,6 +36,7 @@ void DigitalInput::checkLoadCallChanges() {
     bool currentLoad1Call = readLoad1Call();
     bool currentLoad2Call = readLoad2Call();
     bool currentLoad3Call = readLoad3Call();
+    emergencyScreen = currentLoad1Call || currentLoad2Call || currentLoad3Call;
 
     //load 1
     if (currentLoad1Call && !lastLoad1Call) {
