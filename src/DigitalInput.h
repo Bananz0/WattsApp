@@ -13,7 +13,6 @@ public:
     bool readLoad1Call();
     bool readLoad2Call();
     bool readLoad3Call();
-    void checkLoadCallChanges();
 };  //Third RJ45 Port C (0 to 2)=
 
 

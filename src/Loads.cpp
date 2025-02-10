@@ -1,0 +1,79 @@
+//
+// Created by glenm on 2/9/2025.
+//
+
+#include "Loads.h"
+
+Loads::Loads(DigitalOutput* loadSwitcher, DigitalInput* loadCaller) : output(loadSwitcher), input(loadCaller) {
+     lastLoad1Call = false;
+     lastLoad2Call = false;
+     lastLoad3Call = false;
+}
+
+Loads::~Loads(){
+
+}
+
+void Loads::checkLoadCallChanges() {
+    bool currentLoad1Call = input->readLoad1Call();
+    bool currentLoad2Call = input->readLoad2Call();
+    bool currentLoad3Call = input->readLoad3Call();
+    emergencyScreen = currentLoad1Call || currentLoad2Call || currentLoad3Call;
+
+    //load 1
+    if (currentLoad1Call && !lastLoad1Call) {
+        PORTB |= (1 << PB3);  //Load 1 on
+    } else if (!currentLoad1Call && lastLoad1Call) {
+        PORTB &= ~(1 << PB3); //OFF
+    }
+
+    //load 2
+    if (currentLoad2Call && !lastLoad2Call) {
+        PORTB |= (1 << PB4);  //ON
+    } else if (!currentLoad2Call && lastLoad2Call) {
+        PORTB &= ~(1 << PB4); //OFF
+    }
+
+    //load 3
+    if (currentLoad3Call && !lastLoad3Call) {
+        PORTB |= (1 << PB5);  //ON
+    } else if (!currentLoad3Call && lastLoad3Call) {
+        PORTB &= ~(1 << PB5); //OFF
+    }
+
+    lastLoad1Call = currentLoad1Call;
+    lastLoad2Call = currentLoad2Call;
+    lastLoad3Call = currentLoad3Call;
+}
+
+void Loads::turnLoadOn(uint8_t load) {
+    switch (load) {
+        case 1:
+            output->loadSwitch1();
+        break;
+        case 2:
+            output->loadSwitch2();
+        break;
+        case 3:
+            output->loadSwitch3();
+        break;
+        default:
+            break;
+    }
+}
+
+void Loads::turnLoadOff(uint8_t load) {
+    switch (load) {
+        case 1:
+            output->loadSwitch1();
+        break;
+        case 2:
+            output->loadSwitch2();
+        break;
+        case 3:
+            output->loadSwitch3();
+        break;
+        default:
+            break;
+    }
+}

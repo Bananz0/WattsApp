@@ -29,7 +29,7 @@ struct EnergyStats {
     volatile float busbarPower;
     volatile float averagePower;
     volatile float totalEnergy;
-    volatile float batteryCapacity;
+    volatile int batteryCapacity;
 };
 struct LoadStats {
 

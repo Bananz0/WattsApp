@@ -19,6 +19,9 @@
 
 #include "DisplayHandler.h"
 
+#include "Loads.h"
+#include "Sources.h"
+
 //Moved all timer functions to PWMHandler for central management
 
 AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor    PORTA1
@@ -28,6 +31,10 @@ DigitalOutput digitalOutput;                        //very basic                
 
 DisplayHandler display;
 TimeHandler timeHandler;
+
+Loads loads(&digitalOutput,&digitalInput);
+
+
 
 void updateStats(uint8_t frequency) {
     //Time Interrupt - Moved the div/10 to main
@@ -59,7 +66,7 @@ ISR(TIMER1_COMPA_vect) {
 //Pin Change ISR
 ISR(PCINT2_vect) {
     // Read Load Calls 1, 2 and 3
-    digitalInput.checkLoadCallChanges();
+    loads.checkLoadCallChanges();
 }
 
 int main() {
@@ -106,6 +113,8 @@ int main() {
         display.carouselScreen(screen);
 
         //Implement Labview Algorithm
+        //Default: Charge battery
+        digitalOutput.chargeBattery();
 
 
     }
