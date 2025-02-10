@@ -56,7 +56,10 @@ DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRi
     sprintf(bootVersion, "v1.0.0");
     sprintf(bootAuthors, "TEAM\n L");
 
-    screenPage = BUSBAR_SCREEN;
+    fanPos = {250 , 140} ;
+    batteryCapacityPos = {250,140};
+
+    screenPage = TURBINE_SCREEN;
 }
 
 void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
@@ -135,6 +138,8 @@ void DisplayHandler::showTurbineScreen() {
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
     //pictorDrawS(reinterpret_cast<unsigned char *>(text2),voltPos, RED,backgroundColour,OryxB,3);
     //pictorDrawS(reinterpret_cast<unsigned char *>(text3),powerPos, DARK_GREEN,backgroundColour,OryxB,3);
+
+    drawUIfan();
 }
 
 void DisplayHandler::showBatteryScreen() {
@@ -147,6 +152,8 @@ void DisplayHandler::showBatteryScreen() {
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
     //pictorDrawS(reinterpret_cast<unsigned char *>(text2),voltPos, RED,backgroundColour,OryxB,3);
     //pictorDrawS(reinterpret_cast<unsigned char *>(text3),powerPos, DARK_GREEN,backgroundColour,OryxB,3);
+
+    drawUIbattery();
 }
 
 void DisplayHandler::showErrorScreen() {
@@ -212,21 +219,30 @@ void DisplayHandler::drawText(char message[]) {
     pictorDrawS((unsigned char*)message, textPos, fontColour, backgroundColour, Mash, 2);  // Draw the message with scale 1
 }
 
-void DisplayHandler::drawUIsimple() {
+void DisplayHandler::drawUIbattery() {
+    switch (energyStats.batteryCapacity) {
+        case 0:
+            pictorDrawSpriteType(&batt204, batteryCapacityPos,4,2);
+        break;
+        case 1:
+            pictorDrawSpriteType(&batt404, batteryCapacityPos,4,2);
+        break;
+        case 2:
+            pictorDrawSpriteType(&batt604, batteryCapacityPos,4,2);
+        break;
+        case 3:
+            pictorDrawSpriteType(&batt804, batteryCapacityPos,4,2);
+        break;
+        case 4:
+            pictorDrawSpriteType(&batt1004, batteryCapacityPos,4,2);
+        break;
 
+    }
 
 }
 
-void DisplayHandler::drawRectangle() {
-}
-
-void DisplayHandler::drawCircle() {
-}
-
-void DisplayHandler::drawTriangle() {
-}
-
-void DisplayHandler::drawEllipse() {
+void DisplayHandler::drawUIfan() {
+    pictorDrawSpriteType(&fan4, fanPos,4,2);
 }
 
 void DisplayHandler::drawBitmap() {
@@ -235,11 +251,6 @@ void DisplayHandler::drawBitmap() {
 void DisplayHandler::drawPicture() {
 }
 
-void DisplayHandler::drawArc() {
-}
-
-void DisplayHandler::drawSquircle() {
-}
 
 void DisplayHandler::drawBootLogo() {
 

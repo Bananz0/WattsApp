@@ -1,5 +1,5 @@
 #include "pictor.h"
-
+#include <math.h>
 #include <stdio.h>
 
 uint16_t encode656Colour(const uint8_t Red, const uint8_t Green, const uint8_t Blue) {
@@ -1519,4 +1519,105 @@ void pictorDrawF(const double Number,const point Pos,const uint16_t ForegroundCo
 	}
 	pictorDrawS((unsigned char*)NumberString, Pos2, ForegroundColour,
 	BackgroundColour, Font, scale);
+}
+// Helper function to rotate a point around a center
+point rotatePoint(point p, point center, float angle) {
+    float s = sin(angle);
+    float c = cos(angle);
+
+    // Translate point back to origin
+    p.X -= center.X;
+    p.Y -= center.Y;
+
+    // Rotate point
+    float xnew = p.X * c - p.Y * s;
+    float ynew = p.X * s + p.Y * c;
+
+    // Translate point back
+    p.X = (uint16_t)(xnew + center.X);
+    p.Y = (uint16_t)(ynew + center.Y);
+
+    return p;
+}
+
+// Helper function to get the color from a palette-indexed sprite
+uint16_t getColorFromPalette(const uint16_t* palette, uint8_t index) {
+    return pgm_read_word(&palette[index]); // Read palette color from progmem
+}
+
+
+void pictorDrawRotatedSprite(const void* Sprite, const point Pos, const uint8_t type, const uint8_t Scale, float angle) {
+    // This function now supports types 0, 1, and 4
+
+    point spriteSize;
+    point spriteCenter;
+    uint16_t* rgbData = NULL; // For type 0 & 1
+    uint8_t* indexedData = NULL; // For type 4
+    uint16_t* palette = NULL; //For type 4
+
+    if (type == 0 || type == 1) {
+        sprite* SpriteReg = (sprite*)Sprite;
+        spriteSize = SpriteReg->Size;
+        spriteCenter = (point){spriteSize.X / 2, spriteSize.Y / 2};
+		rgbData = SpriteReg->RGB;
+
+    } else if (type == 4) {
+        spriteEncoded* SpriteIndex = (spriteEncoded*)Sprite;
+        spriteSize = SpriteIndex->Size;
+        spriteCenter = (point){spriteSize.X / 2, spriteSize.Y / 2};
+		indexedData = (uint8_t*)SpriteIndex->data;
+        palette = SpriteIndex->palette;
+
+    } else {
+        // Unsupported type
+        return;
+    }
+
+
+
+    // Canvas boundaries.  Calculating this accurately for rotated sprites is difficult
+    // without more complex calculations.  This approximation will work for small rotations.
+    point canvasStart = {Pos.X, Pos.Y};
+    point canvasEnd = {Pos.X + spriteSize.X * Scale - 1, Pos.Y + spriteSize.Y * Scale - 1};
+
+    // Basic bounds checking (optional but recommended)
+    if (canvasStart.X >= 240 || canvasStart.Y >= 320 || canvasEnd.X < 0 || canvasEnd.Y < 0) return; //screen size.  Check your specific screen's max values here.
+
+
+    for (int16_t y = 0; y < spriteSize.Y; y++) {
+        for (int16_t x = 0; x < spriteSize.X; x++) {
+            // Calculate the sprite pixel's position in sprite coordinates
+            point pixelPos = {(uint16_t)x, (uint16_t)y};  // Cast to uint16_t
+
+            // Scale
+            pixelPos.X *= Scale;
+            pixelPos.Y *= Scale;
+
+            // Translate to world coordinates (position on the screen)
+            point scaledPixel = {pixelPos.X + Pos.X, pixelPos.Y + Pos.Y};
+
+
+            // Rotate the pixel's world coordinates.  Importantly rotate around the *screen* center of the sprite
+            point rotatedPixel = rotatePoint(scaledPixel, (point){Pos.X + spriteCenter.X*Scale,Pos.Y+ spriteCenter.Y*Scale}, angle);
+
+            //Draw the pixel
+
+            uint16_t color;
+
+            if (type == 0 || type == 1) {
+				//if pixel inside valid bounds of display, draw pixel
+				if(rotatedPixel.X < 240 && rotatedPixel.Y < 320){
+                	color = pgm_read_word(&rgbData[y * spriteSize.X + x]); // Type 0 or 1
+					pictorDrawPixel(rotatedPixel, color);
+				}
+            } else if (type == 4) {
+				//If pixel inside valid bounds of display, draw pixel
+				if(rotatedPixel.X < 240 && rotatedPixel.Y < 320){
+                	uint8_t indexedColor = pgm_read_byte(&indexedData[y * spriteSize.X + x]);// get pixel data here for indexed
+                	color = getColorFromPalette(palette, indexedColor);
+					pictorDrawPixel(rotatedPixel, color);
+				}
+            }
+        }
+    }
 }

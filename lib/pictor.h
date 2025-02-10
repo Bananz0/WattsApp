@@ -222,6 +222,8 @@ void pictorDrawSpritePartial(const sprite* Sprite, const point Pos, const uint8_
 void pictorDrawSpriteType(const void* Sprite, const point Pos, const uint8_t type, const uint8_t Scale);
 //	Draws a circle using Bresenham's algorithm with a given centre point and radius
 void pictorDrawCircle(const point Centre, const uint8_t Radius, const uint16_t Colour);
+//	Draws a sprite at a given angle of rotation
+void pictorDrawRotatedSprite(const void* Sprite, const point Pos, const uint8_t type, const uint8_t Scale, float angle);
 
 //====================
 // LCD INTITALISATION

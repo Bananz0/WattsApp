@@ -15,10 +15,12 @@ public:
     typedef enum {PORTRAIT = 0, LANDSCAPE = 1, PORTRAIT_INV = 2, LANDSCAPE_INV = 3} orientation;
     typedef enum {LIGHT = 1, DIM = 0}state;
 
-
-
     point timePos;
-
+    //Sprite Pos
+    point fanPos;
+    point load1Pos, load2Pos, load3Pos;
+    point busbarSPose;
+    point pvSpos; //PV Sprite Pos
 
     uint16_t primaryColour, secondaryColour, backgroundColour, fontColour,
              accentColour, errorColour,successColour, lineColour, shapeColour;
@@ -34,22 +36,14 @@ public:
     void screenOn();
     void screenOff();
 
-    //Drawing Elements
-    void drawRectangle();
-    void drawCircle();
-    void drawTriangle();
-    void drawEllipse();
-    void drawArc();
-    void drawSquircle();
-
-
     //Text elements
     void drawText(char text[]);
     void drawBitmap();
     void drawPicture();
 
     //UI Elements (hopefully)
-    void drawUIsimple();
+    void drawUIbattery();
+    void drawUIfan();
     void drawBootLogo();
     void drawBootSequence();
 
@@ -62,7 +56,6 @@ public:
     void showErrorScreen();
 
     void carouselScreen(Screen screen);
-
 
 private:
     point topLeft, bottomRight, bottomLeft, topRight, top ,center ,bottom, screenCenter
