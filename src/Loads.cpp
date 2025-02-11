@@ -10,14 +10,12 @@ Loads::Loads(DigitalOutput* loadSwitcher, DigitalInput* loadCaller) : output(loa
      lastLoad3Call = false;
 }
 
-Loads::~Loads(){
-
-}
+Loads::~Loads()= default;
 
 void Loads::checkLoadCallChanges() {
-    bool currentLoad1Call = input->readLoad1Call();
-    bool currentLoad2Call = input->readLoad2Call();
-    bool currentLoad3Call = input->readLoad3Call();
+    currentLoad1Call = input->readLoad1Call();
+    currentLoad2Call = input->readLoad2Call();
+    currentLoad3Call = input->readLoad3Call();
     emergencyScreen = currentLoad1Call || currentLoad2Call || currentLoad3Call;
 
     //load 1

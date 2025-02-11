@@ -20,6 +20,7 @@ class Loads {
     void turnLoadOff(uint8_t load);
 
     bool lastLoad1Call, lastLoad2Call, lastLoad3Call;
+    bool currentLoad1Call, currentLoad2Call, currentLoad3Call;
 
     private:
     DigitalOutput* output;
