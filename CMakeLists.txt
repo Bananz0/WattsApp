@@ -34,6 +34,7 @@ set(BASE_PATH    "${CMAKE_SOURCE_DIR}")
 set(SRC_PATH     "${BASE_PATH}/src")
 set(LIB_PATH     "${BASE_PATH}/lib")
 set(FONT_PATH    "${BASE_PATH}/fonts")
+set(ARDUINO_PATH    "${BASE_PATH}/lib/arduino")
 
 # Files to be compiled
 file(GLOB_RECURSE SRC_FILES
@@ -58,8 +59,16 @@ file(GLOB_RECURSE LIB_FILES
         "${LIB_PATH}/*.asm"
 )
 
-file(GLOB_RECURSE FONT_FILES
-        "${FONT_FILES}/*.h"
+file(GLOB_RECURSE ARDUINO_FILES
+        "${ARDUINO_PATH}/*.h"
+        "${ARDUINO_PATH}/*.cpp"
+        "${ARDUINO_PATH}/*.cc"
+        "${ARDUINO_PATH}/*.c"
+        "${ARDUINO_PATH}/*.cxx"
+        "${ARDUINO_PATH}/*.S"
+        "${ARDUINO_PATH}/*.s"
+        "${ARDUINO_PATH}/*.sx"
+        "${ARDUINO_PATH}/*.asm"
 )
 
 # Compiler flags
@@ -79,9 +88,9 @@ set(CMAKE_CXX_FLAGS "${CXXFLAGS}")
 set(CMAKE_ASM_FLAGS   "${CFLAGS}")
 
 # Project setup
-include_directories(${INC_PATH} ${SRC_PATH} ${LIB_PATH} ${FONT_PATH})
+include_directories(${INC_PATH} ${SRC_PATH} ${LIB_PATH} ${FONT_PATH} ${ARDUINO_PATH})
 
-add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_FILES} ${FONT_FILES})
+add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_FILES} ${ARDUINO_FILES})
 
 set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.elf")
 

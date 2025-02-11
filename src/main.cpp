@@ -8,7 +8,6 @@
 #include <avr/interrupt.h>
 
 #include "debug.h"
-#include "uart.h"
 
 #include "portHandler.h"
 
