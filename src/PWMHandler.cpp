@@ -4,6 +4,7 @@
 
 #define TARGET_TIME_MS 100
 #define PRESCALER 64
+#include <avr/interrupt.h>
 #include "PWMHandler.h"
 
 PWMHandler::PWMHandler() {}
@@ -39,4 +40,21 @@ void PWMHandler::initializeTimer2() {
     TIMSK2 = 0;			            	// No interrupts
     TCNT2 = 0x00;	        			// Counter 1
     OCR2A = 0xFF;			         	// Compare Value
+}
+
+void PWMHandler::initializeEmergencyTimer() {
+    TCCR2A = 0;
+    TCCR2B = (1 << CS22);
+    TIMSK2 = (1 << TOIE2);
+    emergency_flag = false;
+}
+
+void PWMHandler::checkEmergency() {
+    if (emergency_flag) {
+        emergencyScreen = true;  // 触发主循环中的紧急显示
+    }
+}
+
+ISR(TIMER2_OVF_vect) {
+    PWMHandler::checkEmergency();
 }

@@ -18,6 +18,12 @@ public:
     void initializeTimer1();
     void initializeTimer2();
     void setOutputVoltage(float voltage);
+
+    void initializeEmergencyTimer();
+    static void checkEmergency();
+
+private:
+    static volatile bool emergency_flag
 };
 
 #endif //PWMHANDLER_H
