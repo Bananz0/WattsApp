@@ -112,8 +112,11 @@ int main() {
         display.carouselScreen(screen);
 
         //Implement Labview Algorithm
-        //Default: Charge battery
+        //Default: Charge battery and turn all loads off.
         digitalOutput.chargeBattery();
+        loads.turnLoadOff(1);
+        loads.turnLoadOff(2);
+        loads.turnLoadOff(3);
 
 
     }

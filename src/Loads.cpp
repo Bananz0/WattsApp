@@ -47,13 +47,13 @@ void Loads::checkLoadCallChanges() {
 void Loads::turnLoadOn(uint8_t load) {
     switch (load) {
         case 1:
-            output->loadSwitch1();
+            output->loadSwitch1(DigitalOutput::ON);
         break;
         case 2:
-            output->loadSwitch2();
+            output->loadSwitch2(DigitalOutput::ON);
         break;
         case 3:
-            output->loadSwitch3();
+            output->loadSwitch3(DigitalOutput::ON);
         break;
         default:
             break;
@@ -63,13 +63,13 @@ void Loads::turnLoadOn(uint8_t load) {
 void Loads::turnLoadOff(uint8_t load) {
     switch (load) {
         case 1:
-            output->loadSwitch1();
+            output->loadSwitch1(DigitalOutput::OFF);
         break;
         case 2:
-            output->loadSwitch2();
+            output->loadSwitch2(DigitalOutput::OFF);
         break;
         case 3:
-            output->loadSwitch3();
+            output->loadSwitch3(DigitalOutput::OFF);
         break;
         default:
             break;

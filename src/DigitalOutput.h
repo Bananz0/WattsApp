@@ -10,12 +10,13 @@
 
 class DigitalOutput {
 public:
+    typedef enum {OFF, ON}status;
     DigitalOutput();
     void chargeBattery();
     void dischargeBattery();
-    void loadSwitch1();
-    void loadSwitch2();
-    void loadSwitch3();
+    void loadSwitch1(status Status);
+    void loadSwitch2(status Status);
+    void loadSwitch3(status Status);
 private:
     bool load1Status, load2Status, load3Status;
 }; //Third RJ45 Port C (2 - 7)

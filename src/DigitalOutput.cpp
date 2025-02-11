@@ -18,12 +18,39 @@ void DigitalOutput::chargeBattery() { //Pin C3
 void DigitalOutput::dischargeBattery() { //Pin C4
     PORTC &= ~(1 << PORTC4); //Set PC4 to Low
 }
-void DigitalOutput::loadSwitch1() { //Pin C5
-    PORTC ^= (1 << PORTC5); //Toggle switch 1
+void DigitalOutput::loadSwitch1(status Status) { //Pin C5
+    switch (Status) {
+        case ON:
+            PORTC |= (1 << PORTC5); //Set PC3 to High
+        break;
+        case OFF:
+            PORTC &= ~(1 << PORTC5); //Set PC3 to LOW
+        break;
+        default:
+            PORTC ^= (1 << PORTC5); //Toggle switch 1
+    }
 }
-void DigitalOutput::loadSwitch2() { //Pin C6
-    PORTC ^= (1 << PORTC6); //Toggle switch 2
+void DigitalOutput::loadSwitch2(status Status) { //Pin C6
+    switch (Status) {
+        case ON:
+            PORTC |= (1 << PORTC6); //Set PC3 to High
+        break;
+        case OFF:
+            PORTC &= ~(1 << PORTC6); //Set PC3 to LOW
+        break;
+        default:
+            PORTC ^= (1 << PORTC6); //Toggle switch 1
+    }
 }
-void DigitalOutput::loadSwitch3() { //Pin C7
-    PORTC ^= (1 << PORTC7); //Toggle switch 3
+void DigitalOutput::loadSwitch3(status Status) { //Pin C7
+    switch (Status) {
+        case ON:
+            PORTC |= (1 << PORTC7); //Set PC3 to High
+        break;
+        case OFF:
+            PORTC &= ~(1 << PORTC7); //Set PC3 to LOW
+        break;
+        default:
+            PORTC ^= (1 << PORTC7); //Toggle switch 1
+    }
 }
