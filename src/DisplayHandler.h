@@ -55,11 +55,6 @@ public:
     void showLoadsScreen();
     void showErrorScreen();
 
-    void showEmergencyScreen() {
-        clearScreen();
-        showErrorScreen();
-    }
-
     void carouselScreen(Screen screen);
 
 private:

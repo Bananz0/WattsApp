@@ -51,10 +51,6 @@ void updateStats(uint8_t frequency) {
     energyStats.totalEnergy = energyStats.averagePower * 100 / 1000;
 }
 
-void checkSystemStatus() {
-    //TODO
-}
-
 //ADC ISR
 ISR(ADC_vect){
     ADCVoltage = (ADC * Vref) / 0x3FF;
@@ -111,15 +107,6 @@ int main() {
         if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
             screen = static_cast<Screen>((screenPage + 1) % SCREENCOUNT );
             lastScreenUpdateSecond = timeUTC->tm_sec;
-        }
-
-        if (emergencyScreen) {
-            display.showEmergencyScreen();
-            continue;
-        }
-
-        if (Counter % 10 == 0) {
-            checkSystemStatus();
         }
 
         display.carouselScreen(screen);
