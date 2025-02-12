@@ -104,8 +104,14 @@ int main() {
 
         //cycle through the screens somehwow
         if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
-            screen = static_cast<Screen>((screenPage + 1) % SCREENCOUNT );
-            lastScreenUpdateSecond = timeUTC->tm_sec;
+            if (emergencyScreen) {
+                //Display screen for 5 seconds
+                screen = ERROR_SCREEN;
+                emergencyScreen = false;
+            } else if (!emergencyScreen) {
+                screen = static_cast<Screen>((screenPage + 1) % ((int)SCREENCOUNT-1) ); //Subtraced 1 to never cycle to the error screebb
+                lastScreenUpdateSecond = timeUTC->tm_sec;
+            }
         }
 
         // for (int i = 0; i < 10; i++) {
@@ -113,10 +119,9 @@ int main() {
         //     _delay_ms(1000);
         // }
 
-        analogueOutput.setMainsCapacity(2.70);
 
+        display.carouselScreen(screen);
 
-        display.carouselScreen(BUSBAR_SCREEN);
 
         //Implement Labview Algorithm
         //Default: Charge battery and turn all loads off.
