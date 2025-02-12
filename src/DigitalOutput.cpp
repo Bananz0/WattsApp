@@ -5,52 +5,52 @@
 #include "DigitalOutput.h"
 
 DigitalOutput::DigitalOutput() : load1Status(false), load2Status(false), load3Status(false) {
-    //Explicitly set Pin C3 - C7 as outputs
-    DDRC |= _BV(3)
+    //Explicitly set Pin D2 - D6 as outputs
+    DDRD |= _BV(2)
+          | _BV(3)
           | _BV(4)
           | _BV(5)
-          | _BV(6)
-          | _BV(7);
+          | _BV(6);
 }
 void DigitalOutput::chargeBattery() { //Pin C3
-    PORTC |= (1 << PORTC3); //Set PC3 to High
+    PORTD |= (1 << PORTD2); //Set PC3 to High
 }
 void DigitalOutput::dischargeBattery() { //Pin C4
-    PORTC &= ~(1 << PORTC4); //Set PC4 to Low
+    PORTD &= ~(1 << PORTD3); //Set PC4 to Low
 }
 void DigitalOutput::loadSwitch1(status Status) { //Pin C5
     switch (Status) {
         case ON:
-            PORTC |= (1 << PORTC5); //Set PC3 to High
+            PORTD |= (1 << PORTD4); //Set PC3 to High
         break;
         case OFF:
-            PORTC &= ~(1 << PORTC5); //Set PC3 to LOW
+            PORTD &= ~(1 << PORTD4); //Set PC3 to LOW
         break;
         default:
-            PORTC ^= (1 << PORTC5); //Toggle switch 1
+            PORTD ^= (1 << PORTD4); //Toggle switch 1
     }
 }
 void DigitalOutput::loadSwitch2(status Status) { //Pin C6
     switch (Status) {
         case ON:
-            PORTC |= (1 << PORTC6); //Set PC3 to High
+            PORTD |= (1 << PORTD5); //Set PC3 to High
         break;
         case OFF:
-            PORTC &= ~(1 << PORTC6); //Set PC3 to LOW
+            PORTD &= ~(1 << PORTD5); //Set PC3 to LOW
         break;
         default:
-            PORTC ^= (1 << PORTC6); //Toggle switch 1
+            PORTD ^= (1 << PORTD5); //Toggle switch 1
     }
 }
 void DigitalOutput::loadSwitch3(status Status) { //Pin C7
     switch (Status) {
         case ON:
-            PORTC |= (1 << PORTC7); //Set PC3 to High
+            PORTD |= (1 << PORTD6); //Set PC3 to High
         break;
         case OFF:
-            PORTC &= ~(1 << PORTC7); //Set PC3 to LOW
+            PORTD &= ~(1 << PORTD6); //Set PC3 to LOW
         break;
         default:
-            PORTC ^= (1 << PORTC7); //Toggle switch 1
+            PORTD ^= (1 << PORTD6); //Toggle switch 1
     }
 }
