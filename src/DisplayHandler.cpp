@@ -105,9 +105,9 @@ void DisplayHandler::drawBootSequence() {
 
 void DisplayHandler::showBusbarScreen() {
     sprintf(title, "BUSBAR\nSTATUS");
-    sprintf(text1, "Current: \n%00.2f A", (double)energyStats.busbarCurrent);
-    sprintf(text2, "Volatage: \n%00.2f V", (double)energyStats.busbarVoltage);
-    sprintf(text3, "Power: \n%0000.2f VA", (double)energyStats.busbarPower);
+    sprintf(text1, "Current: \n%0.2f A", (double)energyStats.busbarCurrent);
+    sprintf(text2, "Volatage: \n%0.2f V", (double)energyStats.busbarVoltage);
+    sprintf(text3, "Power: \n%0.2f VA", (double)energyStats.busbarPower);
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, BLUE,backgroundColour,OryxB,3);
@@ -117,7 +117,7 @@ void DisplayHandler::showBusbarScreen() {
 
 void DisplayHandler::showPVScreen() {
     sprintf(title, "SOLAR\nSTATUS");
-    sprintf(text1, "Solar\nCapacity: \n%00.2f A", (double)energyStats.busbarCurrent);
+    sprintf(text1, "Solar\nCapacity: \n%0.2f A", (double)energyStats.busbarCurrent);
     //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
     //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
 
@@ -130,7 +130,7 @@ void DisplayHandler::showPVScreen() {
 
 void DisplayHandler::showTurbineScreen() {
     sprintf(title, "TURBINE\nSTATUS");
-    sprintf(text1, "Turbine\nCapacity: \n%00.2f A", (double)energyStats.busbarCurrent);
+    sprintf(text1, "Turbine\nCapacity: \n%0.2f A", (double)energyStats.busbarCurrent);
     //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
     //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
 
@@ -144,7 +144,7 @@ void DisplayHandler::showTurbineScreen() {
 
 void DisplayHandler::showBatteryScreen() {
     sprintf(title, "BATTERY\nSTATUS");
-    sprintf(text1, "Current: \n%00.2f AH", (double)energyStats.busbarCurrent);
+    sprintf(text1, "Current: \n%0.2f AH", (double)energyStats.busbarCurrent);
     //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
     //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
 
@@ -188,7 +188,7 @@ void DisplayHandler::stopDisplay() { //Should be used when turning off the Il Ma
 
 }
 
-void DisplayHandler::setBacklight(state State) {
+void DisplayHandler::setBacklight(const state State) {
     pictorBacklightState(State);
 }
 
@@ -196,7 +196,7 @@ void DisplayHandler::toggleBacklight() {
     pictorBacklightState(-1);
 }
 
-void DisplayHandler::setOrientation(orientation rotation) {
+void DisplayHandler::setOrientation(const orientation rotation) {
     pictorSetRotation(rotation);
 }
 
@@ -213,10 +213,10 @@ void DisplayHandler::screenOff() {
     setBacklight(DIM); //Dim and turn off backlight
 }
 
-void DisplayHandler::drawText(char message[]) {
+void DisplayHandler::drawText(char text[]) {
     //Will expand to handle any char string decimal or number
     point textPos = {50, 50};
-    pictorDrawS((unsigned char*)message, textPos, fontColour, backgroundColour, Mash, 2);  // Draw the message with scale 1
+    pictorDrawS(reinterpret_cast<unsigned char *>(text), textPos, fontColour, backgroundColour, Mash, 2);  // Draw the message with scale 1
 }
 
 void DisplayHandler::drawUIbattery() {
