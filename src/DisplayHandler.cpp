@@ -119,7 +119,7 @@ void DisplayHandler::showBusbarScreen() {
 
 void DisplayHandler::showPVScreen() {
     sprintf(title, "SOLAR\nSTATUS");
-    sprintf(text1, "Solar\nCapacity: \n%0.2f A", (double)sources->busbarCurrent);
+    sprintf(text1, "Solar\nCapacity: \n%0.2f A", (double)sources->pvCapacity);
     //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
     //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
 
@@ -132,7 +132,7 @@ void DisplayHandler::showPVScreen() {
 
 void DisplayHandler::showTurbineScreen() {
     sprintf(title, "TURBINE\nSTATUS");
-    sprintf(text1, "Turbine\nCapacity: \n%0.2f A", (double)sources->busbarCurrent);
+    sprintf(text1, "Turbine\nCapacity: \n%0.2f A", (double)sources->windTurbineCapacity);
     //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
     //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
 
@@ -146,7 +146,7 @@ void DisplayHandler::showTurbineScreen() {
 
 void DisplayHandler::showBatteryScreen() {
     sprintf(title, "BATTERY\nSTATUS");
-    sprintf(text1, "Current: \n%0.2f AH", (double)sources->busbarCurrent);
+    sprintf(text1, "Current: \n%0.2f AH", (double)sources->batteryCapacity);
     //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
     //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
 
@@ -170,6 +170,8 @@ void DisplayHandler::showErrorScreen() {
 
 void DisplayHandler::showLoadsScreen() {
     sprintf(title, "LOADS\nSTATUS");
+    //TODO: implement load status
+
     // sprintf(text1, "Current: \n%00.2f AH", (double)sources->busbarCurrent);
     //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
     //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
@@ -227,25 +229,27 @@ void DisplayHandler::drawText(char text[]) {
 }
 
 void DisplayHandler::drawUIbattery() {
-    switch (sources->batteryCapacity) {
-        case 0:
-            pictorDrawSpriteType(&batt204, batteryCapacityPos,4,2);
-        break;
-        case 1:
-            pictorDrawSpriteType(&batt404, batteryCapacityPos,4,2);
-        break;
-        case 2:
-            pictorDrawSpriteType(&batt604, batteryCapacityPos,4,2);
-        break;
-        case 3:
-            pictorDrawSpriteType(&batt804, batteryCapacityPos,4,2);
-        break;
-        case 4:
-            pictorDrawSpriteType(&batt1004, batteryCapacityPos,4,2);
-        break;
-
+    if (sources->isBatteryCharging) {
+        pictorDrawSpriteType(&charging4, batteryCapacityPos,4,2);
+    } else {
+        switch (sources->batteryCapacity/4) { //Since we have 24Ah, scale it for to the four available cases.
+            case 0:
+                pictorDrawSpriteType(&batt204, batteryCapacityPos,4,2);
+            break;
+            case 1:
+                pictorDrawSpriteType(&batt404, batteryCapacityPos,4,2);
+            break;
+            case 2:
+                pictorDrawSpriteType(&batt604, batteryCapacityPos,4,2);
+            break;
+            case 3:
+                pictorDrawSpriteType(&batt804, batteryCapacityPos,4,2);
+            break;
+            case 4:
+                pictorDrawSpriteType(&batt1004, batteryCapacityPos,4,2);
+            break;
+        }
     }
-
 }
 
 void DisplayHandler::drawUIfan() {
