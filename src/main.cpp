@@ -84,18 +84,20 @@ int main() {
     uint16_t updateCounter = 0;
     Screen screen;
     uint8_t lastScreenUpdateSecond = -1;
+    uint16_t lastCounter = 0;
 
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
-        if (Counter  % 1 == 0) {
+        if ((Counter % 10 == 0) && (Counter != lastCounter)) {
             utc++;
+            lastCounter = Counter;
         };
         timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
         pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
         updateCounter = Counter;
 
-        if (updateCounter % 1 == 0) {
+        if (updateCounter % 10 == 0) {
             updateStats(0);
             updateCounter = 0;
         }
