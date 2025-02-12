@@ -20,4 +20,6 @@ volatile uint32_t utc = 0;
 volatile tm* timeUTC;
 
 volatile Screen screenPage, nextScreenPage, prevScreenPage;
+
 volatile bool emergencyScreen = false;
+volatile char emergencyMessage[] = "Emergency\nNot\nSpecified";

@@ -3,10 +3,25 @@
 //
 
 #include "AnalogueOutput.h"
+#include <string.h>
 
 AnalogueOutput::AnalogueOutput() {
     pWMHandler.initializePWM();
 }
 void AnalogueOutput::setMainsCapacity(float mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
-    pWMHandler.setOutputVoltage(mainsCapacity);
+    // We need to clamp the output from 0-10v and scale it down to 3.3v
+    //Voltage Clamp
+    if (mainsCapacity < 0.0f) {
+        mainsCapacity = 0.0f;
+    } else {
+        if (mainsCapacity > 10.0f) {
+            mainsCapacity = 10.0f;
+            emergencyScreen = true;
+            strcpy(emergencyMessage, "Mains\nCapacity\n> 10");
+        }
+    }
+    //Voltage Scale - 0-10A scaled to 0-3.3v
+    scaledMainsCapacity = (mainsCapacity/10.0f) * Vref;
+
+    pWMHandler.setOutputVoltage(scaledMainsCapacity);
 }

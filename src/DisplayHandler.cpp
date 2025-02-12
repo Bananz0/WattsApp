@@ -58,8 +58,6 @@ DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRi
 
     fanPos = {250 , 140} ;
     batteryCapacityPos = {250,140};
-
-    screenPage = TURBINE_SCREEN;
 }
 
 void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
@@ -157,8 +155,13 @@ void DisplayHandler::showBatteryScreen() {
 }
 
 void DisplayHandler::showErrorScreen() {
+    strncpy(tempMessage, emergencyMessage, sizeof(tempMessage)); //Ignore error - compiles
+
     sprintf(title, "ERROR\nSTATUS");
-    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, RED,backgroundColour,OryxB,5);
+    pictorDrawS(reinterpret_cast<const unsigned char *>(tempMessage),currentPos,  YELLOW,backgroundColour,OryxB,3);
+    //TODO: Exclamation mark sprite
+
 }
 
 void DisplayHandler::showLoadsScreen() {

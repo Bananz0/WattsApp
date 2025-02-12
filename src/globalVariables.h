@@ -49,5 +49,6 @@ typedef enum  {BUSBAR_SCREEN ,PV_SCREEN , TURBINE_SCREEN , BATTERY_SCREEN
 extern volatile Screen screenPage, nextScreenPage,prevScreenPage;
 
 extern volatile bool emergencyScreen;
+extern volatile char emergencyMessage[40];
 
 #endif //GLOBALVARIABLES_H

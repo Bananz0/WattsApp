@@ -63,7 +63,7 @@ private:
     solarCapacityPos, batteryCapacityPos,turbineCapacityPos;
 
     char bootName[10],bootVersion[10], bootAuthors[10];
-    char title[40], text2[40], text1[40], batteryStatus[40], text3[40];
+    char title[40], text2[40], text1[40], batteryStatus[40], text3[40], tempMessage[40];
 };
 
 
