@@ -12,13 +12,13 @@ void PWMHandler::initializePWM() { //Initialize the PWM based on pg155 of the il
     //Using PD5
     initializeTimer1();
     //Using PD7
-    //initializeTimer2();
+    initializeTimer2();
 
 }
 
 void PWMHandler::setOutputVoltage(float voltage) { //PD6 and PD7 for Amplitude Modulation
     DDRD |= _BV(7);
-    const float scalingFactor = static_cast<float>(voltage) * 1000 / Vref;
+    const float scalingFactor = static_cast<float>(voltage) / Vref;
     //OCR2A = ((voltage * 1000)/ Vref ) * 0xFF;
     OCR2A = (float) 0xFF * scalingFactor;
 }

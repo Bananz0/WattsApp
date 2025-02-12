@@ -67,9 +67,9 @@ static uint8_t pictorRot = 0;
 //	DATA PORTS -- don't use port B if you intend to use USB!
 #define CTRLPORT	PORTB
 #define CTRLDDR		DDRB
-#define DATAPORT	PORTD
-#define DATADDR		DDRD
-#define DATAPINS	PIND
+#define DATAPORT	PORTC
+#define DATADDR		DDRC
+#define DATAPINS	PINC
 
 //	CONRTOL BITS
 #define BACKLIGHT	0b00000010

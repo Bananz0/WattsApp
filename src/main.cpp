@@ -33,8 +33,6 @@ TimeHandler timeHandler;
 
 Loads loads(&digitalOutput,&digitalInput);
 
-
-
 void updateStats(uint8_t frequency) {
     //Time Interrupt - Moved the div/10 to main
     //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
@@ -63,7 +61,7 @@ ISR(TIMER1_COMPA_vect) {
     //utc++;
 }
 //Pin Change ISR
-ISR(PCINT2_vect) {
+ISR(PCINT0_vect) {
     // Read Load Calls 1, 2 and 3
     loads.checkLoadCallChanges();
 }
@@ -90,15 +88,14 @@ int main() {
 
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
-        if (Counter  % 10 == 0) {
+        if (Counter  % 1 == 0) {
             utc++;
-            testOutputPin('C',6);
         };
         timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
         pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
         updateCounter = Counter;
 
-        if (updateCounter % 10 == 0) {
+        if (updateCounter % 1 == 0) {
             updateStats(0);
             updateCounter = 0;
         }
@@ -109,7 +106,15 @@ int main() {
             lastScreenUpdateSecond = timeUTC->tm_sec;
         }
 
-        display.carouselScreen(screen);
+        // for (int i = 0; i < 10; i++) {
+        //     analogueOutput.setMainsCapacity(.33*i);
+        //     _delay_ms(1000);
+        // }
+
+        analogueOutput.setMainsCapacity(2.70);
+
+
+        display.carouselScreen(BUSBAR_SCREEN);
 
         //Implement Labview Algorithm
         //Default: Charge battery and turn all loads off.

@@ -18,36 +18,47 @@ void initializePorts(const char portName, const PortType portType ) { //This is 
 
 void finalizePorts() {
     /*portType Input = 0x00 , Output = 0xFF*/
-    initializePorts('A', INPUT); // Set Port A to Analog Output (from SM to TB ( Mains Capacity, Analog Ground Ref for Mains Capacity))
-    initializePorts('B', OUTPUT); // Set Port B to Analog Input (from TB to SM ( Power Generation Stats ) )
-    initializePorts('C', OUTPUT); // Set Port C to Digital Output ( from SM to TB ( Charge batt, discharge batt, eetc...))
-    initializePorts('D', INPUT); // Set Port D to Digital Input (from TB to SM ( Call for Load 1,2,3, ground ref)
+    //initializePorts('A', INPUT); // Set Port A to Analog Output (from SM to TB ( Mains Capacity, Analog Ground Ref for Mains Capacity))
+    // initializePorts('B', OUTPUT); // Set Port B to Analog Input (from TB to SM ( Power Generation Stats ) )
+    // initializePorts('C', OUTPUT); // Set Port C to Digital Output ( from SM to TB ( Charge batt, discharge batt, eetc...))
+    //initializePorts('D', INPUT); // Set Port D to Digital Input (from TB to SM ( Call for Load 1,2,3, ground ref)
 
     //Port A pin defs
     //Will need to use ADC
     //Redundant but set 4 pins as explicit inputs
     DDRA &= ~(_BV(0) /*Busbar Voltage*/
-           | _BV(1) /*Busbar Current*/
-           | _BV(2) /*Wind Turbine Capacity*/
-           | _BV(3) /*PV Capacity*/);
+            | _BV(1) /*Busbar Current*/
+            | _BV(2) /*Wind Turbine Capacity*/
+            | _BV(3) /*PV Capacity*/
+            | _BV(5) /*Call for Load 1*/
+            | _BV(6) /*Call for Load 2*/
+            | _BV(7) /*Call for Load 3*/);
+
+
+    DDRA |=  _BV(4) /*Potential ESP8266 Enable Pin*/;
+
+
+    //PORT B AND C ARE USED FOR THE DISPLAY
 
     //Port B pin defs
     //Analog Output
-    DDRB |= _BV(0); //Mains Capacity (0-10v)
-
+    // DDRB |= _BV(0); //Mains Capacity (0-10v)
 
     //Port C pin defs
     //Digital Outputs
-    DDRC |= (_BV(0) /*Charge Battery*/
-         | _BV(1) /*Discharge Battery*/
-         | _BV(2) /*Load 1 Switch*/
-         | _BV(3) /*Load 2 Switch*/
-         | _BV(4) /*Load 3 Switch*/); //this took way tooo long bruh
+    // DDRC |= (_BV(2) /*Charge Battery*/
+    //      | _BV(3) /*Discharge Battery*/
+    //      | _BV(4) /*Load 1 Switch*/
+    //      | _BV(5) /*Load 2 Switch*/
+    //      | _BV(6) /*Load 3 Switch*/); //this took way tooo long bruh
+
+    //PORT B AND C ARE USED FOR THE DISPLAY
 
     //Port D pin defs
-    //Digital Inputs
-    PORTD = 0xFF;
-    DDRD &= ~(_BV(0) /*Call for Load 1*/
-            | _BV(1) /*Call for Load 2*/
-            | _BV(2) /*Call for Load 3*/);
+    //Digital Outputs
+    DDRD |= (_BV(2) /*Charge Battery*/
+         | _BV(3) /*Discharge Battery*/
+         | _BV(4) /*Load 1 Switch*/
+         | _BV(5) /*Load 2 Switch*/
+         | _BV(6) /*Load 3 Switch*/); //this took way tooo long bruh
 }
