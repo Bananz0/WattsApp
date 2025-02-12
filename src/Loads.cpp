@@ -8,6 +8,12 @@ Loads::Loads(DigitalOutput* loadSwitcher, DigitalInput* loadCaller) : output(loa
      lastLoad1Call = false;
      lastLoad2Call = false;
      lastLoad3Call = false;
+
+    //TODO: Not implemented variable load control
+    currentLoad1 = 1;
+    currentLoad2 = 1;
+    currentLoad3 = 1;
+
 }
 
 Loads::~Loads()= default;
@@ -74,4 +80,17 @@ void Loads::turnLoadOff(uint8_t load) {
         default:
             break;
     }
+}
+
+void Loads::calculateLoadCapacity() {
+    // if (currentLoad1Call) {
+    //     currentTotalLoad += currentLoad1;
+    // }
+    // if (currentLoad2Call) {
+    //     currentTotalLoad += currentLoad2;
+    // }
+    // if (currentLoad3Call) {
+    //     currentTotalLoad += currentLoad3;
+    // }
+    currentTotalLoad = currentLoad1*currentLoad1Call + currentLoad2*currentLoad2Call + currentLoad3*currentLoad3Call;
 }

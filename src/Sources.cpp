@@ -12,17 +12,25 @@ Sources::Sources(AnalogueInput *sourceHandler, AnalogueOutput *mainsHandler, Dig
 
 Sources::~Sources() = default;
 
-void Sources::requestMains(float mainsCapacity) {
-    mainsHandler->setMainsCapacity(mainsCapacity);
+void Sources::requestMains(float mainsCapacityIn) {
+    mainsHandler->setMainsCapacity(mainsCapacityIn);
+    mainsCapacity += mainsCapacityIn;
 }
 
-void Sources::requestBattery(uint8_t batteryCapacity) {
-    //TODO: Handbook on how to handle time in this thing
-    batteryHandler->chargeBattery();
+void Sources::requestBattery(uint8_t batteryCapacityOut) {
+    batteryHandler->dischargeBattery();
+    if(batteryCapacity >= 1) {
+        batteryCapacity-=1;
+    }
+    isBatteryCharging = false;
 }
 
 void Sources::chargeBattery() {
     batteryHandler->chargeBattery();
+    if(batteryCapacity < 24) {
+        batteryCapacity+=1;
+    }
+    isBatteryCharging = true;
 }
 
 
@@ -42,7 +50,11 @@ void Sources::readBusbarVoltage() {
     busbarVoltage = sourceHandler->busbarVoltage();
 }
 
+void Sources::calculateTotalAvailableCapacity() {
+    totalAvailableCapacity = totalRenewableCapacity + batteryCapacity + mainsCapacity;
+}
+
 void Sources::calculateTotalEnergyandPower() {
     busbarPower = busbarCurrent * busbarVoltage;
-    totalRenewablePower = pvCapacity + windTurbineCapacity;
+    totalRenewableCapacity = pvCapacity + windTurbineCapacity;
 }

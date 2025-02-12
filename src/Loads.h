@@ -19,8 +19,13 @@ class Loads {
     void turnLoadOn(uint8_t load);
     void turnLoadOff(uint8_t load);
 
+    void calculateLoadCapacity();
+
     bool lastLoad1Call, lastLoad2Call, lastLoad3Call;
-    bool currentLoad1Call, currentLoad2Call, currentLoad3Call;
+    bool currentLoad1Call{}, currentLoad2Call{}, currentLoad3Call{};
+
+    float currentLoad1, currentLoad2, currentLoad3;
+    float currentTotalLoad{};
 
     private:
     DigitalOutput* output;

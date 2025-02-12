@@ -34,6 +34,8 @@ Sources sources(&analogueInput, &analogueOutput,&digitalOutput);
 DisplayHandler display(&loads,&sources);
 TimeHandler timeHandler;
 
+float netCapacity = 0;
+
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
     //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
@@ -47,6 +49,10 @@ void updateStats() {
     sources.calculateTotalEnergyandPower();
 
     sources.totalEnergy = sources.averagePower * 100 / 1000;
+
+    loads.calculateLoadCapacity();
+
+    netCapacity = sources.totalAvailableCapacity -  loads.currentTotalLoad;
 }
 
 //ADC ISR
@@ -86,6 +92,8 @@ int main() {
     uint8_t lastScreenUpdateSecond = -1;
     uint16_t lastCounter = 0;
 
+
+
     //CLion complains about forever while loop
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
@@ -121,14 +129,18 @@ int main() {
 
         display.carouselScreen(screen);
 
+        //Implement LabView Algorithm
 
-        //Implement Labview Algorithm
+        //Maximum battery capacity = 24Ah
+        //1 Hour Simulation time = 1 Min Runtime
         //Default: Charge battery and turn all loads off.
         sources.requestMains(0);
         sources.chargeBattery();
         loads.turnLoadOff(1);
         loads.turnLoadOff(2);
         loads.turnLoadOff(3);
+
+
 
 
     }
