@@ -5,26 +5,21 @@
 #include "DigitalInput.h"
 
 DigitalInput::DigitalInput() {
-    //Explicitly set PIN C0, C1 and C2 as inputs.
-    DDRC &= ~(_BV(0) | _BV(1) | _BV(2));
+    //Explicitly set PIN A5, A6 and A7 as inputs.
+    DDRC &= ~(_BV(5) | _BV(6) | _BV(7));
     //Enable Pull Up resistors
-    PORTC |= (_BV(0) | _BV(1) | _BV(2));
+    PORTC |= (_BV(5) | _BV(6) | _BV(7));
     //Enable Pin Change Registers
-    PCICR |= _BV(PCIE2); //Pin change regiser for PortC
-    //Enable specific pin change mask for the port c
-    PCMSK2 |= _BV(PCINT16)|_BV(PCINT17)| _BV(PCINT18);
-
-    //Set the load switches PB1/PB2/PB3 as output
-    DDRB |= (1 << PB3) | (1 << PB4) | (1 << PB5);
-    //Turn off the load switches
-    PORTB &= ~((1 << PB3) | (1 << PB4) | (1 << PB5));
+    PCICR |= _BV(PCIE0); //Pin change regiser for Port A
+    //Enable specific pin change mask for the Pins A5-A7
+    PCMSK0 |= _BV(PCINT0)|_BV(PCINT1)| _BV(PCINT2);
 }
-bool DigitalInput::readLoad1Call() { //Pin C0 Call for Load 1 (1 - on 0 - off)
-    return (PINC & (1 << PINC0));
+bool DigitalInput::readLoad1Call() { //Pin A5 Call for Load 1 (1 - on 0 - off)
+    return (PINA & (1 << PINA5));
 }
-bool DigitalInput::readLoad2Call() { //Pin C1 Call for Load 2 (1 - on 0 - off)
-    return (PINC & (1 << PINC1));
+bool DigitalInput::readLoad2Call() { //Pin A6 Call for Load 2 (1 - on 0 - off)
+    return (PINA & (1 << PINA6));
 }
-bool DigitalInput::readLoad3Call() { //Pin C2 Call for Load 3 (1 - on 0 - off)
-    return (PINC & (1 << PINC2));
+bool DigitalInput::readLoad3Call() { //Pin A7 Call for Load 3 (1 - on 0 - off)
+    return (PINA & (1 << PINA7));
 }
