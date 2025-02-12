@@ -20,23 +20,23 @@ void Loads::checkLoadCallChanges() {
 
     //load 1
     if (currentLoad1Call && !lastLoad1Call) {
-        PORTB |= (1 << PB3);  //Load 1 on
+        output->loadSwitch1(DigitalOutput::ON);  //Load 1 on
     } else if (!currentLoad1Call && lastLoad1Call) {
-        PORTB &= ~(1 << PB3); //OFF
+        output->loadSwitch1(DigitalOutput::OFF); //OFF
     }
 
     //load 2
     if (currentLoad2Call && !lastLoad2Call) {
-        PORTB |= (1 << PB4);  //ON
+        output->loadSwitch2(DigitalOutput::ON);  //ON
     } else if (!currentLoad2Call && lastLoad2Call) {
-        PORTB &= ~(1 << PB4); //OFF
+        output->loadSwitch2(DigitalOutput::OFF); //OFF
     }
 
     //load 3
     if (currentLoad3Call && !lastLoad3Call) {
-        PORTB |= (1 << PB5);  //ON
+        output->loadSwitch3(DigitalOutput::ON);  //ON
     } else if (!currentLoad3Call && lastLoad3Call) {
-        PORTB &= ~(1 << PB5); //OFF
+        output->loadSwitch3(DigitalOutput::OFF); //OFF
     }
 
     lastLoad1Call = currentLoad1Call;
