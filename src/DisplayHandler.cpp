@@ -3,6 +3,8 @@
 //
 
 #include "DisplayHandler.h"
+#include "Sources.h"
+#include "Loads.h"
 #include "globalVariables.h"
 
 #include <stdio.h>
@@ -11,17 +13,19 @@
 
 ///Will implement carousel for switching between the different screens later TODO
 
-DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRight(), top(), center(), bottom(),
-                                   primaryColour(WHITE), secondaryColour(BLUE),
-                                   backgroundColour(BLACK),fontColour(DARK GRAY),
-                                   accentColour(ORANGE), errorColour(BRIGHT RED),
-                                   successColour(LIGHT_GREEN), lineColour(BROWN), shapeColour(GRAY)
+DisplayHandler::DisplayHandler(Loads *loads, Sources *sources) : primaryColour(WHITE),
+                                                                 secondaryColour(BLUE),
+                                                                 backgroundColour(BLACK),
+                                                                 fontColour(DARK GRAY),
+                                                                 accentColour(ORANGE),
+                                                                 errorColour(BRIGHT RED),
+                                                                 successColour(LIGHT_GREEN),
+                                                        lineColour(BROWN), shapeColour(GRAY),
+                                   topLeft({0,0}),bottomRight({320,240}),
+                                   bottomLeft({0,240}), topRight({320,0}),
+                                   top(), center(), bottom(),
+                                   sources(sources), loads(loads)
                                     {
-    topLeft = {0,0};
-    bottomLeft = {0,240};
-    topRight = {320,0};
-    bottomRight = {320,240};
-
 
     // bottomRight.X = 320; bottomRight.Y = 240;
     // bottomLeft.X = 0; bottomLeft.Y = 240;
@@ -103,9 +107,9 @@ void DisplayHandler::drawBootSequence() {
 
 void DisplayHandler::showBusbarScreen() {
     sprintf(title, "BUSBAR\nSTATUS");
-    sprintf(text1, "Current: \n%0.2f A", (double)energyStats.busbarCurrent);
-    sprintf(text2, "Volatage: \n%0.2f V", (double)energyStats.busbarVoltage);
-    sprintf(text3, "Power: \n%0.2f VA", (double)energyStats.busbarPower);
+    sprintf(text1, "Current: \n%0.2f A", (double)sources->busbarCurrent);
+    sprintf(text2, "Volatage: \n%0.2f V", (double)sources->busbarVoltage);
+    sprintf(text3, "Power: \n%0.2f VA", (double)sources->busbarPower);
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, BLUE,backgroundColour,OryxB,3);
@@ -115,9 +119,9 @@ void DisplayHandler::showBusbarScreen() {
 
 void DisplayHandler::showPVScreen() {
     sprintf(title, "SOLAR\nSTATUS");
-    sprintf(text1, "Solar\nCapacity: \n%0.2f A", (double)energyStats.busbarCurrent);
-    //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
-    //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
+    sprintf(text1, "Solar\nCapacity: \n%0.2f A", (double)sources->busbarCurrent);
+    //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
+    //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),solarCapacityPos, YELLOW,backgroundColour,OryxB,3);
@@ -128,9 +132,9 @@ void DisplayHandler::showPVScreen() {
 
 void DisplayHandler::showTurbineScreen() {
     sprintf(title, "TURBINE\nSTATUS");
-    sprintf(text1, "Turbine\nCapacity: \n%0.2f A", (double)energyStats.busbarCurrent);
-    //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
-    //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
+    sprintf(text1, "Turbine\nCapacity: \n%0.2f A", (double)sources->busbarCurrent);
+    //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
+    //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
@@ -142,9 +146,9 @@ void DisplayHandler::showTurbineScreen() {
 
 void DisplayHandler::showBatteryScreen() {
     sprintf(title, "BATTERY\nSTATUS");
-    sprintf(text1, "Current: \n%0.2f AH", (double)energyStats.busbarCurrent);
-    //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
-    //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
+    sprintf(text1, "Current: \n%0.2f AH", (double)sources->busbarCurrent);
+    //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
+    //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
@@ -166,9 +170,9 @@ void DisplayHandler::showErrorScreen() {
 
 void DisplayHandler::showLoadsScreen() {
     sprintf(title, "LOADS\nSTATUS");
-    // sprintf(text1, "Current: \n%00.2f AH", (double)energyStats.busbarCurrent);
-    //sprintf(text2, "Volatage: \n%00.2fV", (double)energyStats.busbarVoltage);
-    //sprintf(text3, "Power: \n%0000.2fVA", (double)energyStats.busbarPower);
+    // sprintf(text1, "Current: \n%00.2f AH", (double)sources->busbarCurrent);
+    //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
+    //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     // pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
@@ -223,7 +227,7 @@ void DisplayHandler::drawText(char text[]) {
 }
 
 void DisplayHandler::drawUIbattery() {
-    switch (energyStats.batteryCapacity) {
+    switch (sources->batteryCapacity) {
         case 0:
             pictorDrawSpriteType(&batt204, batteryCapacityPos,4,2);
         break;

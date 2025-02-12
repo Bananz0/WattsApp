@@ -5,6 +5,8 @@
 #ifndef DISPLAYHANDLER_H
 #define DISPLAYHANDLER_H
 #include <globalVariables.h>
+#include <Loads.h>
+#include <Sources.h>
 #include <stdint.h>
 #include "pictor.h"
 #include "Mash.h"
@@ -15,17 +17,17 @@ public:
     typedef enum {PORTRAIT = 0, LANDSCAPE = 1, PORTRAIT_INV = 2, LANDSCAPE_INV = 3} orientation;
     typedef enum {LIGHT = 1, DIM = 0}state;
 
-    point timePos;
+    point timePos{};
     //Sprite Pos
-    point fanPos;
-    point load1Pos, load2Pos, load3Pos;
-    point busbarSPose;
-    point pvSpos; //PV Sprite Pos
+    point fanPos{};
+    point load1Pos{}, load2Pos{}, load3Pos{};
+    point busbarSPose{};
+    point pvSpos{}; //PV Sprite Pos
 
     uint16_t primaryColour, secondaryColour, backgroundColour, fontColour,
              accentColour, errorColour,successColour, lineColour, shapeColour;
 
-    DisplayHandler();
+    DisplayHandler(Loads *loads, Sources *sources);
     ~DisplayHandler();
     void startDisplay(bool vsync);
     void stopDisplay();
@@ -58,12 +60,15 @@ public:
     void carouselScreen(Screen screen);
 
 private:
-    point topLeft, bottomRight, bottomLeft, topRight, top ,center ,bottom, screenCenter
-    ,currentPos, voltPos, powerPos, titlePos, teamPos ,bootNamePos ,bootVersionPos,
-    solarCapacityPos, batteryCapacityPos,turbineCapacityPos;
+    point topLeft, bottomRight, bottomLeft, topRight, top ,center ,bottom, screenCenter{}
+    ,currentPos{}, voltPos{}, powerPos{}, titlePos{}, teamPos{} ,bootNamePos{} ,bootVersionPos{},
+    solarCapacityPos{}, batteryCapacityPos{},turbineCapacityPos{};
 
-    char bootName[10],bootVersion[10], bootAuthors[10];
-    char title[40], text2[40], text1[40], batteryStatus[40], text3[40], tempMessage[40];
+    char bootName[10]{},bootVersion[10]{}, bootAuthors[10]{};
+    char title[40]{}, text2[40]{}, text1[40]{}, batteryStatus[40]{}, text3[40]{}, tempMessage[40]{};
+
+    Sources *sources;
+    Loads *loads;
 };
 
 

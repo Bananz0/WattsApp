@@ -28,25 +28,25 @@ AnalogueOutput analogueOutput;                      //Starts the PWM up in the A
 DigitalInput digitalInput;                          //Start the Digital ISR                                     PORTC0-2
 DigitalOutput digitalOutput;                        //very basic                                                PORTC3-7
 
-DisplayHandler display;
+Loads loads(&digitalOutput,&digitalInput);
+Sources sources(&analogueInput, &analogueOutput,&digitalOutput);
+
+DisplayHandler display(&loads,&sources);
 TimeHandler timeHandler;
 
-Loads loads(&digitalOutput,&digitalInput);
-
-void updateStats(uint8_t frequency) {
+void updateStats() {
     //Time Interrupt - Moved the div/10 to main
     //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
-    energyStats.windTurbineCapacity = analogueInput.turbineCurrentCapacity();
-    energyStats.pvCapacity = analogueInput.pvCurrentCapacity();
-
-    energyStats.totalRenewablePower = energyStats.windTurbineCapacity + energyStats.pvCapacity;
+    sources.readTurbineCapacity();
+    sources.readPvCapacity();
 
     //Calculate average power and total energy consumption based on bus voltage and bus current (analogue output)
-    energyStats.busbarVoltage = analogueInput.busbarVoltage();
-    energyStats.busbarCurrent = analogueInput.busbarCurrent();
-    energyStats.busbarPower = energyStats.busbarVoltage * energyStats.busbarCurrent;
+    sources.readBusbarCurrent();
+    sources.readBusbarVoltage();
 
-    energyStats.totalEnergy = energyStats.averagePower * 100 / 1000;
+    sources.calculateTotalEnergyandPower();
+
+    sources.totalEnergy = sources.averagePower * 100 / 1000;
 }
 
 //ADC ISR
@@ -98,7 +98,7 @@ int main() {
         updateCounter = Counter;
 
         if (updateCounter % 10 == 0) {
-            updateStats(0);
+            updateStats();
             updateCounter = 0;
         }
 
@@ -114,8 +114,8 @@ int main() {
             }
         }
 
-        if (analogueInput.busbarVoltage() > 2.5) {
-            analogueOutput.setMainsCapacity(11);
+        if (sources.busbarVoltage > 2.5) {
+            sources.requestMains(11);
         }
 
         display.carouselScreen(screen);

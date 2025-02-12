@@ -20,23 +20,25 @@ extern volatile bool ADCConversionFlag;
 // extern volatile float averagePower;
 // extern volatile float totalEnergy;
 
-struct EnergyStats {
-    volatile float windTurbineCapacity;
-    volatile float pvCapacity;
-    volatile float totalRenewablePower;
-    volatile float busbarVoltage;
-    volatile float busbarCurrent;
-    volatile float busbarPower;
-    volatile float averagePower;
-    volatile float totalEnergy;
-    volatile int batteryCapacity;
-};
-struct LoadStats {
+// struct EnergyStats {
+//     volatile float windTurbineCapacity;
+//     volatile float pvCapacity;
+//     volatile float totalRenewablePower;
+//     volatile float busbarVoltage;
+//     volatile float busbarCurrent;
+//     volatile float busbarPower;
+//     volatile float averagePower;
+//     volatile float totalEnergy;
+// };
+// struct LoadStats {
+//     volatile float loadCapacity;
+// };
+//
+// extern volatile EnergyStats energyStats;
+// extern volatile LoadStats loadStats;
 
-};
+//Moved to Loads and Sources classes
 
-extern volatile EnergyStats energyStats;
-extern volatile LoadStats loadStats;
 
 extern volatile uint32_t Counter;
 extern volatile uint32_t utc;
