@@ -86,7 +86,7 @@ int main() {
     uint8_t lastScreenUpdateSecond = -1;
     uint16_t lastCounter = 0;
 
-
+    //CLion complains about forever while loop
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
         if ((Counter % 10 == 0) && (Counter != lastCounter)) {
