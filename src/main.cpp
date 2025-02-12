@@ -114,11 +114,9 @@ int main() {
             }
         }
 
-        // for (int i = 0; i < 10; i++) {
-        //     analogueOutput.setMainsCapacity(.33*i);
-        //     _delay_ms(1000);
-        // }
-
+        if (analogueInput.busbarVoltage() > 2.5) {
+            analogueOutput.setMainsCapacity(11);
+        }
 
         display.carouselScreen(screen);
 

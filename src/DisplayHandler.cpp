@@ -54,7 +54,7 @@ DisplayHandler::DisplayHandler() : topLeft(), bottomRight(), bottomLeft(), topRi
 
     sprintf(bootName, "WattsApp");
     sprintf(bootVersion, "v1.0.0");
-    sprintf(bootAuthors, "TEAM\n L");
+    sprintf(bootAuthors, "TEAM\nL");
 
     fanPos = {250 , 140} ;
     batteryCapacityPos = {250,140};
