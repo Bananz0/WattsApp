@@ -114,16 +114,18 @@ int main() {
             }
         }
 
-        if (sources.busbarVoltage > 2.5) {
-            sources.requestMains(11);
-        }
+        // if (sources.busbarVoltage > 2.5) {
+        //     sources.requestMains(11);
+        // }
+        //Used for testing the error screen which hopefully will never have to happen
 
         display.carouselScreen(screen);
 
 
         //Implement Labview Algorithm
         //Default: Charge battery and turn all loads off.
-        digitalOutput.chargeBattery();
+        sources.requestMains(0);
+        sources.chargeBattery();
         loads.turnLoadOff(1);
         loads.turnLoadOff(2);
         loads.turnLoadOff(3);
