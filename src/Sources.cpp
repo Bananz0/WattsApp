@@ -29,10 +29,11 @@ void Sources::chargeBattery() {
     batteryHandler->chargeBattery();
     if(batteryCapacity < 24) {
         batteryCapacity+=1;
+        isBatteryCharging = true;
+    } else if(batteryCapacity >= 24) {
+        isBatteryCharging = false;
     }
-    isBatteryCharging = true;
 }
-
 
 void Sources::readTurbineCapacity() {
     windTurbineCapacity = sourceHandler->turbineCurrentCapacity();

@@ -231,8 +231,9 @@ void DisplayHandler::drawText(char text[]) {
 void DisplayHandler::drawUIbattery() {
     if (sources->isBatteryCharging) {
         pictorDrawSpriteType(&charging4, batteryCapacityPos,4,2);
-    } else {
-        switch (sources->batteryCapacity/4) { //Since we have 24Ah, scale it for to the four available cases.
+    }
+    if (!sources->isBatteryCharging) {
+        switch (sources->batteryCapacity/6) { //Since we have 24Ah, scale it for to the four available cases.
             case 0:
                 pictorDrawSpriteType(&batt204, batteryCapacityPos,4,2);
             break;
