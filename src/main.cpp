@@ -21,6 +21,8 @@
 #include "Loads.h"
 #include "Sources.h"
 
+#include "WiFiHandler.h"
+
 //Moved all timer functions to PWMHandler for central management
 
 AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor    PORTA1
@@ -33,6 +35,8 @@ Sources sources(&analogueInput, &analogueOutput,&digitalOutput);
 
 DisplayHandler display(&loads,&sources);
 TimeHandler timeHandler;
+
+WiFiHandler wifiHandler(&Serial, 36);
 
 float netCapacity = 0;
 
@@ -81,7 +85,8 @@ int main() {
     display.clearScreen();
     display.setBacklight(DisplayHandler::LIGHT);
     display.setOrientation(DisplayHandler::LANDSCAPE);
-    //display.screenOff();
+
+    wifiHandler.connectToWiFi("TEST", "TEST");
 
     //Boot and Initialization
     display.drawBootSequence();
