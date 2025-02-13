@@ -25,7 +25,7 @@ void PWMHandler::setOutputVoltage(float voltage) { //PD6 and PD7 for Amplitude M
 
 void PWMHandler::initializeTimer1() {
     TCCR1B |= (1 << WGM12);
-    OCR1A = (F_CPU / (PRESCALER * 1000)) * TARGET_TIME_MS - 1;
+    OCR1A = static_cast<uint16_t>((static_cast<uint32_t>(F_CPU) / (static_cast<uint32_t>(PRESCALER) * 1000UL)) * TARGET_TIME_MS - 1);
     TIMSK1 |= (1 << OCIE1A);
     TCCR1B |= (1 << CS11) | (1 << CS10);
 }

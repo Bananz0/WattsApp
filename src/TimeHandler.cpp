@@ -17,13 +17,14 @@ TimeHandler::TimeHandler() {
 TimeHandler::~TimeHandler() {
 }
 
-bool TimeHandler::syncTime() {
-    timeUTC->tm_hour = NULL;
-    timeUTC->tm_min = NULL;
-    timeUTC->tm_sec = NULL;
-    timeUTC->tm_mday = NULL;
-    timeUTC->tm_mon = NULL;
-    timeUTC->tm_year = NULL;
+bool TimeHandler::syncTime(tm ntpTime) {
+    timeUTC->tm_hour = ntpTime.tm_hour;
+    timeUTC->tm_min = ntpTime.tm_min;
+    timeUTC->tm_sec = ntpTime.tm_sec;
+    timeUTC->tm_mday = ntpTime.tm_mday;
+    timeUTC->tm_mon = ntpTime.tm_mon;
+    timeUTC->tm_year = ntpTime.tm_year;
+    return true;
 }
 
 void TimeHandler::updateTime() {

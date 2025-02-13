@@ -54,7 +54,7 @@ void Sources::calculateTotalAvailableCapacity() {
     totalAvailableCapacity = totalRenewableCapacity + batteryCapacity + mainsCapacity;
 }
 
-void Sources::calculateTotalEnergyandPower() {
+void Sources::calculateTotalEnergyAndPower() {
     busbarPower = busbarCurrent * busbarVoltage;
     totalRenewableCapacity = pvCapacity + windTurbineCapacity;
 }

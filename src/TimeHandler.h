@@ -12,14 +12,14 @@ class TimeHandler {
   public:
     TimeHandler();
     ~TimeHandler();
-    bool syncTime();
+    bool syncTime(tm ntpTime);
     bool getTime();
     void updateTime();
     char* returnTime();
     uint32_t returnUNIXTime();
 
 private:
-    char timeString[20];
+    char timeString[25];
 };
 
 

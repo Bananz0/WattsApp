@@ -1,6 +1,7 @@
 #include "pictor.h"
 #include <math.h>
 #include <stdio.h>
+uint8_t pictorRot = 0;
 
 uint16_t encode656Colour(const uint8_t Red, const uint8_t Green, const uint8_t Blue) {
 	uint16_t Colour = Red & 0xF8;	//	00000000RRRRR000
@@ -569,15 +570,17 @@ void pictorDrawSpritePartial(const sprite* Sprite, const point Pos, const uint8_
 }
 
 void pictorDrawSpriteType_(const void* Sprite, const point Pos, const uint8_t type) {
-	uint8_t* Buffer;
-	uint8_t* byteCur;
+	uint8_t* Buffer=0;
+	uint8_t* byteCur=0;
 	uint8_t datH, datL;//only used for types 1,3,5,7
 	uint8_t number=0, colour=0;//only used for types 4-7
 	uint8_t mask = 0x80;//only used for types 2-3
 	uint8_t HighFCol=0, LowFCol=0, HighBCol=0, LowBCol=0;//only used for types 2-3
 	uint8_t ProgMem = (type & _BV(0)), k = 0;
+	(void)ProgMem;
+	(void)mask;
 	uint16_t j = 0, j2 = 0;
-	point I;
+	point I={};
 	uint16_t _palette[16];
 	uint16_t* Palette =_palette;
 
@@ -844,14 +847,14 @@ void pictorDrawSpriteType(const void* Sprite, const point Pos, const uint8_t typ
 		return;//if scale is 0 then nothing to draw
 	}
 
-	uint8_t* byteStart;
-	uint8_t* byteCur;
-	uint8_t datH, datL;//only used for types 1,3,5,7
+	uint8_t* byteStart=0;
+	uint8_t* byteCur=0;
+	uint8_t datH=0, datL=0;//only used for types 1,3,5,7
 	uint8_t number=0, lastCol, lastNum, endNum=0xFF, colour=0;//only used for types 4-7
-	uint8_t maskStart, mask = 0x80;//only used for types 2-3
+	uint8_t maskStart=0, mask = 0x80;//only used for types 2-3
 	uint8_t ProgMem = (type & _BV(0));
 	uint8_t HighFCol =0, LowFCol=0, HighBCol=0, LowBCol=0;//only used for types 2-3
-	point J, I;
+	point J={}, I={};
 	uint16_t _palette[16];
 	uint16_t* Palette = _palette;
 

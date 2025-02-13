@@ -26,7 +26,7 @@ private:
     bool connected;
     void sendATCommand(const char* command);
     void waitForResponse();
-    HardwareSerial& espSerial;
+    HardwareSerial* espSerial;
 
 };
 

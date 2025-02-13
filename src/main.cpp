@@ -46,7 +46,7 @@ void updateStats() {
     sources.readBusbarCurrent();
     sources.readBusbarVoltage();
 
-    sources.calculateTotalEnergyandPower();
+    sources.calculateTotalEnergyAndPower();
 
     sources.totalEnergy = sources.averagePower * 100 / 1000;
 
@@ -88,7 +88,7 @@ int main() {
 
     uint16_t displayDuration = 4;
     uint16_t updateCounter = 0;
-    Screen screen;
+    Screen screen{};
     uint8_t lastScreenUpdateSecond = -1;
     uint16_t lastCounter = 0;
 
@@ -140,6 +140,13 @@ int main() {
         loads.turnLoadOff(2);
         loads.turnLoadOff(3);
 
+        //program automatically listens for calls for loads and updates.
+        //could be a good idea to use that as a way to update the stats.
+        //Could be also be a good idea to enable pin change interrupts for every one of the pins as the busbar could
+        //change while the turbine capacity maintaining its original value.
+        //since 1 min is 1 hour and there is the potential of having the NTP, we could time the changes from the start
+        //to get the values from the TB instantly. not sure if the speed at which the change is detected nor the
+        //resolution of the scope
 
 
 

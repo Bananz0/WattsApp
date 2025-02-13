@@ -62,7 +62,7 @@ typedef struct{//Sprite type 8, 9, A & B
 //	FONT STRUCTURE
 #define font uint8_t
 
-static uint8_t pictorRot = 0;
+extern uint8_t pictorRot;
 
 //	DATA PORTS -- don't use port B if you intend to use USB!
 #define CTRLPORT	PORTB

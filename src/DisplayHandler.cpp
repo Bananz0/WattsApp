@@ -159,7 +159,7 @@ void DisplayHandler::showBatteryScreen() {
 }
 
 void DisplayHandler::showErrorScreen() {
-    strncpy(tempMessage, emergencyMessage, sizeof(tempMessage)); //Ignore error - compiles
+    memcpy(const_cast<char *>(emergencyMessage), tempMessage, sizeof(tempMessage));;
 
     sprintf(title, "ERROR\nSTATUS");
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, RED,backgroundColour,OryxB,5);
