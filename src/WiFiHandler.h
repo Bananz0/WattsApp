@@ -14,10 +14,10 @@
 class WiFiHandler {
 public:
     WiFiHandler(HardwareSerial* serial, uint8_t enablePin);     // Pass serial port & enable pin
-    bool connectToWiFi(const char* ssid, const char* password);
+    bool connectToWiFi(const char *ssid, const char *password);
     void disconnectFromWiFi();
 
-    bool isConnected();
+    bool isConnected() const;
     bool isModuleReady();
 
     const char* getIPAddress();
@@ -29,13 +29,19 @@ public:
 
     void turnOnModule();  // EN pin to 3.3v
     void turnOffModule(); // EN low
+    void restartModule(); // soft restart the wifi module
     void resetModule();   //reset the module but wont implement because not enough pins
+
+    void sleepMode(uint8_t mode);
 
 private:
     uint8_t enablePin{8};
     bool connected{false};
-    void sendATCommand(const char* command);
-    void waitForResponse();
+
+    const char *sendATCommand(const String &command, const char *expectedResponse);
+    static String waitForResponse();
+
+
     HardwareSerial* espSerial{};
     IPAddress ip;
 };
