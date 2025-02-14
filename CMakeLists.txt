@@ -73,12 +73,14 @@ file(GLOB_RECURSE ARDUINO_FILES
 
 # Compiler flags
 
-set(CDEBUG    "-gstabs -g -ggdb")
+#set(CDEBUG    "-gstabs -g -ggdb")
+set(CDEBUG    "-g1")
 set(CWARN     "-Wall -Wl,--gc-sections -Wl,--relax")
-set(CTUNING   "-funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ffunction-sections -fdata-sections")
-set(COPT      "-Os -lm -lprintf_flt -Wl,-u,vfprintf")
+set(CTUNING   "-funsigned-char -funsigned-bitfields -fpack-struct -fshort-enums -ffunction-sections -fdata-sections -lprintf_flt  \"-mcall-prologues\"")
+set(COPT      "-Os -lm -Wl,-u,vfprintf")
 set(CMCU      "-mmcu=${MCU}")
 set(CDEFS     "-DF_CPU=${F_CPU} -DBAUD=${BAUD}")
+
 
 set(CFLAGS   "${CMCU} ${CDEBUG} ${CDEFS} ${COPT} ${CWARN} ${CTUNING} -Wstrict-prototypes")
 set(CXXFLAGS "${CMCU} ${CDEBUG} ${CDEFS} ${COPT} ${CWARN} ${CTUNING} -fpermissive")
@@ -97,9 +99,9 @@ set_target_properties(${PROJECT_NAME} PROPERTIES OUTPUT_NAME "${PROJECT_NAME}.el
 # Compiling targets
 add_custom_target(strip ALL     ${AVRSTRIP} "${PROJECT_NAME}.elf" DEPENDS ${PROJECT_NAME})
 add_custom_target(hex   ALL     ${OBJCOPY} -R .eeprom -O ihex "${PROJECT_NAME}.elf" "${PROJECT_NAME}.hex" DEPENDS strip)
+add_custom_target(size  ALL     ${AVRSIZE}  "${PROJECT_NAME}.elf" DEPENDS ${PROJECT_NAME})
 add_custom_target(eeprom        ${OBJCOPY} -j .eeprom --change-section-lma .eeprom=0 -O ihex "${PROJECT_NAME}.elf" "${PROJECT_NAME}.eeprom" DEPENDS strip)
-
-add_custom_target(flash ${AVRDUDE} -c ${PROG_TYPE} -p ${MCU} -U flash:w:${PROJECT_NAME}.hex DEPENDS hex)
-
+#add_custom_target(flash         ${AVRDUDE} -v -c ${PROG_TYPE} -p ${MCU} -U flash:w:${PROJECT_NAME}.hex DEPENDS hex)
+add_custom_target(flash COMMAND cmd.exe /C "avrdude -c usbasp -p atmega644p -U flash:w:WattsApp.hex && avr-size -C --mcu=atmega644p WattsApp.elf" DEPENDS WattsApp.hex)
 
 set_directory_properties(PROPERTIES ADDITIONAL_MAKE_CLEAN_FILES "${PROJECT_NAME}.hex;${PROJECT_NAME}.eeprom;${PROJECT_NAME}.lst")
