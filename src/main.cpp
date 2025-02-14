@@ -23,8 +23,11 @@
 
 #include "WiFiHandler.h"
 
-//Moved all timer functions to PWMHandler for central management
+#define CARROUSEL_E //Use CARROUSEL_E to enable and CARROUSEL_D to disable
+#define DEBUG
+#define SECOND_REVIEW_MODE //Turn off all auxillary functions - Everything low power and only display team L
 
+//Moved all timer functions to PWMHandler for central management
 AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor    PORTA1
 AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor   PORTD7
 DigitalInput digitalInput;                          //Start the Digital ISR                                     PORTC0-2
@@ -36,9 +39,15 @@ Sources sources(&analogueInput, &analogueOutput,&digitalOutput);
 DisplayHandler display(&loads,&sources);
 TimeHandler timeHandler;
 
-WiFiHandler wifiHandler(&Serial, 36);
+WiFiHandler wifiHandler(&Serial1, 36);
 
 float netCapacity = 0;
+
+uint16_t displayDuration = 4;
+uint16_t updateCounter = 0;
+Screen screen{};
+uint8_t lastScreenUpdateSecond = -1;
+uint16_t lastCounter = 0;
 
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
