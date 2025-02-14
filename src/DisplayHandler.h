@@ -55,6 +55,9 @@ public:
     void showTurbineScreen();
     void showBatteryScreen();
     void showLoadsScreen();
+
+    void showUARTScreen();
+
     void showErrorScreen();
 
     void carouselScreen(Screen screen);

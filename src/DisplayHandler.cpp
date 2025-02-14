@@ -3,12 +3,10 @@
 //
 
 #include "DisplayHandler.h"
+#include <HardwareSerial.h>
 #include "Sources.h"
 #include "Loads.h"
 #include "globalVariables.h"
-
-#include <stdio.h>
-#include <string.h>
 #include "../assets/stripe_assets.h"
 
 ///Will implement carousel for switching between the different screens later TODO
@@ -93,6 +91,9 @@ void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
         break;
         case ERROR_SCREEN:
             showErrorScreen();
+        break;
+        case UART_SCREEN:
+            showUARTScreen();
         break;
         default:
         break;
@@ -186,6 +187,14 @@ void DisplayHandler::showLoadsScreen() {
     pictorDrawS(reinterpret_cast<unsigned char *>(text3),load3Pos, loads->currentLoad3Call?  GREEN: RED,backgroundColour,OryxB,3);
 }
 
+void DisplayHandler::showUARTScreen() {
+    sprintf(title, "UART\nDEBUG");
+    sprintf(tempMessage, "UART Received:\n%s",uartMessage);
+
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, ORANGE,backgroundColour,OryxB,5);
+    pictorDrawS(reinterpret_cast<unsigned char *>(tempMessage),currentPos,  WHITE,backgroundColour,OryxB,2);
+}
+
 DisplayHandler::~DisplayHandler() = default;
 
 void DisplayHandler::startDisplay(bool vsync) {
@@ -233,31 +242,31 @@ void DisplayHandler::drawText(char text[]) {
 
 void DisplayHandler::drawUIbattery() {
     if (sources->isBatteryCharging) {
-        pictorDrawSpriteType(&charging4, batteryCapacityPos,4,2);
+        pictorDrawSpriteType(&charging7, batteryCapacityPos,7,2);
     }
     if (!sources->isBatteryCharging) {
         switch (sources->batteryCapacity/6) { //Since we have 24Ah, scale it for to the four available cases.
             case 0:
-                pictorDrawSpriteType(&batt204, batteryCapacityPos,4,2);
+                pictorDrawSpriteType(&batt207, batteryCapacityPos,7,2);
             break;
             case 1:
-                pictorDrawSpriteType(&batt404, batteryCapacityPos,4,2);
+                pictorDrawSpriteType(&batt407, batteryCapacityPos,7,2);
             break;
             case 2:
-                pictorDrawSpriteType(&batt604, batteryCapacityPos,4,2);
+                pictorDrawSpriteType(&batt607, batteryCapacityPos,7,2);
             break;
             case 3:
-                pictorDrawSpriteType(&batt804, batteryCapacityPos,4,2);
+                pictorDrawSpriteType(&batt807, batteryCapacityPos,7,2);
             break;
             case 4:
-                pictorDrawSpriteType(&batt1004, batteryCapacityPos,4,2);
+                pictorDrawSpriteType(&batt1007, batteryCapacityPos,7,2);
             break;
         }
     }
 }
 
 void DisplayHandler::drawUIfan() {
-    pictorDrawSpriteType(&fan4, fanPos,4,2);
+    pictorDrawSpriteType(&fan7, fanPos,7,2);
 }
 
 void DisplayHandler::drawBitmap() {
