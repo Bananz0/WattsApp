@@ -24,3 +24,4 @@ volatile Screen screenPage, nextScreenPage, prevScreenPage;
 
 volatile bool emergencyScreen = false;
 volatile char emergencyMessage[] = "Emergency\nNot\nSpecified";
+volatile char uartMessage[] = "";
