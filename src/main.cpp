@@ -59,6 +59,37 @@ void updateStats() {
     netCapacity = sources.totalAvailableCapacity -  loads.currentTotalLoad;
 }
 
+void drawTime() {
+    if ((Counter % 10 == 0) && (Counter != lastCounter)) {
+        utc++;
+        lastCounter = Counter;
+    };
+    timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
+    pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
+    updateCounter = Counter;
+}
+
+void screenCarrousel() {
+    //cycle through the screens somehwow
+    if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
+        if (emergencyScreen) {
+            //Display screen for 5 seconds
+            screen = ERROR_SCREEN;
+            emergencyScreen = false;
+        } else if (!emergencyScreen) {
+            screen = static_cast<Screen>((screenPage + 1) % ((int)SCREENCOUNT-1) ); //Subtraced 1 to never cycle to the error screebb
+            lastScreenUpdateSecond = timeUTC->tm_sec;
+        }
+    }
+}
+
+void updateMainStats() {
+    if (updateCounter % 10 == 0) {
+        updateStats();
+        updateCounter = 0;
+    }
+}
+
 //ADC ISR
 ISR(ADC_vect){
     ADCVoltage = (ADC * Vref) / 0x3FF;
