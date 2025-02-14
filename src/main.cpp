@@ -1,4 +1,4 @@
-#include <time.h>
+#include "time.h" // NOLINT(*-deprecated-headers)
 #include <TimeHandler.h>
 
 #include "globalVariables.h"
@@ -117,62 +117,70 @@ ISR(PCINT0_vect) {
 }
 
 int main() {
+    Serial.begin(9600);
+    Serial.println("Starting up...");
     finalizePorts();
+    Serial.println("Initialized ports");
     testLight(1);                              //Boot Light
     sei();                                               //Enable Global interrupts
+    Serial.println("Tested light PB6 and enabled global interrupts");
 
     display.startDisplay(false);
     display.clearScreen();
     display.setBacklight(DisplayHandler::LIGHT);
     display.setOrientation(DisplayHandler::LANDSCAPE);
+    Serial.println("Initialized display and set to Landscape");
 
     wifiHandler.connectToWiFi("TEST", "TEST");
 
     //Boot and Initialization
+    Serial.println("Drawing boot sequence");
     display.drawBootSequence();
 
-    uint16_t displayDuration = 4;
-    uint16_t updateCounter = 0;
-    Screen screen{};
-    uint8_t lastScreenUpdateSecond = -1;
-    uint16_t lastCounter = 0;
+    String response;
 
-
+    Serial.println("Boot Complete...starting program");
 
     //CLion complains about forever while loop
     // ReSharper disable once CppDFAEndlessLoop
     while (true) {
-        if ((Counter % 10 == 0) && (Counter != lastCounter)) {
-            utc++;
-            lastCounter = Counter;
-        };
-        timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
-        pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
-        updateCounter = Counter;
+        drawTime();
+        screenCarrousel();
+        updateMainStats();
 
-        if (updateCounter % 10 == 0) {
-            updateStats();
-            updateCounter = 0;
+        if(Serial1.available()) {
+            String uartMessageBuff = Serial1.readStringUntil('\r');
+            strncpy((char*)uartMessage, uartMessageBuff.c_str(), sizeof(uartMessage) - 1);
+            uartMessage[sizeof(uartMessage) - 1] = '\0';
+            // sprintf((char*)emergencyMessage,"%s",response.c_str());
+            // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
+            Serial1.println("Received: " + uartMessageBuff);
         }
-
-        //cycle through the screens somehwow
-        if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
-            if (emergencyScreen) {
-                //Display screen for 5 seconds
-                screen = ERROR_SCREEN;
-                emergencyScreen = false;
-            } else if (!emergencyScreen) {
-                screen = static_cast<Screen>((screenPage + 1) % ((int)SCREENCOUNT-1) ); //Subtraced 1 to never cycle to the error screebb
-                lastScreenUpdateSecond = timeUTC->tm_sec;
-            }
-        }
+        // strncpy((char*)emergencyMessage, response.c_str(), 39);
+        // emergencyMessage[response.length()] = '\0'; // Null-terminate
 
         // if (sources.busbarVoltage > 2.5) {
         //     sources.requestMains(11);
         // }
         //Used for testing the error screen which hopefully will never have to happen
 
+        // display.carouselScreen(screen);
+
+
+
         display.carouselScreen(screen);
+
+
+        // if(Serial1.available()) {
+        //     String response = Serial1.readStringUntil('\r');
+        //     Serial1.println(response);  // Print to debug serial
+        // }
+
+        // if(Serial1.available()) {
+        //     char c = Serial1.read();
+        //     Serial1.write(c);  // Echo single character
+        // }
+
 
         //Implement LabView Algorithm
 
@@ -193,7 +201,15 @@ int main() {
         //to get the values from the TB instantly. not sure if the speed at which the change is detected nor the
         //resolution of the scope
 
+        // debugString = Serial1.readStringUntil('\n');
+        //
+        // Serial1.println(debugString);
 
-
+        // sprintf(debugString, "Busbar Current: %.2f", sources.busbarCurrent);
+        //
+        // if (bCurrentBuffer != sources.busbarCurrent) {
+        //     bCurrentBuffer = sources.busbarCurrent;
+        //     Serial1.println(debugString);
+        // }
     }
 }
