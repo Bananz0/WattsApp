@@ -99,6 +99,17 @@ void updateMainStats() {
     }
 }
 
+void echoSerial(){
+    if(Serial1.available()) {
+        String uartMessageBuff = Serial1.readStringUntil('\r');
+        strncpy((char*)uartMessage, uartMessageBuff.c_str(), sizeof(uartMessage) - 1);
+        uartMessage[sizeof(uartMessage) - 1] = '\0';
+        // sprintf((char*)emergencyMessage,"%s",response.c_str());
+        // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
+        Serial1.println("Received: " + uartMessageBuff);
+    }
+}
+
 //ADC ISR
 ISR(ADC_vect){
     ADCVoltage = (ADC * Vref) / 0x3FF;
@@ -117,7 +128,6 @@ ISR(PCINT0_vect) {
 }
 
 int main() {
-    Serial.begin(9600);
     Serial.println("Starting up...");
     finalizePorts();
     Serial.println("Initialized ports");
@@ -126,12 +136,14 @@ int main() {
     Serial.println("Tested light PB6 and enabled global interrupts");
 
     display.startDisplay(false);
+    Serial.println("Turned on display");
     display.clearScreen();
+    Serial.println("Cleared screen");
     display.setBacklight(DisplayHandler::LIGHT);
     display.setOrientation(DisplayHandler::LANDSCAPE);
     Serial.println("Initialized display and set to Landscape");
 
-    wifiHandler.connectToWiFi("TEST", "TEST");
+    wifiHandler.connectToWiFi("Glen's XPS", "eesp8266");
 
     //Boot and Initialization
     Serial.println("Drawing boot sequence");
@@ -147,15 +159,8 @@ int main() {
         drawTime();
         screenCarrousel();
         updateMainStats();
+        echoSerial();
 
-        if(Serial1.available()) {
-            String uartMessageBuff = Serial1.readStringUntil('\r');
-            strncpy((char*)uartMessage, uartMessageBuff.c_str(), sizeof(uartMessage) - 1);
-            uartMessage[sizeof(uartMessage) - 1] = '\0';
-            // sprintf((char*)emergencyMessage,"%s",response.c_str());
-            // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
-            Serial1.println("Received: " + uartMessageBuff);
-        }
         // strncpy((char*)emergencyMessage, response.c_str(), 39);
         // emergencyMessage[response.length()] = '\0'; // Null-terminate
 
@@ -168,7 +173,7 @@ int main() {
 
 
 
-        display.carouselScreen(screen);
+        display.carouselScreen(UART_SCREEN);
 
 
         // if(Serial1.available()) {
