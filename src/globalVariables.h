@@ -54,4 +54,9 @@ extern volatile bool emergencyScreen;
 extern volatile char emergencyMessage[100];
 extern volatile char uartMessage[40];
 
+
+extern  time_t startNonBlockingWait();
+
+extern bool isWaitComplete(time_t startTime, time_t durationSeconds);
+
 #endif //GLOBALVARIABLES_H

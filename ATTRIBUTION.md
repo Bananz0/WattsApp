@@ -8,13 +8,13 @@ This project includes code and resources from third-party sources. The following
 - **Author(s):** [Terra Barber](https://github.com/TBTerra), [Will Barber](https://github.com/WillB97), [Alexandru Tiniuc](https://github.com/tiniuclx).
 - **Used for:** This library was used for vector graphics on the Il Matto (AVR ATmega644p)
 
-### 2. [avr-uart](https://github.com/andygock/avr-uart)
-- **Author(s):** [Andy Gock](https://github.com/andygock)
-- **Used for:** An interrupt driven UART Library for 8-bit AVR microcontrollers.
+### 2. [arduino-core](https://github.com/arduino/ArduinoCore-avr/tree/master)
+- **Author(s):** [arduino](https://github.com/arduino)
+- **Used for:** The Official Arduino AVR core for 8-bit AVR microcontrollers.
 
-### 2. [espsoftwareserial](https://github.com/plerup/espsoftwareserial/)
-- **Author(s):** [Peter Lerup](https://github.com/plerup)
-- **Used for:** Implementation of the Arduino software serial library for the ESP8266 / ESP32 family
+### 2. [InfluxDB Arduino Client](https://github.com/tobiasschuerg/InfluxDB-Client-for-Arduino)
+- **Author(s):** [Tobias Schürg](https://github.com/tobiasschuerg)
+- **Used for:** Implementation of the InfluxDB Client for the Arduino
 
 ## License Compliance
 
@@ -25,3 +25,4 @@ If you are a contributor or user and have questions regarding the attribution or
 ---
 
 _Last updated: [2025-02-03]_  
+Ard

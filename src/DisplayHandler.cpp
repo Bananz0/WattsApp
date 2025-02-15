@@ -106,7 +106,7 @@ void DisplayHandler::drawBootSequence() {
     pictorDrawS(reinterpret_cast<const unsigned char *>(bootName),bootNamePos,GREEN,BLACK, Mash,4);
     pictorDrawS(reinterpret_cast<const unsigned char *>(bootVersion),bootVersionPos,BLUE,BLACK, Mash,4);
 
-    _delay_ms(5000);
+    _delay_ms(3500);
     clearScreen();
 }
 
@@ -189,7 +189,7 @@ void DisplayHandler::showLoadsScreen() {
 
 void DisplayHandler::showUARTScreen() {
     sprintf(title, "UART\nDEBUG");
-    sprintf(tempMessage, "UART Received:\n%s",uartMessage);
+    sprintf(tempMessage, "UART Received:\n%s",const_cast<char *>(uartMessage));
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, ORANGE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(tempMessage),currentPos,  WHITE,backgroundColour,OryxB,2);
