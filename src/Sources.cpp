@@ -8,6 +8,15 @@ Sources::Sources(AnalogueInput *sourceHandler, AnalogueOutput *mainsHandler, Dig
     this->sourceHandler = sourceHandler;
     this->mainsHandler = mainsHandler;
     this->batteryHandler = batteryHandler;
+    windTurbineCapacity=0;
+    pvCapacity=0;
+    totalRenewableCapacity=0;
+    busbarVoltage=0;
+    busbarCurrent=0;
+    busbarPower=0;
+    averagePower=0;
+    totalEnergy=0;
+    mainsCapacity=0;
 }
 
 Sources::~Sources() = default;

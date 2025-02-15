@@ -17,15 +17,15 @@ public:
     AnalogueOutput *mainsHandler;
     DigitalOutput *batteryHandler;
 
-    float windTurbineCapacity{0},
-            pvCapacity{0},
-            totalRenewableCapacity{0},
-            busbarVoltage{0},
-            busbarCurrent{0},
-            busbarPower{0},
-            averagePower{0},
-            totalEnergy{0},
-            mainsCapacity{0};
+    float windTurbineCapacity,
+            pvCapacity,
+            totalRenewableCapacity,
+            busbarVoltage,
+            busbarCurrent,
+            busbarPower,
+            averagePower,
+            totalEnergy,
+            mainsCapacity;
 
     uint8_t batteryCapacity{0};
     float totalAvailableCapacity{0};
