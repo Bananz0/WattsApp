@@ -10,16 +10,21 @@ WiFiHandler::WiFiHandler(HardwareSerial* serial, uint8_t enablePin) {
     this->connected = false;
 
     espSerial->begin(115200); //from arduino docs this initializes the hardware serial
+    espSerial->println("WiFiHandler initialized");
 
     turnOnModule();
 
-    sendATCommand("AT+CWMODE=1", {});  //Station Mode
+    isModuleReady();
+
+    sendATCommand("AT+CWMODE=1", "OK");  //Station Mode
 }
 
 
 bool WiFiHandler::connectToWiFi(const char *ssid, const char *password) {
     String ssidStr = ssid,passwordStr = password, command = "AT+CWJAP_DEF=";
-    sendATCommand(command+","+ssid+","+password, {"OK"});
+    ssidStr = "\"" + ssidStr + "\"";
+    passwordStr = "\"" + passwordStr + "\"";
+    sendATCommand(command+","+ssidStr+","+passwordStr, {"OK"});
 }
 
 void WiFiHandler::disconnectFromWiFi() {
@@ -34,11 +39,16 @@ bool WiFiHandler::isConnected() const {
 }
 
 bool WiFiHandler::isModuleReady() {
-    sendATCommand("AT", {});
-    if (waitForResponse() == "OK") {
-        return true;
-    }
-    return false;
+    bool ready = false;
+    String readyString;
+    // while  (!ready) {
+    //     delay(500);
+    //     readyString = sendATCommand("AT", "OK");
+    //     if (readyString == "OK") {
+    //         ready = true;
+    //     }
+    // }
+    return ready;
 }
 
 const char * WiFiHandler::getIPAddress() {
@@ -106,15 +116,14 @@ void WiFiHandler::sleepMode(uint8_t mode) {
 
 const char *WiFiHandler::sendATCommand(const String &command, const char *expectedResponse){
     String response{}; //Should store the response from Serial
-    if(Serial1.available()) {
+    for (uint8_t attempt = 0; attempt < 3; attempt++) {
         espSerial->println(command);
-        //Retries and timeout maybe
+        _delay_ms(100);
         response = waitForResponse();
-        if (response.c_str() != expectedResponse) {
-            for (uint8_t i = 0; i < 20; i++) { //Three retries
-                espSerial->println(command);
-            }
+        if (response == expectedResponse) {
+            break; // Stop if we get the expected response
         }
+
     }
     return response.c_str();
 }
