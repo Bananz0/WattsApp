@@ -58,6 +58,8 @@ public:
 
     void showUARTScreen();
 
+    void secondReviewScreen();
+
     void showErrorScreen();
 
     void carouselScreen(Screen screen);

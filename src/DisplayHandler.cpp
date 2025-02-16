@@ -89,6 +89,9 @@ void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
         case TURBINE_SCREEN:
             showTurbineScreen();
         break;
+        case SEC_REV_SCREEN:
+            secondReviewScreen();
+        break;
         case ERROR_SCREEN:
             showErrorScreen();
         break;
@@ -102,19 +105,21 @@ void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
 
 
 void DisplayHandler::drawBootSequence() {
+#ifdef NORMAL_MODE
     pictorDrawS(reinterpret_cast<const unsigned char *>(bootAuthors),teamPos,RED,BLACK, Mash,7);
     pictorDrawS(reinterpret_cast<const unsigned char *>(bootName),bootNamePos,GREEN,BLACK, Mash,4);
     pictorDrawS(reinterpret_cast<const unsigned char *>(bootVersion),bootVersionPos,BLUE,BLACK, Mash,4);
 
     _delay_ms(3500);
     clearScreen();
+#endif
 }
 
 void DisplayHandler::showBusbarScreen() {
     sprintf(title, "BUSBAR\nSTATUS");
-    sprintf(text1, "Current: \n%0.2f A", (double)sources->busbarCurrent);
-    sprintf(text2, "Volatage: \n%0.2f V", (double)sources->busbarVoltage);
-    sprintf(text3, "Power: \n%0.2f VA", (double)sources->busbarPower);
+    sprintf(text1, "Current: \n%0.2f A", static_cast<double>(sources->busbarCurrent));
+    sprintf(text2, "Volatage: \n%0.2f V", static_cast<double>(sources->busbarVoltage));
+    sprintf(text3, "Power: \n%0.2f VA", static_cast<double>(sources->busbarPower));
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, BLUE,backgroundColour,OryxB,3);
@@ -164,7 +169,8 @@ void DisplayHandler::showBatteryScreen() {
 }
 
 void DisplayHandler::showErrorScreen() {
-    memcpy(const_cast<char *>(emergencyMessage), tempMessage, sizeof(tempMessage));;
+    strncpy(tempMessage, const_cast<char *>(emergencyMessage), sizeof(tempMessage)); //Ignore error - compiles
+    //memcpy(const_cast<char *>(emergencyMessage), tempMessage, sizeof(tempMessage));;
 
     sprintf(title, "ERROR\nSTATUS");
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, RED,backgroundColour,OryxB,5);
@@ -193,6 +199,11 @@ void DisplayHandler::showUARTScreen() {
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, ORANGE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(tempMessage),currentPos,  WHITE,backgroundColour,OryxB,2);
+}
+
+void DisplayHandler::secondReviewScreen() {
+    sprintf(title, "TEAM\n    \n L  ");
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLACK,WHITE,OryxB,9);
 }
 
 DisplayHandler::~DisplayHandler() = default;

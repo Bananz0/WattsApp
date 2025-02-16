@@ -46,7 +46,7 @@ extern volatile uint32_t utc;
 extern volatile tm* timeUTC;
 
 typedef enum  {BUSBAR_SCREEN ,PV_SCREEN , TURBINE_SCREEN , BATTERY_SCREEN
-              ,LOADS_SCREEN, ERROR_SCREEN,UART_SCREEN, SCREENCOUNT} Screen ;
+              ,LOADS_SCREEN, ERROR_SCREEN,SEC_REV_SCREEN,UART_SCREEN, SCREENCOUNT} Screen ;
 
 extern volatile Screen screenPage, nextScreenPage,prevScreenPage;
 
