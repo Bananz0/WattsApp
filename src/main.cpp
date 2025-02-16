@@ -169,6 +169,7 @@ int main() {
     loads.turnLoadOff(1);
     loads.turnLoadOff(2);
     loads.turnLoadOff(3);
+    loads.checkLoadCallChanges();
 
     //program automatically listens for calls for loads and updates.
     //could be a good idea to use that as a way to update the stats.
