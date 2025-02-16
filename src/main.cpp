@@ -24,8 +24,10 @@
 #include "WiFiHandler.h"
 
 #define CARROUSEL_E //Use CARROUSEL_E to enable and CARROUSEL_D to disable
-#define DEBUG
-#define SECOND_REVIEW_MODE //Turn off all auxillary functions - Everything low power and only display team L
+//#define DEBUG
+#define NORMAL_MODE
+//#define SECOND_REVIEW_MODE //Turn off all auxillary functions - Everything low power and only display team L TODO: Fully implement this.
+
 
 //Moved all timer functions to PWMHandler for central management
 AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor    PORTA1
@@ -39,7 +41,9 @@ Sources sources(&analogueInput, &analogueOutput,&digitalOutput);
 DisplayHandler display(&loads,&sources);
 TimeHandler timeHandler;
 
-WiFiHandler wifiHandler(&Serial1, 36);
+HardwareSerial wifiSerial = Serial;
+HardwareSerial debugSerial = Serial;
+
 
 float netCapacity = 0;
 
@@ -48,6 +52,7 @@ uint16_t updateCounter = 0;
 Screen screen{};
 uint8_t lastScreenUpdateSecond = -1;
 uint16_t lastCounter = 0;
+String response;
 
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
@@ -79,6 +84,9 @@ void drawTime() {
 }
 
 void screenCarrousel() {
+#ifdef SECOND_REVIEW_MODE
+    screen = SEC_REV_SCREEN;
+#elif !defined(SECOND_REVIEW_MODE)
     //cycle through the screens somehwow
     if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
         if (emergencyScreen) {
@@ -86,10 +94,11 @@ void screenCarrousel() {
             screen = ERROR_SCREEN;
             emergencyScreen = false;
         } else if (!emergencyScreen) {
-            screen = static_cast<Screen>((screenPage + 1) % ((int)SCREENCOUNT-1) ); //Subtraced 1 to never cycle to the error screebb
+            screen = static_cast<Screen>((screenPage + 1) % ((int)SCREENCOUNT-3) ); //Subtraced 1 to never cycle to the error screebb
             lastScreenUpdateSecond = timeUTC->tm_sec;
         }
     }
+#endif
 }
 
 void updateMainStats() {
@@ -100,13 +109,13 @@ void updateMainStats() {
 }
 
 void echoSerial(){
-    if(Serial1.available()) {
-        String uartMessageBuff = Serial1.readStringUntil('\r');
+    if(wifiSerial.available()) {
+        String uartMessageBuff = wifiSerial.readStringUntil('\r');
         strncpy((char*)uartMessage, uartMessageBuff.c_str(), sizeof(uartMessage) - 1);
         uartMessage[sizeof(uartMessage) - 1] = '\0';
         // sprintf((char*)emergencyMessage,"%s",response.c_str());
         // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
-        Serial1.println("Received: " + uartMessageBuff);
+        debugSerial.println("Received: " + uartMessageBuff);
     }
 }
 
@@ -128,30 +137,47 @@ ISR(PCINT0_vect) {
 }
 
 int main() {
-    Serial.println("Starting up...");
+    // debugSerial.println("Starting up...");
     finalizePorts();
-    Serial.println("Initialized ports");
+    // debugSerial.println("Initialized ports");
     testLight(1);                              //Boot Light
     sei();                                               //Enable Global interrupts
-    Serial.println("Tested light PB6 and enabled global interrupts");
+    // debugSerial.println("Tested light PB6 and enabled global interrupts");
 
     display.startDisplay(false);
-    Serial.println("Turned on display");
+    // debugSerial.println("Turned on display");
     display.clearScreen();
-    Serial.println("Cleared screen");
+    // debugSerial.println("Cleared screen");
     display.setBacklight(DisplayHandler::LIGHT);
     display.setOrientation(DisplayHandler::LANDSCAPE);
-    Serial.println("Initialized display and set to Landscape");
+    WiFiHandler wifiHandler(&Serial, 36);
+    // debugSerial.println("Initialized display and set to Landscape");
 
-    wifiHandler.connectToWiFi("Glen's XPS", "eesp8266");
+    wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
 
     //Boot and Initialization
-    Serial.println("Drawing boot sequence");
+    // debugSerial.println("Drawing boot sequence");
     display.drawBootSequence();
+    // debugSerial.println("Boot Complete...starting program");
 
-    String response;
+    //Start of the LabView Algorighm
 
-    Serial.println("Boot Complete...starting program");
+    // Maximum battery capacity = 24Ah
+    // 1 Hour Simulation time = 1 Min Runtime
+    // Default: Charge battery and turn all loads off.
+    sources.requestMains(0);
+    sources.chargeBattery();
+    loads.turnLoadOff(1);
+    loads.turnLoadOff(2);
+    loads.turnLoadOff(3);
+
+    //program automatically listens for calls for loads and updates.
+    //could be a good idea to use that as a way to update the stats.
+    //Could be also be a good idea to enable pin change interrupts for every one of the pins as the busbar could
+    //change while the turbine capacity maintaining its original value.
+    //since 1 min is 1 hour and there is the potential of having the NTP, we could time the changes from the start
+    //to get the values from the TB instantly. not sure if the speed at which the change is detected nor the
+    //resolution of the scope
 
     //CLion complains about forever while loop
     // ReSharper disable once CppDFAEndlessLoop
@@ -161,60 +187,45 @@ int main() {
         updateMainStats();
         echoSerial();
 
-        // strncpy((char*)emergencyMessage, response.c_str(), 39);
-        // emergencyMessage[response.length()] = '\0'; // Null-terminate
-
-        // if (sources.busbarVoltage > 2.5) {
-        //     sources.requestMains(11);
-        // }
-        //Used for testing the error screen which hopefully will never have to happen
-
-        // display.carouselScreen(screen);
-
-
-
-        display.carouselScreen(UART_SCREEN);
-
-
-        // if(Serial1.available()) {
-        //     String response = Serial1.readStringUntil('\r');
-        //     Serial1.println(response);  // Print to debug serial
-        // }
-
-        // if(Serial1.available()) {
-        //     char c = Serial1.read();
-        //     Serial1.write(c);  // Echo single character
-        // }
-
+        display.carouselScreen(screen);
 
         //Implement LabView Algorithm
 
-        //Maximum battery capacity = 24Ah
-        //1 Hour Simulation time = 1 Min Runtime
-        //Default: Charge battery and turn all loads off.
-        sources.requestMains(0);
-        sources.chargeBattery();
-        loads.turnLoadOff(1);
-        loads.turnLoadOff(2);
-        loads.turnLoadOff(3);
 
-        //program automatically listens for calls for loads and updates.
-        //could be a good idea to use that as a way to update the stats.
-        //Could be also be a good idea to enable pin change interrupts for every one of the pins as the busbar could
-        //change while the turbine capacity maintaining its original value.
-        //since 1 min is 1 hour and there is the potential of having the NTP, we could time the changes from the start
-        //to get the values from the TB instantly. not sure if the speed at which the change is detected nor the
-        //resolution of the scope
-
-        // debugString = Serial1.readStringUntil('\n');
-        //
-        // Serial1.println(debugString);
-
-        // sprintf(debugString, "Busbar Current: %.2f", sources.busbarCurrent);
-        //
-        // if (bCurrentBuffer != sources.busbarCurrent) {
-        //     bCurrentBuffer = sources.busbarCurrent;
-        //     Serial1.println(debugString);
-        // }
     }
 }
+
+
+// strncpy((char*)emergencyMessage, response.c_str(), 39);
+// emergencyMessage[response.length()] = '\0'; // Null-terminate
+
+// if (sources.busbarVoltage > 2.5) {
+//     sources.requestMains(11);
+// }
+//Used for testing the error screen which hopefully will never have to happen
+
+// display.carouselScreen(screen);
+
+
+// if(wifiSerial.available()) {
+//     String response = wifiSerial.readStringUntil('\r');
+//     debugSerial.println(response);  // Print to debug serial
+// }
+
+// if(wifiSerial.available()) {
+//     char c = wifiSerial.read();
+//     wifiSerial.write(c);  // Echo single character
+// }
+
+
+// debugString = wifiSerial.readStringUntil('\n');
+//
+// debugSerial.println(debugString);
+
+// sprintf(debugString, "Busbar Current: %.2f", sources.busbarCurrent);
+//
+// if (bCurrentBuffer != sources.busbarCurrent) {
+//     bCurrentBuffer = sources.busbarCurrent;
+//     debugSerial.println(debugString);
+// }.
+
