@@ -17,8 +17,8 @@ void AnalogueOutput::setMainsCapacity(float mainsCapacity) { //Set Mains Capacit
         if (mainsCapacity > 10.0f) {
             mainsCapacity = 10.0f;
             emergencyScreen = true;
-            //strcpy(emergencyMessage, "Mains\nCapacity\n> 10");
-            memcpy((char*)emergencyMessage, "Mains\nCapacity\n> 10", sizeof("Mains\nCapacity\n> 10"));
+            strcpy(const_cast<char *>(emergencyMessage), "Mains\nCapacity\n> 10");
+            // memcpy(const_cast<char *>(emergencyMessage), "Mains\nCapacity\n> 10", sizeof("Mains\nCapacity\n> 10"));
         }
     }
     //Voltage Scale - 0-10A scaled to 0-3.3v
