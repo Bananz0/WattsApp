@@ -46,7 +46,6 @@ HardwareSerial debugSerial = Serial;
 
 
 float netCapacity = 0;
-
 uint16_t displayDuration = 4;
 uint16_t updateCounter = 0;
 Screen screen{};
@@ -109,8 +108,8 @@ void updateMainStats() {
 }
 
 void echoSerial(){
-    if(wifiSerial.available()) {
-        String uartMessageBuff = wifiSerial.readStringUntil('\r');
+    if(debugSerial.available()) {
+        String uartMessageBuff = debugSerial.readStringUntil('\r');
         strncpy((char*)uartMessage, uartMessageBuff.c_str(), sizeof(uartMessage) - 1);
         uartMessage[sizeof(uartMessage) - 1] = '\0';
         // sprintf((char*)emergencyMessage,"%s",response.c_str());
