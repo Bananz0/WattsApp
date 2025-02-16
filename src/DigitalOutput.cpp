@@ -16,7 +16,7 @@ void DigitalOutput::chargeBattery() { //Pin C3
     PORTD |= (1 << PORTD2); //Set PC3 to High
 }
 void DigitalOutput::dischargeBattery() { //Pin C4
-    PORTD &= ~(1 << PORTD3); //Set PC4 to Low
+    PORTD |= (1 << PORTD3); //Set PC4 to Low
 }
 void DigitalOutput::loadSwitch1(status Status) { //Pin C5
     switch (Status) {
