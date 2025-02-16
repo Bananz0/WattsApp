@@ -37,13 +37,13 @@ public:
 private:
     uint8_t enablePin{8};
     bool connected{false};
-
-    const char *sendATCommand(const String &command, const char *expectedResponse);
-    static String waitForResponse();
-
-
-    HardwareSerial* espSerial{};
+    HardwareSerial* espSerial = espSerial;
     IPAddress ip;
+
+    String sendATCommand(const String &command, const char *expectedResponse);
+    String waitForResponse();
+
+    static bool checkResponse(const String &received, const char *expectedResponse);
 };
 
 #endif //WIFIHANDLER_H
