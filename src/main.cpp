@@ -52,6 +52,7 @@ Screen screen{};
 uint8_t lastScreenUpdateSecond = -1;
 uint16_t lastCounter = 0;
 String response;
+bool dayHasChanged = false;
 
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
@@ -118,6 +119,26 @@ void echoSerial(){
     }
 }
 
+void checkForDayChange() {
+    //Copy all the stats to a temporary store. Array or struct could work
+    float sourcesStats[4] = {sources.busbarVoltage, sources.busbarCurrent, sources.pvCapacity, sources.windTurbineCapacity};
+    static float sourceStatsBuffer[4] = {0};
+    float percentStatsDifference[4];
+    uint8_t percentStatsDifferenceCount = 0; //ran out of names bruh
+    //Calcultae the difference between the two
+    for (int i = 0; i < 4; i++) {
+        if ((sourceStatsBuffer[i]!=0)&&(sourcesStats[i]!=0)) {
+            percentStatsDifference[i] = (sourcesStats[i] - sourceStatsBuffer[i])/ sourceStatsBuffer[i] * 100;
+            percentStatsDifference[i] > 10 ? percentStatsDifferenceCount++ : 0;
+        }
+    }
+    //dopy new array buffer from main array
+    for (int i = 0; i < 4; i++) {
+        sourceStatsBuffer[i] = sourcesStats[i];
+    }
+    percentStatsDifferenceCount > 2 ? dayHasChanged = true : dayHasChanged = false;
+}
+
 //ADC ISR
 ISR(ADC_vect){
     ADCVoltage = (ADC * Vref) / 0x3FF;
@@ -163,6 +184,7 @@ int main() {
 
     // Maximum battery capacity = 24Ah
     // 1 Hour Simulation time = 1 Min Runtime
+    uint8_t dayCount = 0, remainingDays = 24;
     // Default: Charge battery and turn all loads off.
     sources.requestMains(0);
     sources.chargeBattery();
@@ -184,12 +206,35 @@ int main() {
     while (true) {
         drawTime();
         screenCarrousel();
-        updateMainStats();
         echoSerial();
-
         display.carouselScreen(screen);
 
+        for (uint8_t count = 0; count % timeUTC->tm_sec == 5; count++) {
+            updateMainStats(); //Should update every change of pins or every 10 seconds
+            checkForDayChange();
+        }
+
+        //Still need to figure out how to accurately detect the changes in days without using a blocking _delay(6000) which would work but would have an effect in the other operations in the smart meter
+        //This is not accurate as there is no RTC on the board but could use NTP or add the clock later
+        //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
+        if ((timeUTC->tm_sec +60) % 10 == 0 ) {
+            if (dayHasChanged) {
+                dayCount +=1;
+                remainingDays -= 1;
+                dayHasChanged = false;
+            }
+        }
+
+        //Deplete battery capacity if the capacity can last days close to the end of the "Simulation"
+        if ((sources.batteryCapacity> remainingDays)&&(remainingDays < 6)) {
+            sources.requestMains(0);
+            sources.requestBattery(0);
+        }
+
         //Implement LabView Algorithm
+        //Check and call for mains
+        //This should be done in the updateStats()
+
 
 
     }
