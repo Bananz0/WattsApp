@@ -29,6 +29,7 @@ public:
 
     uint8_t batteryCapacity{0};
     float totalAvailableCapacity{0};
+    float totalAvailableCapacityMain{0};
     bool isBatteryCharging{false}; // to monitor battery charging status for sprite
 
     Sources(AnalogueInput *sourceHandler, AnalogueOutput *mainsHandler,DigitalOutput *batteryHandler);

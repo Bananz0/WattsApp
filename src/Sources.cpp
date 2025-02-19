@@ -61,10 +61,11 @@ void Sources::readBusbarVoltage() {
 }
 
 void Sources::calculateTotalAvailableCapacity() {
-    totalAvailableCapacity = totalRenewableCapacity + batteryCapacity + mainsCapacity;
+    totalRenewableCapacity = pvCapacity + windTurbineCapacity;
+    totalAvailableCapacity = totalRenewableCapacity + batteryCapacity;
+    totalAvailableCapacityMain = totalAvailableCapacity + mainsCapacity;
 }
 
 void Sources::calculateTotalEnergyAndPower() {
     busbarPower = busbarCurrent * busbarVoltage;
-    totalRenewableCapacity = pvCapacity + windTurbineCapacity;
 }
