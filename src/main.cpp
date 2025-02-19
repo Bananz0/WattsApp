@@ -43,10 +43,11 @@ TimeHandler timeHandler;
 
 HardwareSerial wifiSerial = Serial;
 HardwareSerial debugSerial = Serial;
+//WiFiHandler wifiHandler(&Serial, 36);
 
 
 float netCapacity = 0;
-uint16_t displayDuration = 4;
+uint16_t displayDuration = 2;
 uint16_t updateCounter = 0;
 Screen screen{};
 uint8_t lastScreenUpdateSecond = -1;
@@ -70,14 +71,14 @@ void updateStats() {
 
     loads.calculateLoadCapacity();
 
-    netCapacity = sources.totalAvailableCapacity -  loads.currentTotalLoad;
+    netCapacity = sources.totalAvailableCapacity -  loads.totalLoadCapacity;
 }
 
 void drawTime() {
-    if ((Counter % 10 == 0) && (Counter != lastCounter)) {
+    if ((Counter % 5 == 0) && (Counter != lastCounter)) {
         utc++;
         lastCounter = Counter;
-    };
+    }
     timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
     pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
     updateCounter = Counter;
@@ -170,10 +171,9 @@ int main() {
     // debugSerial.println("Cleared screen");
     display.setBacklight(DisplayHandler::LIGHT);
     display.setOrientation(DisplayHandler::LANDSCAPE);
-    WiFiHandler wifiHandler(&Serial, 36);
     // debugSerial.println("Initialized display and set to Landscape");
 
-    wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
+    //wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
 
     //Boot and Initialization
     // debugSerial.println("Drawing boot sequence");
@@ -214,10 +214,12 @@ int main() {
             checkForDayChange();
         }
 
+        //Implement LabView Algorithm
+
         //Still need to figure out how to accurately detect the changes in days without using a blocking _delay(6000) which would work but would have an effect in the other operations in the smart meter
         //This is not accurate as there is no RTC on the board but could use NTP or add the clock later
         //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
-        if ((timeUTC->tm_sec +60) % 10 == 0 ) {
+        if ((timeUTC->tm_sec + 60) % 10 == 0 ) {
             if (dayHasChanged) {
                 dayCount +=1;
                 remainingDays -= 1;
@@ -225,17 +227,46 @@ int main() {
             }
         }
 
+        //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
+        if ((sources.totalRenewableCapacity > loads.totalLoadCapacity)&&(sources.totalRenewableCapacity > (1 + loads.totalLoadCapacity))) {
+            sources.chargeBattery(); //Charges it by 1A
+        }
+
         //Deplete battery capacity if the capacity can last days close to the end of the "Simulation"
-        if ((sources.batteryCapacity> remainingDays)&&(remainingDays < 6)) {
+        if ((sources.batteryCapacity > remainingDays)) {
             sources.requestMains(0);
             sources.requestBattery(0);
         }
 
-        //Implement LabView Algorithm
-        //Check and call for mains
-        //This should be done in the updateStats()
+        //This should check for the available load capacity and the renewables capacity. If not sufficient, it should call the battery.
+        //Ultimately if not available it should call the mains as a last option.
 
+        if (netCapacity<0 && netCapacity!=0) { //redundant but idc
+            if (sources.batteryCapacity > 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
+                sources.requestBattery((-1.0 * static_cast<int>(netCapacity))); // We can only discharge 1A per day
+            }  else if (sources.batteryCapacity < 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
+                sources.requestMains(-1 * netCapacity);
+            }
+            // break; // If the battery can sustain it break the if condition. Do not trust this cause im not sure if i should use break or continue. Will search later. - switched to elif
+        }
 
+        //Last resort.
+        //Turn off loads if the battery capacity, renewables and main can't match the output of the loads required
+        //Will need to consider priority into all of these.
+        sources.loadDeficit =  sources.totalAvailableCapacity - loads.totalLoadCapacity;
+        if (sources.totalAvailableCapacity < loads.totalLoadCapacity) {
+            //will implement load priority
+            for (uint8_t loadCount = 0; loadCount < 3; loadCount++) {
+                if (loads.currentLoad[loadCount] > sources.totalAvailableCapacity ) {
+                    loads.loadOverride[loadCount] = true;
+                    loads.turnLoadOff(loadCount);
+                }
+            }
+        } else if (sources.totalAvailableCapacity > loads.totalLoadCapacity) {
+            for (bool & loadCount : loads.loadOverride) {
+                loadCount = false;
+            }
+        }
 
     }
 }
