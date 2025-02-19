@@ -9,16 +9,31 @@ Loads::Loads(DigitalOutput* loadSwitcher, DigitalInput* loadCaller) : output(loa
      lastLoad2Call = false;
      lastLoad3Call = false;
 
+
     //TODO: Not implemented variable load control
     currentLoad1 = 1;
     currentLoad2 = 1;
     currentLoad3 = 1;
 
+    currentLoad[0] = 1;
+    currentLoad[1] = 1;
+    currentLoad[2] = 1;
+
+
+    loadOverride1 = false;
+    loadOverride2 = false;
+    loadOverride3 = false;
+
+    loadOverride[0] = false;
+    loadOverride[1] = false;
+    loadOverride[2] = false;
 }
 
 Loads::~Loads()= default;
 
 void Loads::checkLoadCallChanges() {
+
+
     currentLoad1Call = input->readLoad1Call();
     currentLoad2Call = input->readLoad2Call();
     currentLoad3Call = input->readLoad3Call();
@@ -92,5 +107,5 @@ void Loads::calculateLoadCapacity() {
     // if (currentLoad3Call) {
     //     currentTotalLoad += currentLoad3;
     // }
-    totalLoadCapacity = currentLoad1*currentLoad1Call + currentLoad2*currentLoad2Call + currentLoad3*currentLoad3Call;
+    totalLoadCapacity = currentLoad[0]*currentLoad1Call + currentLoad[1]*currentLoad2Call + currentLoad[2]*currentLoad3Call;
 }
