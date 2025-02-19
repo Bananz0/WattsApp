@@ -184,7 +184,7 @@ int main() {
 
     // Maximum battery capacity = 24Ah
     // 1 Hour Simulation time = 1 Min Runtime
-    uint8_t dayCount = 0, remainingDays = 24;
+    dayCount = 0, remainingDays = 24;
     // Default: Charge battery and turn all loads off.
     sources.requestMains(0);
     sources.chargeBattery();

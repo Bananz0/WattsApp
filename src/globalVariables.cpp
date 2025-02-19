@@ -25,3 +25,5 @@ volatile Screen screenPage, nextScreenPage, prevScreenPage;
 volatile bool emergencyScreen = false;
 volatile char emergencyMessage[] = "Emergency\nNot\nSpecified";
 volatile char uartMessage[] = "";
+
+volatile uint8_t dayCount = 0, remainingDays = 24;

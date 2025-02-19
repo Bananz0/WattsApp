@@ -11,6 +11,7 @@
 extern volatile float Vref;                            //Reference Voltage, 3.3v
 extern volatile float ADCVoltage;             //Global - extern - ADC voltage variable and idk if this is good
 extern volatile bool ADCConversionFlag;
+extern volatile uint8_t dayCount , remainingDays;
 
 // extern volatile float windTurbineCapacity;
 // extern volatile float pvCapacity;
