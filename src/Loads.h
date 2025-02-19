@@ -25,7 +25,7 @@ class Loads {
     bool currentLoad1Call{}, currentLoad2Call{}, currentLoad3Call{};
 
     float currentLoad1, currentLoad2, currentLoad3;
-    float currentTotalLoad{};
+    float totalLoadCapacity{};
 
     private:
     DigitalOutput* output;

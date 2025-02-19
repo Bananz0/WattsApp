@@ -92,5 +92,5 @@ void Loads::calculateLoadCapacity() {
     // if (currentLoad3Call) {
     //     currentTotalLoad += currentLoad3;
     // }
-    currentTotalLoad = currentLoad1*currentLoad1Call + currentLoad2*currentLoad2Call + currentLoad3*currentLoad3Call;
+    totalLoadCapacity = currentLoad1*currentLoad1Call + currentLoad2*currentLoad2Call + currentLoad3*currentLoad3Call;
 }
