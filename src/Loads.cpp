@@ -69,12 +69,15 @@ void Loads::turnLoadOn(uint8_t load) {
     switch (load) {
         case 1:
             output->loadSwitch1(DigitalOutput::ON);
+            currentLoadStatus[0] = true;
         break;
         case 2:
             output->loadSwitch2(DigitalOutput::ON);
+            currentLoadStatus[1] = true;
         break;
         case 3:
             output->loadSwitch3(DigitalOutput::ON);
+            currentLoadStatus[2] = true;
         break;
         default:
             break;
@@ -85,12 +88,15 @@ void Loads::turnLoadOff(uint8_t load) {
     switch (load) {
         case 1:
             output->loadSwitch1(DigitalOutput::OFF);
+            currentLoadStatus[0] = false;
         break;
         case 2:
             output->loadSwitch2(DigitalOutput::OFF);
+            currentLoadStatus[1] = false;
         break;
         case 3:
             output->loadSwitch3(DigitalOutput::OFF);
+            currentLoadStatus[2] = false;
         break;
         default:
             break;

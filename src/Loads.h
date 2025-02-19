@@ -26,6 +26,7 @@ class Loads {
     bool loadOverride1, loadOverride2, loadOverride3;
     bool loadOverride[3];
     float currentLoad[3];
+    bool currentLoadStatus[3];
     float currentLoad1, currentLoad2, currentLoad3;
     float totalLoadCapacity{};
 

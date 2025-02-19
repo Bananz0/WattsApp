@@ -257,7 +257,7 @@ int main() {
         if (sources.totalAvailableCapacity < loads.totalLoadCapacity) {
             //will implement load priority
             for (uint8_t loadCount = 0; loadCount < 3; loadCount++) {
-                if (loads.currentLoad[loadCount] > sources.totalAvailableCapacity ) {
+                if (loads.currentLoadStatus[loadCount] && loads.currentLoad[loadCount] > sources.totalAvailableCapacity ) {
                     loads.loadOverride[loadCount] = true;
                     loads.turnLoadOff(loadCount);
                 }
