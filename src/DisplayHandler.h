@@ -62,6 +62,8 @@ public:
 
     void showErrorScreen();
 
+    void showDayCountScreen();
+
     void carouselScreen(Screen screen);
 
 private:

@@ -88,14 +88,14 @@ void screenCarrousel() {
 #ifdef SECOND_REVIEW_MODE
     screen = SEC_REV_SCREEN;
 #elif !defined(SECOND_REVIEW_MODE)
-    //cycle through the screens somehwow
+    //cycle through the screens
     if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
         if (emergencyScreen) {
             //Display screen for 5 seconds
             screen = ERROR_SCREEN;
             emergencyScreen = false;
         } else if (!emergencyScreen) {
-            screen = static_cast<Screen>((screenPage + 1) % ((int)SCREENCOUNT-3) ); //Subtraced 1 to never cycle to the error screebb
+            screen = static_cast<Screen>((screenPage + 1) % ((int)SCREEN_COUNT-3) ); //Subtraced 1 to never cycle to the error screebb
             lastScreenUpdateSecond = timeUTC->tm_sec;
         }
     }
@@ -122,22 +122,40 @@ void echoSerial(){
 
 void checkForDayChange() {
     //Copy all the stats to a temporary store. Array or struct could work
-    float sourcesStats[4] = {sources.busbarVoltage, sources.busbarCurrent, sources.pvCapacity, sources.windTurbineCapacity};
+    const float sourcesStats[4] = {sources.busbarVoltage, sources.busbarCurrent, sources.pvCapacity, sources.windTurbineCapacity};
+    bool loadStats[3] = {loads.currentLoad1Call, loads.currentLoad2Call, loads.currentLoad3Call};
+
     static float sourceStatsBuffer[4] = {0};
+    static bool loadsStatsBuffer[3] = {0};
+
     float percentStatsDifference[4];
+    bool loadStatsDifferent = false;
+
     uint8_t percentStatsDifferenceCount = 0; //ran out of names bruh
-    //Calcultae the difference between the two
+
+    //Calcultae the difference between the two (for sources)
     for (int i = 0; i < 4; i++) {
         if ((sourceStatsBuffer[i]!=0)&&(sourcesStats[i]!=0)) {
             percentStatsDifference[i] = (sourcesStats[i] - sourceStatsBuffer[i])/ sourceStatsBuffer[i] * 100;
             percentStatsDifference[i] > 10 ? percentStatsDifferenceCount++ : 0;
         }
     }
+
+    //Calculate the difference between the loads
+    for (int i = 0; i < 3; i++) {
+        if (loadsStatsBuffer[i] != loadStats[i]) {
+            loadStatsDifferent = true;
+        }
+        loadsStatsBuffer[i] = loadStats[i];
+    }
+
     //dopy new array buffer from main array
     for (int i = 0; i < 4; i++) {
         sourceStatsBuffer[i] = sourcesStats[i];
     }
-    percentStatsDifferenceCount > 2 ? dayHasChanged = true : dayHasChanged = false;
+
+    dayHasChanged = (percentStatsDifferenceCount > 2) || loadStatsDifferent;
+
 }
 
 //ADC ISR
@@ -207,10 +225,12 @@ int main() {
         drawTime();
         screenCarrousel();
         echoSerial();
-        display.carouselScreen(screen);
+        //display.carouselScreen(screen);
 
+        display.carouselScreen(DAY_SCREEN);
+
+        updateMainStats(); //Should update every change of pins or every 10 seconds
         for (uint8_t count = 0; count % timeUTC->tm_sec == 5; count++) {
-            updateMainStats(); //Should update every change of pins or every 10 seconds
             checkForDayChange();
         }
 
@@ -219,13 +239,18 @@ int main() {
         //Still need to figure out how to accurately detect the changes in days without using a blocking _delay(6000) which would work but would have an effect in the other operations in the smart meter
         //This is not accurate as there is no RTC on the board but could use NTP or add the clock later
         //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
-        if ((timeUTC->tm_sec + 60) % 10 == 0 ) {
-            if (dayHasChanged) {
-                dayCount +=1;
-                remainingDays -= 1;
-                dayHasChanged = false;
-            }
+
+
+        if (dayHasChanged) {
+            dayCount +=1;
+            remainingDays -= 1;
+
+            //TODO: update battery stats here maybe?
+
+
+            dayHasChanged = false;
         }
+
 
         //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
         if ((sources.totalRenewableCapacity > loads.totalLoadCapacity)&&(sources.totalRenewableCapacity > (1 + loads.totalLoadCapacity))) {

@@ -98,6 +98,9 @@ void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
         case UART_SCREEN:
             showUARTScreen();
         break;
+        case DAY_SCREEN:
+            showDayCountScreen();
+        break;
         default:
         break;
     }
@@ -176,7 +179,17 @@ void DisplayHandler::showErrorScreen() {
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, RED,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<const unsigned char *>(tempMessage),currentPos,  YELLOW,backgroundColour,OryxB,3);
     //TODO: Exclamation mark sprite
+}
 
+void DisplayHandler::showDayCountScreen() {
+    strncpy(tempMessage, const_cast<char *>(emergencyMessage), sizeof(tempMessage)); //Ignore error - compiles
+
+    sprintf(title, "DAY\nSTATUS");
+    sprintf(text1, "Current: \n%0.2u Days", dayCount);
+
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
+    //TODO: Exclamation mark sprite
 }
 
 void DisplayHandler::showLoadsScreen() {
