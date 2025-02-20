@@ -185,7 +185,7 @@ void DisplayHandler::showDayCountScreen() {
     strncpy(tempMessage, const_cast<char *>(emergencyMessage), sizeof(tempMessage)); //Ignore error - compiles
 
     sprintf(title, "DAY\nSTATUS");
-    sprintf(text1, "Current: \n%0.2u Days", dayCount);
+    sprintf(text1, "Current: \n%u Days", dayCount);
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
