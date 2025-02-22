@@ -103,6 +103,9 @@ void screenCarrousel() {
 }
 
 void updateMainStats() {
+    if (LoadChangeFlag) {
+        loads.checkLoadCallChanges();
+    }
     if (updateCounter % 10 == 0) {
         updateStats();
         updateCounter = 0;
@@ -158,78 +161,17 @@ void checkForDayChange() {
 
 }
 
-//ADC ISR
-ISR(ADC_vect){
-    ADCVoltage = (ADC * Vref) / 0x3FF;
-    ADCConversionFlag = true;
-}
-//Counter ISR
-ISR(TIMER1_COMPA_vect) {
-   // PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
-    Counter++;
-    //utc++;
-}
-//Pin Change ISR
-ISR(PCINT0_vect) {
-    // Read Load Calls 1, 2 and 3
-    loads.checkLoadCallChanges();
-}
+void controlAlgrithm() {
+        //program automatically listens for calls for loads and updates.
+        //could be a good idea to use that as a way to update the stats.
+        //Could be also be a good idea to enable pin change interrupts for every one of the pins as the busbar could
+        //change while the turbine capacity maintaining its original value.
+        //since 1 min is 1 hour and there is the potential of having the NTP, we could time the changes from the start
+        //to get the values from the TB instantly. not sure if the speed at which the change is detected nor the
+        //resolution of the scope
 
-int main() {
-    // debugSerial.println("Starting up...");
-    finalizePorts();
-    // debugSerial.println("Initialized ports");
-    testLight(1);                              //Boot Light
-    sei();                                               //Enable Global interrupts
-    // debugSerial.println("Tested light PB6 and enabled global interrupts");
+        //updateMainStats(); //Should update every change of pins or every 10 seconds
 
-    display.startDisplay(false);
-    // debugSerial.println("Turned on display");
-    display.clearScreen();
-    // debugSerial.println("Cleared screen");
-    display.setBacklight(DisplayHandler::LIGHT);
-    display.setOrientation(DisplayHandler::LANDSCAPE);
-    // debugSerial.println("Initialized display and set to Landscape");
-
-    //wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
-
-    //Boot and Initialization
-    // debugSerial.println("Drawing boot sequence");
-    display.drawBootSequence();
-    // debugSerial.println("Boot Complete...starting program");
-
-    //Start of the LabView Algorighm
-
-    // Maximum battery capacity = 24Ah
-    // 1 Hour Simulation time = 1 Min Runtime
-    dayCount = 0, remainingDays = 24;
-    // Default: Charge battery and turn all loads off.
-    sources.requestMains(0);
-    sources.chargeBattery();
-    loads.turnLoadOff(1);
-    loads.turnLoadOff(2);
-    loads.turnLoadOff(3);
-    loads.checkLoadCallChanges();
-
-    //program automatically listens for calls for loads and updates.
-    //could be a good idea to use that as a way to update the stats.
-    //Could be also be a good idea to enable pin change interrupts for every one of the pins as the busbar could
-    //change while the turbine capacity maintaining its original value.
-    //since 1 min is 1 hour and there is the potential of having the NTP, we could time the changes from the start
-    //to get the values from the TB instantly. not sure if the speed at which the change is detected nor the
-    //resolution of the scope
-
-    //CLion complains about forever while loop
-    // ReSharper disable once CppDFAEndlessLoop
-    while (true) {
-        drawTime();
-        screenCarrousel();
-        echoSerial();
-        //display.carouselScreen(screen);
-
-        display.carouselScreen(DAY_SCREEN);
-
-        updateMainStats(); //Should update every change of pins or every 10 seconds
         for (uint8_t count = 0; count % timeUTC->tm_sec == 5; count++) {
             checkForDayChange();
         }
@@ -292,6 +234,76 @@ int main() {
                 loadCount = false;
             }
         }
+
+
+
+}
+
+//ADC ISR
+ISR(ADC_vect){
+    ADCraw = ADC;
+    //ADCVoltage = (ADC * Vref) / 0x3FF; //Moved to main
+    ADCConversionFlag = true;
+}
+//Counter ISR
+ISR(TIMER1_COMPA_vect) {
+   // PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
+    Counter++;
+    //utc++;
+}
+//Pin Change ISR
+ISR(PCINT0_vect) {
+    // Read Load Calls 1, 2 and 3
+    // loads.checkLoadCallChanges(); //Moved to main
+    LoadChangeFlag = true;
+}
+
+int main() {
+    // debugSerial.println("Starting up...");
+    finalizePorts();
+    // debugSerial.println("Initialized ports");
+    testLight(1);                              //Boot Light
+    sei();                                               //Enable Global interrupts
+    // debugSerial.println("Tested light PB6 and enabled global interrupts");
+
+    display.startDisplay(false);
+    // debugSerial.println("Turned on display");
+    display.clearScreen();
+    // debugSerial.println("Cleared screen");
+    display.setBacklight(DisplayHandler::LIGHT);
+    display.setOrientation(DisplayHandler::LANDSCAPE);
+    // debugSerial.println("Initialized display and set to Landscape");
+
+    //wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
+
+    //Boot and Initialization
+    // debugSerial.println("Drawing boot sequence");
+    display.drawBootSequence();
+    // debugSerial.println("Boot Complete...starting program");
+
+    //Start of the LabView Algorighm
+
+    // Maximum battery capacity = 24Ah
+    // 1 Hour Simulation time = 1 Min Runtime
+    dayCount = 0, remainingDays = 24;
+    // Default: Charge battery and turn all loads off.
+    sources.requestMains(0);
+    sources.chargeBattery();
+    loads.turnLoadOff(1);
+    loads.turnLoadOff(2);
+    loads.turnLoadOff(3);
+    loads.checkLoadCallChanges();
+
+
+    // ReSharper disable once CppDFAEndlessLoop - CLion complains about forever while loop
+    while (true) {
+        sources.requestMains(8);
+        drawTime();
+        screenCarrousel();
+        echoSerial();
+        display.carouselScreen(BUSBAR_SCREEN);
+        updateStats();
+        controlAlgrithm();
 
     }
 }

@@ -30,5 +30,6 @@ void ADCHandler::getVoltage(const uint8_t channel) {
     setADCChannel(channel);
     readADC();
     while (!ADCConversionFlag){}
+    ADCVoltage = 0.003f + (ADCraw * Vref) / 0x3FF;
     ADCConversionFlag = false;
 }
