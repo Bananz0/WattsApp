@@ -8,8 +8,6 @@
 #define PORTHANDLER_H
 
 //Define portType as enum
-#undef INPUT
-#undef OUTPUT
 typedef enum {
     INPUT = 0x00,
     OUTPUT = 0xFF

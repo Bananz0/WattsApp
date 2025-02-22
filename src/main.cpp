@@ -4,8 +4,8 @@
 #include "globalVariables.h"
 
 #include <avr/io.h>
- #include <util/delay.h>
- #include <avr/interrupt.h>
+#include <util/delay.h>
+#include <avr/interrupt.h>
 
 #include "debug.h"
 
@@ -42,8 +42,8 @@ DisplayHandler display(&loads,&sources);
 TimeHandler timeHandler;
 
 HardwareSerial wifiSerial = Serial;
-HardwareSerial debugSerial = Serial;
-WiFiHandler wifiHandler(&Serial, 36);
+//HardwareSerial debugSerial = Serial;
+//WiFiHandler wifiHandler(&Serial, 36);
 
 float netCapacity = 0;
 uint16_t displayDuration = 2;
@@ -111,10 +111,10 @@ void updateMainStats() {
     }
 }
 
-void echoSerial(){
+void echoSerial(HardwareSerial &debugSerial){
     if(debugSerial.available()) {
         String uartMessageBuff = debugSerial.readStringUntil('\r');
-        strncpy((char*)uartMessage, uartMessageBuff.c_str(), sizeof(uartMessage) - 1);
+        strncpy(const_cast<char *>(uartMessage), uartMessageBuff.c_str(), sizeof(uartMessage) - 1);
         uartMessage[sizeof(uartMessage) - 1] = '\0';
         // sprintf((char*)emergencyMessage,"%s",response.c_str());
         // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
@@ -287,16 +287,19 @@ int main() {
     loads.turnLoadOff(3);
     loads.checkLoadCallChanges();
 
+    wifiSerial.begin(115200); //from arduino docs this initializes the hardware serial
 
     // ReSharper disable once CppDFAEndlessLoop - CLion complains about forever while loop
     while (true) {
         sources.requestMains(8);
+
         drawTime();
         screenCarrousel();
-        //echoSerial();
-        display.carouselScreen(BUSBAR_SCREEN);
+        echoSerial(wifiSerial);
+        display.carouselScreen(UART_SCREEN); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so on
         updateMainStats();
         controlAlgrithm();
+        //wifiSerial.println("Loop complete");
     }
 }
 

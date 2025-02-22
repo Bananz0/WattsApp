@@ -25,18 +25,6 @@ WiFiHandler::WiFiHandler(HardwareSerial* serial, uint8_t enablePin) {
     turnOnModule();
     isModuleReady();
     sendATCommand("AT+CWMODE=1", "OK");  //Station Mode
-
-    WiFi.init(espSerial);
-
-
-    // WiFi.init(espSerial);
-    //
-    // // attempt to connect to WiFi network
-    // while ( status != WL_CONNECTED) {
-    //     status = WiFi.begin(ssid, pass);
-    // }
-
-
 }
 
 
@@ -165,7 +153,7 @@ String WiFiHandler::sendATCommand(const String &command, const char *expectedRes
         if (response.length() > 0) {
             break;  // Got a response, no need to retry
         }
-        //_delay_ms(100);  // Wait before retry
+        _delay_ms(100);  // Wait before retry
     }
     return response;
 }
@@ -206,15 +194,12 @@ String WiFiHandler::sendATCommand(const String &command, const char *expectedRes
 // }
 
 String WiFiHandler::waitForResponse() {
-    uint16_t timeout = 500;
     char *response = nullptr;
-
-    String uartMessageBuff = espSerial->readStringUntil('\r\n');
+    const String uartMessageBuff = espSerial->readStringUntil(*"\r\n");
     strncpy(response, uartMessageBuff.c_str(), sizeof(response) - 1);
-    response[sizeof(response) - 1] = '\0';
+    if (response != nullptr) response[sizeof(response) - 1] = '\0';
     // sprintf((char*)emergencyMessage,"%s",response.c_str());
     // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
-
     return response;
 }
 
