@@ -5,7 +5,7 @@
 #include "PowerHandler.h"
 #include <avr/sleep.h>
 #include <avr/power.h>
-#include "pictor.h"
+#include "../lib/pictor/pictor.h"
 
 PowerHandler::PowerHandler() {
     power_all_enable();  //All peripherals are enabled

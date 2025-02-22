@@ -16,6 +16,11 @@ This project includes code and resources from third-party sources. The following
 - **Author(s):** [Tobias Schürg](https://github.com/tobiasschuerg)
 - **Used for:** Implementation of the InfluxDB Client for the Arduino
 
+### 2. [WiFiEsp](https://github.com/bportaluri/WiFiEsp/)
+- **Author(s):** [Bruno](https://github.com/bportaluri)
+- **Used for:** Arduino WiFi library for ESP8266 modules
+
+
 ## License Compliance
 
 Each third-party component included in this project retains its original license, which can be found in its respective source repository. If required, copies of these licenses are included in the `licenses/` directory.
@@ -24,5 +29,4 @@ If you are a contributor or user and have questions regarding the attribution or
 
 ---
 
-_Last updated: [2025-02-03]_  
-Ard
+_Last updated: [2025-02-21]_

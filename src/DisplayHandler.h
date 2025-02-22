@@ -8,7 +8,7 @@
 #include <Loads.h>
 #include <Sources.h>
 #include <stdint.h>
-#include "pictor.h"
+#include <pictor/pictor.h>
 #include "Mash.h"
 #include "OryxB.h"
 
