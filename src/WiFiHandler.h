@@ -44,6 +44,10 @@ private:
     String waitForResponse();
 
     static bool checkResponse(const String &received, const char *expectedResponse);
+
+    void printWifiData();
+
+    void printCurrentNet();
 };
 
 #endif //WIFIHANDLER_H

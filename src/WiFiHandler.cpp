@@ -5,19 +5,38 @@
 #include "WiFiHandler.h"
 
 #include <Arduino.h>
-#include <time.h>
+#include <WiFiEsp/WiFiEsp.h>
+#include <WiFiEsp/WiFiEspClient.h>
+#include <WiFiEsp/WiFiEsp.h>
+
+char ssid[] = "Glen's XPS";
+char pass[] = "eesp8266";
+uint8_t status = WL_IDLE_STATUS;
+
 
 WiFiHandler::WiFiHandler(HardwareSerial* serial, uint8_t enablePin) {
     this->espSerial = serial;
     this->enablePin = enablePin;
     this->connected = false;
 
-    espSerial->begin(115200); //from arduino docs this initializes the hardware serial
-    espSerial->println("WiFiHandler initialized");
+    //espSerial->println("WiFiHandler initialized");
 
+    espSerial->begin(115200); //from arduino docs this initializes the hardware serial
     turnOnModule();
     isModuleReady();
     sendATCommand("AT+CWMODE=1", "OK");  //Station Mode
+
+    WiFi.init(espSerial);
+
+
+    // WiFi.init(espSerial);
+    //
+    // // attempt to connect to WiFi network
+    // while ( status != WL_CONNECTED) {
+    //     status = WiFi.begin(ssid, pass);
+    // }
+
+
 }
 
 
@@ -135,17 +154,18 @@ void WiFiHandler::sleepMode(uint8_t mode) {
 
 String WiFiHandler::sendATCommand(const String &command, const char *expectedResponse) {
     String response;
-    for (uint8_t attempt = 0; attempt < 3; attempt++) {
+    for (uint8_t attempt = 0; attempt < 100; attempt++) {
         // Clear any leftover data
         while (espSerial->available()) {
             espSerial->read();
         }
         espSerial->println(command);
+        espSerial->print("\r\n");
         response = waitForResponse();
         if (response.length() > 0) {
             break;  // Got a response, no need to retry
         }
-        _delay_ms(100);  // Wait before retry
+        //_delay_ms(100);  // Wait before retry
     }
     return response;
 }
@@ -164,24 +184,37 @@ String WiFiHandler::sendATCommand(const String &command, const char *expectedRes
 //     return response;
 // }
 
+// String WiFiHandler::waitForResponse() {
+//     uint16_t timeout = 500;
+//     String response;
+//     char c;
+//     unsigned long startTime = millis();
+//
+//     while ((millis() - startTime) < timeout) {
+//         if (espSerial->available()) {
+//             c = espSerial->read();
+//             response += c;
+//
+//             // Check for common AT command endings
+//             if (response.endsWith("\r\n") || response.endsWith("OK\r\n") || response.endsWith("OK")) {
+//                 break;
+//             }
+//         }
+//        // _delay_us(100);  // Small delay to prevent tight polling
+//     }
+//     return response;
+// }
+
 String WiFiHandler::waitForResponse() {
     uint16_t timeout = 500;
-    String response;
-    char c;
-    unsigned long startTime = millis();
+    char *response = nullptr;
 
-    while ((millis() - startTime) < timeout) {
-        if (espSerial->available()) {
-            c = espSerial->read();
-            response += c;
+    String uartMessageBuff = espSerial->readStringUntil('\r\n');
+    strncpy(response, uartMessageBuff.c_str(), sizeof(response) - 1);
+    response[sizeof(response) - 1] = '\0';
+    // sprintf((char*)emergencyMessage,"%s",response.c_str());
+    // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
 
-            // Check for common AT command endings
-            if (response.endsWith("\r\n") || response.endsWith("OK\r\n") || response.endsWith("OK")) {
-                break;
-            }
-        }
-        _delay_us(100);  // Small delay to prevent tight polling
-    }
     return response;
 }
 
@@ -190,5 +223,39 @@ bool WiFiHandler::checkResponse(const String &received, const char *expectedResp
         return false;
     }
     return (received.indexOf(expectedResponse) != -1);
+}
+
+void WiFiHandler::printWifiData()
+{
+    IPAddress ip = WiFi.localIP();
+    Serial.print("IP Address: ");
+    Serial.println(ip);
+
+    byte mac[6];
+    WiFi.macAddress(mac);
+    char buf[20];
+    sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X", mac[5], mac[4], mac[3], mac[2], mac[1], mac[0]);
+    Serial.print("MAC address: ");
+    Serial.println(buf);
+}
+
+void WiFiHandler::printCurrentNet()
+{
+    // print the SSID of the network you're attached to
+    Serial.print("SSID: ");
+    Serial.println(WiFi.SSID());
+
+    // print the MAC address of the router you're attached to
+    byte bssid[6];
+    WiFi.BSSID(bssid);
+    char buf[20];
+    sprintf(buf, "%02X:%02X:%02X:%02X:%02X:%02X", bssid[5], bssid[4], bssid[3], bssid[2], bssid[1], bssid[0]);
+    Serial.print("BSSID: ");
+    Serial.println(buf);
+
+    // print the received signal strength
+    long rssi = WiFi.RSSI();
+    Serial.print("Signal strength (RSSI): ");
+    Serial.println(rssi);
 }
 

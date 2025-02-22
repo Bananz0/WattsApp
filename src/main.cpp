@@ -4,8 +4,8 @@
 #include "globalVariables.h"
 
 #include <avr/io.h>
-#include <util/delay.h>
-#include <avr/interrupt.h>
+ #include <util/delay.h>
+ #include <avr/interrupt.h>
 
 #include "debug.h"
 
@@ -43,8 +43,7 @@ TimeHandler timeHandler;
 
 HardwareSerial wifiSerial = Serial;
 HardwareSerial debugSerial = Serial;
-//WiFiHandler wifiHandler(&Serial, 36);
-
+WiFiHandler wifiHandler(&Serial, 36);
 
 float netCapacity = 0;
 uint16_t displayDuration = 2;
@@ -106,7 +105,7 @@ void updateMainStats() {
     if (LoadChangeFlag) {
         loads.checkLoadCallChanges();
     }
-    if (updateCounter % 10 == 0) {
+    if (updateCounter % 5 == 0) {
         updateStats();
         updateCounter = 0;
     }
@@ -171,8 +170,7 @@ void controlAlgrithm() {
         //resolution of the scope
 
         //updateMainStats(); //Should update every change of pins or every 10 seconds
-
-        for (uint8_t count = 0; count % timeUTC->tm_sec == 5; count++) {
+        if (timeUTC->tm_sec % 5 == 0) {
             checkForDayChange();
         }
 
@@ -182,13 +180,11 @@ void controlAlgrithm() {
         //This is not accurate as there is no RTC on the board but could use NTP or add the clock later
         //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
 
-
         if (dayHasChanged) {
             dayCount +=1;
             remainingDays -= 1;
 
             //TODO: update battery stats here maybe?
-
 
             dayHasChanged = false;
         }
@@ -234,9 +230,6 @@ void controlAlgrithm() {
                 loadCount = false;
             }
         }
-
-
-
 }
 
 //ADC ISR
@@ -300,14 +293,12 @@ int main() {
         sources.requestMains(8);
         drawTime();
         screenCarrousel();
-        echoSerial();
+        //echoSerial();
         display.carouselScreen(BUSBAR_SCREEN);
-        updateStats();
+        updateMainStats();
         controlAlgrithm();
-
     }
 }
-
 
 // strncpy((char*)emergencyMessage, response.c_str(), 39);
 // emergencyMessage[response.length()] = '\0'; // Null-terminate
@@ -319,7 +310,6 @@ int main() {
 
 // display.carouselScreen(screen);
 
-
 // if(wifiSerial.available()) {
 //     String response = wifiSerial.readStringUntil('\r');
 //     debugSerial.println(response);  // Print to debug serial
@@ -329,7 +319,6 @@ int main() {
 //     char c = wifiSerial.read();
 //     wifiSerial.write(c);  // Echo single character
 // }
-
 
 // debugString = wifiSerial.readStringUntil('\n');
 //
@@ -341,4 +330,3 @@ int main() {
 //     bCurrentBuffer = sources.busbarCurrent;
 //     debugSerial.println(debugString);
 // }.
-
