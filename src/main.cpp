@@ -25,9 +25,10 @@
 
 #define CARROUSEL_E //Use CARROUSEL_E to enable and CARROUSEL_D to disable
 //#define DEBUG
-//#define NORMAL_MODE
+
+#define NORMAL_MODE
 #define SECOND_REVIEW_MODE //Turn off all auxillary functions - Everything low power and only display team L TODO: Fully implement this.
-//#define UARTDEBUG //Use this to enable UART debug screen
+#define UARTDEBUG //Use this to enable UART debug screen
 
 
 //Moved all timer functions to PWMHandler for central management
@@ -86,21 +87,21 @@ void drawTime() {
 void screenCarrousel() {
 #ifdef SECOND_REVIEW_MODE
     screen = SEC_REV_SCREEN;
-#elif  NORMAL_MODE
+#elif defined(UARTDEBUG)
+    screen = UART_SCREEN;
+#elif defined(NORMAL_MODE)
     //cycle through the screens
     if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
         if (emergencyScreen) {
             //Display screen for 5 seconds
             screen = ERROR_SCREEN;
             emergencyScreen = false;
-        } else if (!emergencyScreen) {
-            screen = static_cast<Screen>((screenPage + 1) % ((int)SCREEN_COUNT-3) ); //Subtraced 1 to never cycle to the error screebb
-            lastScreenUpdateSecond = timeUTC->tm_sec;
+        } else {
+            //Subtracted to skip the alternate screens
+            screen = static_cast<Screen>((screenPage + 1) % (SCREEN_COUNT-3) );
         }
+        lastScreenUpdateSecond = timeUTC->tm_sec;
     }
-#endif
-#ifdef UARTDEBUG
-    screen = UART_SCREEN;
 #endif
 }
 
@@ -114,14 +115,13 @@ void updateMainStats() {
     }
 }
 
-
 void checkForDayChange() {
     //Copy all the stats to a temporary store. Array or struct could work
     const float sourcesStats[4] = {sources.busbarVoltage, sources.busbarCurrent, sources.pvCapacity, sources.windTurbineCapacity};
     bool loadStats[3] = {loads.currentLoad1Call, loads.currentLoad2Call, loads.currentLoad3Call};
 
     static float sourceStatsBuffer[4] = {0};
-    static bool loadsStatsBuffer[3] = {0};
+    static bool loadsStatsBuffer[3] = {false};
 
     float percentStatsDifference[4];
     bool loadStatsDifferent = false;
@@ -132,7 +132,7 @@ void checkForDayChange() {
     for (int i = 0; i < 4; i++) {
         if ((sourceStatsBuffer[i]!=0)&&(sourcesStats[i]!=0)) {
             percentStatsDifference[i] = (sourcesStats[i] - sourceStatsBuffer[i])/ sourceStatsBuffer[i] * 100;
-            percentStatsDifference[i] > 10 ? percentStatsDifferenceCount++ : 0;
+            abs(percentStatsDifference[i]) > 10 ? percentStatsDifferenceCount++ : 0;
         }
     }
 
@@ -280,7 +280,7 @@ int main() {
     loads.turnLoadOff(3);
     loads.checkLoadCallChanges();
 
-//    wifiSerial->begin(115200);
+//   wifiSerial->begin(115200);
 
 
     // ReSharper disable once CppDFAEndlessLoop - CLion complains about forever while loop
@@ -291,8 +291,8 @@ int main() {
         updateMainStats();
         controlAlgrithm();
 
+        sources.requestMains(10);
         //wifiHandler.echoSerial();
-
     }
 }
 
