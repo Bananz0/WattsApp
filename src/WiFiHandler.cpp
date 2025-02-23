@@ -5,28 +5,23 @@
 #include "WiFiHandler.h"
 
 #include <Arduino.h>
+#include <globalVariables.h>
 #include <WiFiEsp/WiFiEsp.h>
 #include <WiFiEsp/WiFiEspClient.h>
 #include <WiFiEsp/WiFiEsp.h>
 
-char ssid[] = "Glen's XPS";
-char pass[] = "eesp8266";
-uint8_t status = WL_IDLE_STATUS;
-
-
-WiFiHandler::WiFiHandler(HardwareSerial* serial, uint8_t enablePin) {
+WiFiHandler::WiFiHandler(HardwareSerial *serial, uint8_t enablePin) {
     this->espSerial = serial;
     this->enablePin = enablePin;
     this->connected = false;
 
-    //espSerial->println("WiFiHandler initialized");
-
     espSerial->begin(115200); //from arduino docs this initializes the hardware serial
+    espSerial->println("WiFiHandler initialized");
+
     turnOnModule();
     isModuleReady();
     sendATCommand("AT+CWMODE=1", "OK");  //Station Mode
 }
-
 
 bool WiFiHandler::connectToWiFi(const char *ssid, const char *password) {
     const String ssidStr = ssid;
@@ -34,7 +29,7 @@ bool WiFiHandler::connectToWiFi(const char *ssid, const char *password) {
     const String command = "AT+CWJAP_DEF=";
     // ssidStr = "\"" + ssidStr + "\"";
     // passwordStr = "\"" + passwordStr + "\""; // did this in the command's arguments.
-    sendATCommand(command+","+ssidStr+","+passwordStr, {"OK"});
+    sendATCommand(command+ssidStr+","+passwordStr, {"OK"});
     return true;
 }
 
@@ -48,6 +43,19 @@ void WiFiHandler::disconnectFromWiFi() {
 bool WiFiHandler::isConnected() const {
     return connected;
 }
+
+void WiFiHandler::echoSerial(){
+    // if(espSerial->available()) {
+    //     String uartMessageBuff = espSerial->readStringUntil('\r');
+    //     strncpy(const_cast<char *>(uartMessage), uartMessageBuff.c_str(), sizeof(uartMessage) - 1);
+    //     uartMessage[sizeof(uartMessage) - 1] = '\0';
+    //     // sprintf((char*)emergencyMessage,"%s",response.c_str());
+    //     // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
+    //     espSerial->println("Received: " + uartMessageBuff);
+    // }
+    espSerial->println("Received: " + waitForResponse());
+}
+
 
 bool WiFiHandler::isModuleReady() {
     // bool ready = false;
@@ -140,66 +148,47 @@ void WiFiHandler::sleepMode(uint8_t mode) {
 //         return response;
 // }
 
+// String WiFiHandler::sendATCommand(const String &command, const char *expectedResponse) {
+//     String response;
+//     for (uint8_t attempt = 0; attempt < 3; attempt++) {
+//         // Clear any leftover data
+//         while (espSerial->available()) {
+//             espSerial->read();
+//         }
+//         espSerial->println(command);
+//         response = waitForResponse();
+//          if (response.length() > 0) {
+//              break;  // Got a response, no need to retry
+//          }
+//          _delay_ms(100);  // Wait before retry
+//     }
+//     return response;
+// }
+
 String WiFiHandler::sendATCommand(const String &command, const char *expectedResponse) {
     String response;
-    for (uint8_t attempt = 0; attempt < 100; attempt++) {
-        // Clear any leftover data
+    while (true) { // Loop until expected response is received
         while (espSerial->available()) {
             espSerial->read();
         }
         espSerial->println(command);
-        espSerial->print("\r\n");
         response = waitForResponse();
-        if (response.length() > 0) {
-            break;  // Got a response, no need to retry
+        // Check if the expected response is present
+        if (response.indexOf(expectedResponse) != -1) {
+            break; // Exit loop when expected response is found
         }
-        _delay_ms(100);  // Wait before retry
+        _delay_ms(100); // Short delay before retrying
     }
     return response;
 }
 
-// String WiFiHandler::waitForResponse() {
-//     uint16_t timeout = 500;
-//     String response;
-//     espSerial->setTimeout(timeout);  // Set timeout test
-//     unsigned long startTime = millis();
-//     while (!espSerial->available() && (millis() - startTime < timeout)) { //wait for timeout
-//     }
-//     if (espSerial->available()) {
-//         response = espSerial->readStringUntil('\r');
-//         //response = espSerial->readString(); // THIS DOESNT WORK AND I AM NOT SMART ENOUGH TO FIGYURE IT OUT
-//     }
-//     return response;
-// }
-
-// String WiFiHandler::waitForResponse() {
-//     uint16_t timeout = 500;
-//     String response;
-//     char c;
-//     unsigned long startTime = millis();
-//
-//     while ((millis() - startTime) < timeout) {
-//         if (espSerial->available()) {
-//             c = espSerial->read();
-//             response += c;
-//
-//             // Check for common AT command endings
-//             if (response.endsWith("\r\n") || response.endsWith("OK\r\n") || response.endsWith("OK")) {
-//                 break;
-//             }
-//         }
-//        // _delay_us(100);  // Small delay to prevent tight polling
-//     }
-//     return response;
-// }
-
 String WiFiHandler::waitForResponse() {
-    char *response = nullptr;
-    const String uartMessageBuff = espSerial->readStringUntil(*"\r\n");
-    strncpy(response, uartMessageBuff.c_str(), sizeof(response) - 1);
-    if (response != nullptr) response[sizeof(response) - 1] = '\0';
-    // sprintf((char*)emergencyMessage,"%s",response.c_str());
-    // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
+    String response;
+    if(espSerial->available()) {
+        response = espSerial->readStringUntil('\r');
+        strncpy(const_cast<char *>(uartMessage), response.c_str(), sizeof(uartMessage) - 1);
+        uartMessage[sizeof(uartMessage) - 1] = '\0';
+    }
     return response;
 }
 

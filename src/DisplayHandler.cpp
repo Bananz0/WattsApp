@@ -216,7 +216,8 @@ void DisplayHandler::showUARTScreen() {
 
 void DisplayHandler::secondReviewScreen() {
     sprintf(title, "TEAM\n    \n L  ");
-    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLACK,WHITE,OryxB,9);
+    pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, PURPLE,BLACK,OryxB,9);
+    pictorDrawCircle({310,220}, 5, GREEN);
 }
 
 DisplayHandler::~DisplayHandler() = default;
@@ -230,7 +231,6 @@ void DisplayHandler::startDisplay(bool vsync) {
 void DisplayHandler::stopDisplay() { //Should be used when turning off the Il Matto/Reset as it clears the screen contents
     clearScreen();
     screenOff();
-
 }
 
 void DisplayHandler::setBacklight(const state State) {

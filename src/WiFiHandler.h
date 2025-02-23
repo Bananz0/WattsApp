@@ -13,11 +13,14 @@
 
 class WiFiHandler {
 public:
-    WiFiHandler(HardwareSerial* serial, uint8_t enablePin);     // Pass serial port & enable pin
+    WiFiHandler(HardwareSerial *serial, uint8_t enablePin);
     bool connectToWiFi(const char *ssid, const char *password);
     void disconnectFromWiFi();
 
     bool isConnected() const;
+
+    void echoSerial();
+
     bool isModuleReady();
 
     const char* getIPAddress();

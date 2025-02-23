@@ -25,8 +25,9 @@
 
 #define CARROUSEL_E //Use CARROUSEL_E to enable and CARROUSEL_D to disable
 //#define DEBUG
-#define NORMAL_MODE
-//#define SECOND_REVIEW_MODE //Turn off all auxillary functions - Everything low power and only display team L TODO: Fully implement this.
+//#define NORMAL_MODE
+#define SECOND_REVIEW_MODE //Turn off all auxillary functions - Everything low power and only display team L TODO: Fully implement this.
+//#define UARTDEBUG //Use this to enable UART debug screen
 
 
 //Moved all timer functions to PWMHandler for central management
@@ -41,9 +42,8 @@ Sources sources(&analogueInput, &analogueOutput,&digitalOutput);
 DisplayHandler display(&loads,&sources);
 TimeHandler timeHandler;
 
-HardwareSerial wifiSerial = Serial;
-//HardwareSerial debugSerial = Serial;
-//WiFiHandler wifiHandler(&Serial, 36);
+//HardwareSerial *wifiSerial = &Serial;
+//WiFiHandler wifiHandler(wifiSerial, 36);
 
 float netCapacity = 0;
 uint16_t displayDuration = 2;
@@ -86,7 +86,7 @@ void drawTime() {
 void screenCarrousel() {
 #ifdef SECOND_REVIEW_MODE
     screen = SEC_REV_SCREEN;
-#elif !defined(SECOND_REVIEW_MODE)
+#elif  NORMAL_MODE
     //cycle through the screens
     if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
         if (emergencyScreen) {
@@ -98,6 +98,9 @@ void screenCarrousel() {
             lastScreenUpdateSecond = timeUTC->tm_sec;
         }
     }
+#endif
+#ifdef UARTDEBUG
+    screen = UART_SCREEN;
 #endif
 }
 
@@ -111,16 +114,6 @@ void updateMainStats() {
     }
 }
 
-void echoSerial(HardwareSerial &debugSerial){
-    if(debugSerial.available()) {
-        String uartMessageBuff = debugSerial.readStringUntil('\r');
-        strncpy(const_cast<char *>(uartMessage), uartMessageBuff.c_str(), sizeof(uartMessage) - 1);
-        uartMessage[sizeof(uartMessage) - 1] = '\0';
-        // sprintf((char*)emergencyMessage,"%s",response.c_str());
-        // memcpy(const_cast<char *>(emergencyMessage), response.c_str(), sizeof(response.length()));;
-        debugSerial.println("Received: " + uartMessageBuff);
-    }
-}
 
 void checkForDayChange() {
     //Copy all the stats to a temporary store. Array or struct could work
@@ -267,7 +260,7 @@ int main() {
     display.setOrientation(DisplayHandler::LANDSCAPE);
     // debugSerial.println("Initialized display and set to Landscape");
 
-    //wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
+//    wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
 
     //Boot and Initialization
     // debugSerial.println("Drawing boot sequence");
@@ -287,19 +280,19 @@ int main() {
     loads.turnLoadOff(3);
     loads.checkLoadCallChanges();
 
-    wifiSerial.begin(115200); //from arduino docs this initializes the hardware serial
+//    wifiSerial->begin(115200);
+
 
     // ReSharper disable once CppDFAEndlessLoop - CLion complains about forever while loop
     while (true) {
-        sources.requestMains(8);
-
         drawTime();
         screenCarrousel();
-        echoSerial(wifiSerial);
-        display.carouselScreen(UART_SCREEN); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so on
+        display.carouselScreen(screen); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
         updateMainStats();
         controlAlgrithm();
-        //wifiSerial.println("Loop complete");
+
+        //wifiHandler.echoSerial();
+
     }
 }
 

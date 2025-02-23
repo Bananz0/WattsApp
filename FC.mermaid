@@ -1,0 +1,38 @@
+flowchart TD
+    subgraph "Power Sources"
+        RE["Renewable Sources"]
+        RE --> |Read| PV["PV Capacity"]
+        RE --> |Read| WT["Wind Turbine Capacity"]
+        PV & WT --> |Sum| TRC["Total Renewable Capacity"]
+        BAT["Battery (24Ah max)"]
+        MAINS["Mains Power"]
+    end
+
+    subgraph "Load Management"
+        L1["Load 1"]
+        L2["Load 2"]
+        L3["Load 3"]
+        LCAP["Calculate Total Load Capacity"]
+        L1 & L2 & L3 --> LCAP
+    end
+
+    TRC --> NC["Calculate Net Capacity\n(Available - Required)"]
+    LCAP --> NC
+
+    NC --> CD{"Check Deficit"}
+    CD --> |Surplus| CHG["Charge Battery\nif >1A surplus"]
+    CD --> |Deficit| BD{"Check Battery"}
+
+    BD --> |"Battery >1Ah"| USBAT["Use Battery Power"]
+    BD --> |"Battery <1Ah"| UM["Use Mains Power"]
+
+    USBAT & UM --> CHECK{"Check if Power\nStill Insufficient"}
+
+    CHECK --> |Yes| DISABLE["Disable Loads\nby Priority"]
+    CHECK --> |No| NORMAL["Normal Operation"]
+
+    subgraph "Safety Checks"
+        MON["Monitor Busbar\nVoltage & Current"]
+        MON --> SAFE{"Check Safety\nLimits"}
+        SAFE --> |"Exceeded"| EMG["Emergency Mode"]
+    end
