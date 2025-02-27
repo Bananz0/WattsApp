@@ -18,6 +18,10 @@ android {
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
+    buildFeatures {
+        buildConfig = true
+    }
+
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -25,6 +29,12 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            buildConfigField("String", "INFLUXDB_URL", "\"${project.properties["influxdb_url"] ?: System.getenv("INFLUXDB_URL")}\"")
+            buildConfigField("String", "INFLUXDB_TOKEN", "\"${project.properties["influxdb_token"] ?: System.getenv("INFLUXDB_TOKEN")}\"")
+            buildConfigField("String", "INFLUXDB_ORG", "\"${project.properties["influxdb_org"] ?: System.getenv("INFLUXDB_ORG")}\"")
+            buildConfigField("String", "INFLUXDB_BUCKET", "\"${project.properties["influxdb_bucket"] ?: System.getenv("INFLUXDB_BUCKET")}\"")
         }
     }
     compileOptions {
