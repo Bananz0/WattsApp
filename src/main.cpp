@@ -1,5 +1,6 @@
 #include "time.h" // NOLINT(*-deprecated-headers)
 #include <TimeHandler.h>
+#include <WString.h>
 
 #include "globalVariables.h"
 
@@ -21,7 +22,7 @@
 #include "Loads.h"
 #include "Sources.h"
 
-#include "WiFiHandler.h"
+#include "ESP8266Handler.h"
 
 #define CARROUSEL_E //Use CARROUSEL_E to enable and CARROUSEL_D to disable
 //#define DEBUG
@@ -43,8 +44,8 @@ Sources sources(&analogueInput, &analogueOutput,&digitalOutput);
 DisplayHandler display(&loads,&sources);
 TimeHandler timeHandler;
 
-//HardwareSerial *wifiSerial = &Serial;
-//WiFiHandler wifiHandler(wifiSerial, 36);
+HardwareSerial *wifiSerial = &Serial;
+ESP8266Handler esp8266Handler(&loads, &sources);
 
 float netCapacity = 0;
 uint16_t displayDuration = 2;
@@ -288,6 +289,9 @@ int main() {
     loads.turnLoadOff(3);
     loads.checkLoadCallChanges();
 
+
+    esp8266Handler.sendDataToWifi();
+
 //   wifiSerial->begin(115200);
 
 
@@ -295,11 +299,12 @@ int main() {
     while (true) {
         drawTime();
         screenCarrousel();  //screen - variable to give to display.carrouselScreen() below
-        display.carouselScreen(BATTERY_SCREEN); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
+        display.carouselScreen(screen); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
         updateMainStats();
         controlAlgrithm();
+        esp8266Handler.sendDataToWifi(); //actually sends the data over serial0 to the esp hopefully.
 
-        sources.requestMains(2);
+        //requestMains(20);  //this is a hard request to test if the clamp works. Should trigger an error screen and TODO: Document this feature
         //wifiHandler.echoSerial();
     }
 }

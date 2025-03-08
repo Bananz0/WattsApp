@@ -98,7 +98,7 @@ bool WiFiHandler::sendToInfluxDB(const char *message) {
     return result;
 }
 
-void WiFiHandler::turnOnModule() {
+ void WiFiHandler::turnOnModule() {
     PORTA |= (1 << PORTA4); //PA4 to high
 }
 

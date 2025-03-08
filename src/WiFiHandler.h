@@ -30,10 +30,10 @@ public:
     bool sendToFirebase(const char* message);
     bool sendToInfluxDB(const char* message);
 
-    void turnOnModule();  // EN pin to 3.3v
-    void turnOffModule(); // EN low
+static    void turnOnModule();  // EN pin to 3.3v
+static    void turnOffModule(); // EN low
     void restartModule(); // soft restart the wifi module
-    void resetModule();   //reset the module but wont implement because not enough pins
+static    void resetModule();   //reset the module but wont implement because not enough pins
 
     void sleepMode(uint8_t mode);
 
