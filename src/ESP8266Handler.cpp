@@ -30,7 +30,16 @@ void ESP8266Handler::sendDataToWifi() {
              remainingDays, utc,
              loads->currentLoad1);
 
-    Serial.print(dataString); // Send over serial
+    //Calculate chdcksum shere
+    uint8_t checksum = 0;
+    for (int i = 0; dataString[i] != '\0'; i++) {
+        checksum ^= dataString[i];
+    }
+    Serial.print(dataString);
+    Serial.print("*");
+    Serial.println(checksum, HEX);
+
+
 
     //Debug output to serial monitor
     //Serial.print("Sent to Wifi: ");

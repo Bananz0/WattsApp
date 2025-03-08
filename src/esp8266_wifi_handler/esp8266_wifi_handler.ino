@@ -1,41 +1,41 @@
 #if defined(ESP32)
-  #include <WiFiMulti.h>
-  WiFiMulti wifiMulti;
-  #define DEVICE "ESP32"
-  #elif defined(ESP8266)
-  #include <ESP8266WiFiMulti.h>
-  ESP8266WiFiMulti wifiMulti;
-  #define DEVICE "ESP8266"
-  #endif
-  
-  #include <InfluxDbClient.h>
-  #include <InfluxDbCloud.h>
-  
-  // WiFi AP SSID
-  #define WIFI_SSID "Glen's XPS"
-  // WiFi password
-  #define WIFI_PASSWORD "eesp8266"
-  
-  #define INFLUXDB_URL "http://xps.mshome.net:8086"
-  #define INFLUXDB_TOKEN "iiWf_PqMPyerqIJOLyHPS6pEHnzshhFhhL7bC9dSbpkOztgEQqOuBwL_F5_UIuzFpbanUMzLJsPadRC5Axk-Fg=="
-  #define INFLUXDB_ORG "e4d0432f0ad4939a"
-  #define INFLUXDB_BUCKET "wattsapp_streamed_data"
-  
-  // Time zone info
-  #define TZ_INFO "UTC0"
-  
-  // Declare InfluxDB client instance with preconfigured InfluxCloud certificate
-  InfluxDBClient client(INFLUXDB_URL, INFLUXDB_ORG, INFLUXDB_BUCKET, INFLUXDB_TOKEN, InfluxDbCloud2CACert);
-  
-  // Declare Data point
-  Point sensor("wifi_status");
-  Point loadStatus("load_status");
-  Point sourcesStatus("sources_status");
-  Point generalStats("general_statuses");
+#include <WiFiMulti.h>
+WiFiMulti wifiMulti;
+#define DEVICE "ESP32"
+#elif defined(ESP8266)
+#include <ESP8266WiFiMulti.h>
+ESP8266WiFiMulti wifiMulti;
+#define DEVICE "ESP8266"
+#endif
 
-  String getValue(String data, char separator, int index) {
+#include <InfluxDbClient.h>
+#include <InfluxDbCloud.h>
+
+// WiFi AP SSID
+#define WIFI_SSID "Glen's XPS"
+// WiFi password
+#define WIFI_PASSWORD "eesp8266"
+
+#define INFLUXDB_URL "http://xps.mshome.net:8086"
+#define INFLUXDB_TOKEN "iiWf_PqMPyerqIJOLyHPS6pEHnzshhFhhL7bC9dSbpkOztgEQqOuBwL_F5_UIuzFpbanUMzLJsPadRC5Axk-Fg=="
+#define INFLUXDB_ORG "e4d0432f0ad4939a"
+#define INFLUXDB_BUCKET "wattsapp_streamed_data"
+
+// Time zone info
+#define TZ_INFO "UTC0"
+
+// Declare InfluxDB client instance with preconfigured InfluxCloud certificate
+InfluxDBClient client(INFLUXDB_URL, INFLUXDB_ORG, INFLUXDB_BUCKET, INFLUXDB_TOKEN, InfluxDbCloud2CACert);
+
+// Declare Data point
+Point sensor("wifi_status");
+Point loadStatus("load_status");
+Point sourcesStatus("sources_status");
+Point generalStats("general_statuses");
+
+String getValue(String data, char separator, int index) {
   int found = 0;
-  int strIndex[] = { 0, -1 };
+  int strIndex[] = {0, -1};
   int maxIndex = data.length() - 1;
 
   for (int i = 0; i <= maxIndex && found <= index; i++) {
@@ -48,53 +48,77 @@
   return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
 }
 
-  void setup() {
-    Serial.begin(115200);
-  
-    // Setup wifi
-    WiFi.mode(WIFI_STA);
-    wifiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
-  
-    Serial.print("Connecting to wifi");
-    while (wifiMulti.run() != WL_CONNECTED) {
-      Serial.print(".");
-      delay(100);
-    }
-    Serial.println();
-  
-    // Accurate time is necessary for certificate validation and writing in batches
-    // We use the NTP servers in your area as provided by: https://www.pool.ntp.org/zone/
-    // Syncing progress and the time will be printed to Serial.
-    timeSync(TZ_INFO, "pool.ntp.org", "time.nis.gov");
-  
-  
-    // Check server connection
-    if (client.validateConnection()) {
-      Serial.print("Connected to InfluxDB: ");
-      Serial.println(client.getServerUrl());
-    } else {
-      Serial.print("InfluxDB connection failed: ");
-      Serial.println(client.getLastErrorMessage());
-    }
+void setup() {
+  Serial.begin(115200);
 
+  // Setup wifi
+  WiFi.mode(WIFI_STA);
+  wifiMulti.addAP(WIFI_SSID, WIFI_PASSWORD);
 
-    // Add tags to the data point
-    sensor.addTag("device", DEVICE);
-    sensor.addTag("SSID", WiFi.SSID());
+  Serial.print("Connecting to wifi");
+  while (wifiMulti.run() != WL_CONNECTED) {
+    Serial.print(".");
+    delay(100);
+  }
+  Serial.println();
 
-    //Add the loads stgatuses to the data points with their tags for easier viewing.
-    loadStatus.addTag("POWERSTATS", "load");
-    sourcesStatus.addTag("POWERSTATS", "source");
-    generalStats.addTag("POWERSTATS", "general");
+  // Accurate time is necessary for certificate validation and writing in batches
+  // We use the NTP servers in your area as provided by: https://www.pool.ntp.org/zone/
+  // Syncing progress and the time will be printed to Serial.
+  timeSync(TZ_INFO, "pool.ntp.org", "time.nis.gov");
 
+  // Check server connection
+  if (client.validateConnection()) {
+    Serial.print("Connected to InfluxDB: ");
+    Serial.println(client.getServerUrl());
+  } else {
+    Serial.print("InfluxDB connection failed: ");
+    Serial.println(client.getLastErrorMessage());
   }
 
-  void processSerialData(String data) {
-  data.trim();  // Remove leading/trailing whitespace
+  //dd tags to the data point
+  sensor.addTag("device", DEVICE);
+  sensor.addTag("SSID", WiFi.SSID());
+
+  //Add the loads stgatuses to the data points with their tags for easier viewing.
+  loadStatus.addTag("POWERSTATS", "load");
+  sourcesStatus.addTag("POWERSTATS", "source");
+  generalStats.addTag("POWERSTATS", "general");
+}
+
+void processSerialData(String data) {
+  data.trim();
   if (data.length() == 0) {
     Serial.println("Skipping empty line");
-    return; // Skip empty lines
+    return;  // Skip empty lines
   }
+
+    int starIndex = data.indexOf('*');
+    if (starIndex == -1) {
+        Serial.println("No checksum delimiter found");
+        return;
+    }
+
+    String dataPart = data.substring(0, starIndex);
+    String checksumPart = data.substring(starIndex + 1);
+
+    // Calculate Checksum
+    uint8_t calculatedChecksum = 0;
+    for (int i = 0; i < dataPart.length(); i++) {
+        calculatedChecksum ^= dataPart.charAt(i);
+    }
+
+    // Convert received checksum from HEX to int
+    uint8_t receivedChecksum = strtol(checksumPart.c_str(), NULL, 16);
+
+    // Verify Checksum
+    if (calculatedChecksum != receivedChecksum) {
+        Serial.print("Checksum mismatch: calculated = ");
+        Serial.print(calculatedChecksum, HEX);
+        Serial.print(", received = ");
+        Serial.println(receivedChecksum, HEX);
+        return;
+    }
 
   // Parse the CSV data
   float windTurbineCapacity = getValue(data, ',', 0).toFloat();
@@ -155,7 +179,7 @@ void loop() {
   }
 
   if (Serial.available() > 0) {
-    String data = Serial.readStringUntil('\n'); // Read until newline
+    String data = Serial.readStringUntil('\n');  // Read until newline
     processSerialData(data);
   }
 

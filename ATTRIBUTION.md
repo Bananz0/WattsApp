@@ -20,6 +20,15 @@ This project includes code and resources from third-party sources. The following
 - **Author(s):** [Bruno](https://github.com/bportaluri)
 - **Used for:** Arduino WiFi library for ESP8266 modules
 
+### 2. [XOR_Checksum](https://github.com/The-Black-Pig/XOR_checksum/tree/master)
+- **Author(s):** [Steve Clements](https://github.com/The-Black-Pig/)
+- **Used for:** Using XOR checksums for serial communications
+
+### 2. [Checksum](https://github.com/The-Black-Pig/XOR_checksum/tree/master)
+- **Author(s):** [Bolder Flight Systems](https://github.com/bolderflight/checksum)
+- **Used for:** This library contains clases and methods for computing common checksums. This library is compatible with Arduino and with CMake build systems.
+
+
 
 ## License Compliance
 

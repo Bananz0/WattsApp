@@ -37,7 +37,7 @@ void Loads::checkLoadCallChanges() {
     currentLoad1Call = input->readLoad1Call();
     currentLoad2Call = input->readLoad2Call();
     currentLoad3Call = input->readLoad3Call();
-    emergencyScreen = currentLoad1Call || currentLoad2Call || currentLoad3Call;
+    //emergencyScreen = currentLoad1Call || currentLoad2Call || currentLoad3Call;
 
     //load 1
     if (currentLoad1Call && !lastLoad1Call) {
