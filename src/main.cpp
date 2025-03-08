@@ -27,8 +27,8 @@
 //#define DEBUG
 
 #define NORMAL_MODE
-#define SECOND_REVIEW_MODE //Turn off all auxillary functions - Everything low power and only display team L TODO: Fully implement this.
-#define UARTDEBUG //Use this to enable UART debug screen
+//#define SECOND_REVIEW_MODE //Turn off all auxillary functions - Everything low power and only display team L TODO: Fully implement this.
+//#define UARTDEBUG //Use this to enable UART debug screen
 
 
 //Moved all timer functions to PWMHandler for central management (changed ports cause of display later on)
@@ -178,6 +178,14 @@ void controlAlgrithm() {
             remainingDays -= 1;
 
             //TODO: update battery stats here maybe?
+            if (batteryDecrease) {
+                sources.batteryCapacity-=1;
+                batteryDecrease = false;
+            }
+            if (batteryIncrease) {
+                sources.batteryCapacity+=1;
+                batteryIncrease = false;
+            }
 
             dayHasChanged = false;
         }
@@ -286,12 +294,12 @@ int main() {
     // ReSharper disable once CppDFAEndlessLoop - CLion complains about forever while loop
     while (true) {
         drawTime();
-        screenCarrousel();
-        display.carouselScreen(screen); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
+        screenCarrousel();  //screen - variable to give to display.carrouselScreen() below
+        display.carouselScreen(BATTERY_SCREEN); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
         updateMainStats();
         controlAlgrithm();
 
-        sources.requestMains(10);
+        sources.requestMains(2);
         //wifiHandler.echoSerial();
     }
 }

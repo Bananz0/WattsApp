@@ -29,7 +29,8 @@ void Sources::requestMains(float mainsCapacityIn) {
 void Sources::requestBattery(uint8_t batteryCapacityOut) {
     batteryHandler->dischargeBattery();
     if(batteryCapacity >= 1) {
-        batteryCapacity-=1;
+        batteryDecrease = true;
+        //batteryCapacity-=1;
     }
     isBatteryCharging = false;
 }

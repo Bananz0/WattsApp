@@ -56,6 +56,8 @@ extern volatile bool emergencyScreen;
 extern volatile char emergencyMessage[100];
 extern volatile char uartMessage[40];
 
+extern volatile bool batteryDecrease, batteryIncrease;
+
 
 extern  time_t startNonBlockingWait();
 
