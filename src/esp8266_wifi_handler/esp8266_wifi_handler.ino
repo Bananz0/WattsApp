@@ -16,9 +16,9 @@
   // WiFi password
   #define WIFI_PASSWORD "eesp8266"
   
-  #define INFLUXDB_URL "http://localhost:8086"
-  #define INFLUXDB_TOKEN "vXi2rK6BbpKursU3Q4ryb8M9_XllDm0rcun9rDdn2T-c1I-s4qUAyZVD-CoI6qhppRUAert0BcFPHf43snN7XA=="
-  #define INFLUXDB_ORG "8d5f0b691540608f"
+  #define INFLUXDB_URL "http://xps.mshome.net:8086"
+  #define INFLUXDB_TOKEN "iiWf_PqMPyerqIJOLyHPS6pEHnzshhFhhL7bC9dSbpkOztgEQqOuBwL_F5_UIuzFpbanUMzLJsPadRC5Axk-Fg=="
+  #define INFLUXDB_ORG "e4d0432f0ad4939a"
   #define INFLUXDB_BUCKET "wattsapp_streamed_data"
   
   // Time zone info
@@ -29,7 +29,25 @@
   
   // Declare Data point
   Point sensor("wifi_status");
-  
+  Point loadStatus("load_status");
+  Point sourcesStatus("sources_status");
+  Point generalStats("general_statuses");
+
+  String getValue(String data, char separator, int index) {
+  int found = 0;
+  int strIndex[] = { 0, -1 };
+  int maxIndex = data.length() - 1;
+
+  for (int i = 0; i <= maxIndex && found <= index; i++) {
+    if (data.charAt(i) == separator || i == maxIndex) {
+      found++;
+      strIndex[0] = strIndex[1] + 1;
+      strIndex[1] = (i == maxIndex) ? i + 1 : i;
+    }
+  }
+  return found > index ? data.substring(strIndex[0], strIndex[1]) : "";
+}
+
   void setup() {
     Serial.begin(115200);
   
@@ -54,7 +72,7 @@
     if (client.validateConnection()) {
       Serial.print("Connected to InfluxDB: ");
       Serial.println(client.getServerUrl());
-    } else 
+    } else {  // <-- This opening brace was missing
       Serial.print("InfluxDB connection failed: ");
       Serial.println(client.getLastErrorMessage());
     }
@@ -63,21 +81,87 @@
     // Add tags to the data point
     sensor.addTag("device", DEVICE);
     sensor.addTag("SSID", WiFi.SSID());
+
+    //Add the loads stgatuses to the data points with their tags for easier viewing.
+    loadStatus.addTag("category", "load");
+    sourcesStatus.addTag("category", "source");
+    generalStats.addTag("category", "general");
+  
   }
 
 void loop() {
-    // Clear fields for reusing the point. Tags will remain the same as set above.
+
+  if (Serial.available() > 0) {
+        String data = Serial.readStringUntil('\n');
+        data.trim();  // Remove newline and whitespace
+
+
+        // Parse the CSV data sent form the Il MAtto 
+        float windTurbineCapacity = getValue(data, ',', 0).toFloat();
+        float pvCapacity = getValue(data, ',', 1).toFloat();
+        float busbarVoltage = getValue(data, ',', 2).toFloat();
+        float busbarCurrent = getValue(data, ',', 3).toFloat();
+        float totalRenewableCapacity = getValue(data, ',', 4).toFloat();
+        int batteryCapacity = getValue(data, ',', 5).toInt();
+        int mainsCapacity = getValue(data, ',', 6).toInt();
+        int dayCount = getValue(data, ',', 7).toInt();
+        float totalLoadCapacity = getValue(data, ',', 8).toFloat();
+        float loadDeficit = getValue(data, ',', 9).toFloat();
+        int remainingDays = getValue(data, ',', 10).toInt();
+        int utc = getValue(data, ',', 11).toInt();
+        int load1Status = getValue(data, ',', 12).toInt();
+
+        //SourceData
+        sourcesStatus.clearFields();
+        sourcesStatus.addField("wind", windTurbineCapacity);
+        sourcesStatus.addField("pv", pvCapacity);
+        sourcesStatus.addField("voltage", busbarVoltage);
+        sourcesStatus.addField("current", busbarCurrent);
+        sourcesStatus.addField("renewable", totalRenewableCapacity);
+        sourcesStatus.addField("battery", batteryCapacity);
+        sourcesStatus.addField("mains", mainsCapacity);
+        sourcesStatus.addField("deficit", loadDeficit);
+
+        //Loadstaeus Data ppoints 
+        loadStatus.clearFields();
+        loadStatus.addField("load", totalLoadCapacity);
+        loadStatus.addField("load1", load1Status);
+
+        //General Stats data point s
+        generalStats.clearFields();
+        generalStats.addField("day", dayCount);
+        generalStats.addField("remaining", remainingDays);
+        generalStats.addField("utc", utc);
+
+
+        //Send the data to InfluxDB
+        if (!client.writePoint(sourcesStatus)) {
+          Serial.print("InfluxDB write failed (sources): ");
+          Serial.println(client.getLastErrorMessage());
+        }
+        if (!client.writePoint(loadStatus)) {
+          Serial.print("InfluxDB write failed (loads): ");
+          Serial.println(client.getLastErrorMessage());
+        }
+        if (!client.writePoint(generalStats)) {
+          Serial.print("InfluxDB write failed (general): ");
+          Serial.println(client.getLastErrorMessage());
+        }
+        Serial.println("Sources, Load and General Stats sent");
+  }
+  
+    //Clear fields for reusing the point. Tags will remain the same as set above.
     sensor.clearFields();
   
-    // Store measured value into point
-    // Report RSSI of currently connected network
+    //Store measured value into point
+    //Report RSSI of currently connected network
     sensor.addField("rssi", WiFi.RSSI());
   
     // Print what are we exactly writing
     Serial.print("Writing: ");
     Serial.println(sensor.toLineProtocol());
   
-    // Check WiFi connection and reconnect if needed
+    //Check WiFi connection and reconnect if needed
     if (wifiMulti.run() != WL_CONNECTED) {
       Serial.println("Wifi connection lost");
     }
