@@ -5,9 +5,10 @@
 #include "AnalogueOutput.h"
 #include <string.h>
 
-AnalogueOutput::AnalogueOutput() {
+AnalogueOutput::AnalogueOutput(): scaledMainsCapacity(0) {
     pWMHandler.initializePWM();
 }
+
 void AnalogueOutput::setMainsCapacity(float mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
     // We need to clamp the output from 0-10v and scale it down to 3.3v
     //Voltage Clamp
@@ -24,5 +25,6 @@ void AnalogueOutput::setMainsCapacity(float mainsCapacity) { //Set Mains Capacit
     //Voltage Scale - 0-10A scaled to 0-3.3v
     scaledMainsCapacity = (mainsCapacity/10.0f) * Vref;
 
-    pWMHandler.setOutputVoltage(scaledMainsCapacity);
+    //All of this can be ignored as I have found a workaround from final scenario that limits the voltage output to 2v which the Il Matto can handle conveniently
+    pWMHandler.setOutputVoltage(mainsCapacity);
 }

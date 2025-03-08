@@ -13,7 +13,7 @@ public:
     void setMainsCapacity(float mainsCapacity);
 private:
     PWMHandler pWMHandler;
-    float scaledMainsCapacity;
+    float scaledMainsCapacity{};
 
 };//Second RJ45 Port D
 
