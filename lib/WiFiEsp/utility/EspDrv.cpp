@@ -19,8 +19,8 @@ along with The Arduino WiFiEsp library.  If not, see
 #include <Arduino.h>
 #include <avr/pgmspace.h>
 
-#include "WifiEsp/utility/EspDrv.h"
-#include "WifiEsp/utility/debug.h"
+#include "EspDrv.h"
+#include "debug.h"
 
 
 #define NUMESPTAGS 5

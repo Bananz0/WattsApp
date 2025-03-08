@@ -94,8 +94,8 @@ void RingBuffer::getStrN(char * destination, unsigned int skipChars, unsigned in
 {
 	int len = ringBufP-ringBuf-skipChars;
 
-	if (len>num)
-		len=num;
+	if (len>static_cast<int>(num))
+		len=static_cast<int>(num);
 
 	// copy buffer to destination string
 	strncpy(destination, ringBuf, len);
