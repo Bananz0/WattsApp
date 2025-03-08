@@ -7,6 +7,9 @@
 
 #include "Loads.h"
 #include "Sources.h"
+#include <Arduino.h>
+#include <WiFiEsp/WiFiEsp.h>
+#include "WiFiHandler.h"
 
 #include <HardwareSerial.h>
 #include "globalVariables.h"

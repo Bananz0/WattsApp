@@ -178,6 +178,8 @@ void controlAlgrithm() {
             dayCount +=1;
             remainingDays -= 1;
 
+            esp8266Handler.sendDataToWifi();
+
             //TODO: update battery stats here maybe?
             if (batteryDecrease) {
                 sources.batteryCapacity-=1;
@@ -269,7 +271,7 @@ int main() {
     display.setOrientation(DisplayHandler::LANDSCAPE);
     // debugSerial.println("Initialized display and set to Landscape");
 
-//    wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
+                                                                            //wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
 
     //Boot and Initialization
     // debugSerial.println("Drawing boot sequence");
@@ -288,9 +290,6 @@ int main() {
     loads.turnLoadOff(2);
     loads.turnLoadOff(3);
     loads.checkLoadCallChanges();
-
-
-    esp8266Handler.sendDataToWifi();
 
 //   wifiSerial->begin(115200);
 

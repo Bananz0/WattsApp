@@ -4,21 +4,11 @@
 
 #include "ESP8266Handler.h"
 
-#include <Arduino.h>
-#include <WiFiEsp/WiFiEsp.h>
-
-#include "WiFiHandler.h"
-
 ESP8266Handler::ESP8266Handler(Loads *loads, Sources *sources): loads(loads), sources(sources) {
     enableESP(); //Set the EN pin to High (dont remember what it was but will recheck the pin map;
-
     HardwareSerial *wifiSerial = &Serial;
     wifiSerial->begin(115200);
     wifiSerial->println("ATMEGA_WIFI_SETUP_COMPLETE");
-
-
-
-
 }
 
 ESP8266Handler::~ESP8266Handler() = default;
