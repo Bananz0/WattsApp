@@ -5,12 +5,25 @@
 #ifndef ESP8266HANDLER_H
 #define ESP8266HANDLER_H
 
+#include "Loads.h"
+#include "Sources.h"
 
+#include <HardwareSerial.h>
+#include "globalVariables.h"
+#include "globalVariables.h"
 
 class ESP8266Handler {
+  public:
+    ESP8266Handler(Loads *loads, Sources *sources);
+    ~ESP8266Handler();
 
+    void enableESP();
+    void sendDataToWifi();
+
+
+    private:
+      Loads *loads;
+      Sources *sources;
 };
-
-
 
 #endif //ESP8266HANDLER_H
