@@ -279,11 +279,10 @@ void  controlAlgrithm() {
 void updateInfluxDB() {
     uint32_t currentMillis = millis();
     if (currentMillis - lastEspUpdateUpdateMillis >= espUpdateInterval) {
-        lastStatsUpdateMillis = currentMillis;
+        lastEspUpdateUpdateMillis = currentMillis;  // Corrected line
         esp8266Handler.sendDataToWifi();
     }
 }
-
 //ADC ISR
 ISR(ADC_vect){
     ADCraw = ADC;
