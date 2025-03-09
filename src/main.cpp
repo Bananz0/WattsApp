@@ -62,9 +62,9 @@ uint32_t screenUpdateInterval = 2000;//2secs
 uint32_t lastStatsUpdateMillis = 0;
 uint32_t statsUpdateInterval = 100;//100ms
 uint32_t lastEspUpdateUpdateMillis = 0;
-uint32_t espUpdateInterval = 2000;//seconds2
+uint32_t espUpdateInterval = 2500;//seconds1.5
 uint32_t lastDayCheckUpdateMillis = 0;
-uint32_t dayCheckUpdateInterval = 2000;
+uint32_t dayCheckUpdateInterval = 2000;//2 sec
 
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
@@ -279,7 +279,7 @@ void  controlAlgrithm() {
 void updateInfluxDB() {
     uint32_t currentMillis = millis();
     if (currentMillis - lastEspUpdateUpdateMillis >= espUpdateInterval) {
-        lastEspUpdateUpdateMillis = currentMillis;  // Corrected line
+        lastEspUpdateUpdateMillis = currentMillis;
         esp8266Handler.sendDataToWifi();
     }
 }
@@ -351,7 +351,7 @@ int main() {
         display.carouselScreen(screen); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
         updateMainStats();
         controlAlgrithm();
-        esp8266Handler.processSerialCommand();
+        //esp8266Handler.processSerialCommand();
         updateInfluxDB();
 
         //requestMains(20);  //this is a hard request to test if the clamp works. Should trigger an error screen and TODO: Document this feature

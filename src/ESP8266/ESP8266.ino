@@ -212,7 +212,7 @@ void processSerialData(String data) {
   }
   bool isChecksumValid = validateChecksum(data);
 
-  if (true) {
+  if (isChecksumValid) {
     parseCSVData(data);
     // Send the data to InfluxDB
     if (!client.writePoint(sourcesStatus)) {

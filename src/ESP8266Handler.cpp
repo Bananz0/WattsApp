@@ -9,7 +9,7 @@ ESP8266Handler::ESP8266Handler(Loads *loads, Sources *sources): loads(loads), so
     HardwareSerial *wifiSerial = &Serial;
     wifiSerial->begin(115200);
     wifiSerial->setTimeout(1000);
-    wifiSerial->println("ATMEGA_WIFI_SETUP_COMPLETE");
+    //wifiSerial->println("ATMEGA_WIFI_SETUP_COMPLETE");
 }
 
 ESP8266Handler::~ESP8266Handler() = default;
@@ -21,45 +21,67 @@ void ESP8266Handler::enableESP() {
 }
 
 void ESP8266Handler::sendDataToWifi() {
-    char dataString[100];
-    const int len = snprintf(dataString, sizeof(dataString),
-             "%.2f,%.2f,%.2f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.2f,%.2f,%d\n", //Format teh sring so it is parseable by the ESP
-             //Renewable Stats
-             static_cast<double>(sources->windTurbineCapacity), //Float
-             static_cast<double>(sources->pvCapacity),//Float
-             static_cast<double>(sources->totalRenewableCapacity),//Float
-             //Battery Stores
-             sources->batteryCapacity,//Int
-             //Final Source
-             static_cast<double>(sources->mainsCapacity),//Float
-             //Busbar stuff
-             static_cast<double>(sources->busbarVoltage),//Float
-             static_cast<double>(sources->busbarCurrent),//Float
-             static_cast<double>(sources->averagePower),//Float
-             static_cast<double>(sources->totalEnergy),//Float
-             //Load Statuses
-             //Current Load Statuses
-             loads->currentLoadStatus[0],
-             loads->currentLoadStatus[1],
-             loads->currentLoadStatus[2],
-             //Current Requests
-             loads->currentLoad1Call,
-             loads->currentLoad2Call,
-             loads->currentLoad3Call,
-             //Load Overicdes for when we can't supply enough power -definitiojn of over engineering.
-             loads->loadOverride1,
-             loads->loadOverride2,
-             loads->loadOverride3,
-             //TotalCapacityStuff
-             static_cast<double>(sources->loadDeficit),
-             static_cast<double>(loads->totalLoadCapacity),
-             //Day Statuses - Twice cause fuck it we ball (parity)
-             static_cast<int>(dayCount)
-             //timeUTC->tm_mday
-             );
+    // char dataString[100];
+    // const int len = snprintf(dataString, sizeof(dataString),
+    //          "%.2f,%.2f,%.2f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.2f,%.2f,%d\n", //Format teh sring so it is parseable by the ESP
+    //          //Renewable Stats
+    //          static_cast<double>(sources->windTurbineCapacity), //Float
+    //          static_cast<double>(sources->pvCapacity),//Float
+    //          static_cast<double>(sources->totalRenewableCapacity),//Float
+    //          //Battery Stores
+    //          sources->batteryCapacity,//Int
+    //          //Final Source
+    //          static_cast<double>(sources->mainsCapacity),//Float
+    //          //Busbar stuff
+    //          static_cast<double>(sources->busbarVoltage),//Float
+    //          static_cast<double>(sources->busbarCurrent),//Float
+    //          static_cast<double>(sources->averagePower),//Float
+    //          static_cast<double>(sources->totalEnergy),//Float
+    //          //Load Statuses
+    //          //Current Load Statuses
+    //          loads->currentLoadStatus[0],
+    //          loads->currentLoadStatus[1],
+    //          loads->currentLoadStatus[2],
+    //          //Current Requests
+    //          loads->currentLoad1Call,
+    //          loads->currentLoad2Call,
+    //          loads->currentLoad3Call,
+    //          //Load Overicdes for when we can't supply enough power -definitiojn of over engineering.
+    //          loads->loadOverride1,
+    //          loads->loadOverride2,
+    //          loads->loadOverride3,
+    //          //TotalCapacityStuff
+    //          static_cast<double>(sources->loadDeficit),
+    //          static_cast<double>(loads->totalLoadCapacity),
+    //          //Day Statuses - Twice cause fuck it we ball (parity)
+    //          static_cast<int>(dayCount)
+    //          //timeUTC->tm_mday
+    //          );
+
+    String dataString = String(sources->windTurbineCapacity, 2) + "," +  //Float, 2 decimal places
+                 String(sources->pvCapacity, 2) + "," +           //Float, 2 decimal places
+                 String(sources->totalRenewableCapacity, 2) + "," + //Float, 2 decimal places
+                 String(sources->batteryCapacity) + "," +           //Int
+                 String(sources->mainsCapacity, 2) + "," +           //Float, 2 decimal places
+                 String(sources->busbarVoltage, 2) + "," +         //Float, 2 decimal places
+                 String(sources->busbarCurrent, 2) + "," +         //Float, 2 decimal places
+                 String(sources->averagePower, 2) + "," +         //Float, 2 decimal places
+                 String(sources->totalEnergy, 2) + "," +           //Float, 2 decimal places
+                 String(loads->currentLoadStatus[0]) + "," +        //Int (bool represented as 0 or 1)
+                 String(loads->currentLoadStatus[1]) + "," +        //Int (bool represented as 0 or 1)
+                 String(loads->currentLoadStatus[2]) + "," +        //Int (bool represented as 0 or 1)
+                 String(loads->currentLoad1Call) + "," +             //Int (bool represented as 0 or 1)
+                 String(loads->currentLoad2Call) + "," +             //Int (bool represented as 0 or 1)
+                 String(loads->currentLoad3Call) + "," +             //Int (bool represented as 0 or 1)
+                 String(loads->loadOverride1) + "," +              //Int (bool represented as 0 or 1)
+                 String(loads->loadOverride2) + "," +              //Int (bool represented as 0 or 1)
+                 String(loads->loadOverride3) + "," +              //Int (bool represented as 0 or 1)
+                 String(sources->loadDeficit, 2) + "," +           //Float, 2 decimal places
+                 String(loads->totalLoadCapacity, 2) + "," +       //Float, 2 decimal places
+                 String(dayCount);                                    //Int
 
     bfs::Fletcher16 chk;
-    const uint16_t result = chk.Compute(reinterpret_cast<uint8_t const *>(dataString), len);
+    const uint16_t result = chk.Compute(reinterpret_cast<const uint8_t*>(dataString.c_str()), dataString.length());
     Serial.print(dataString);
     Serial.print("*");
     Serial.println(result, HEX);
@@ -86,12 +108,12 @@ void ESP8266Handler::processSerialCommand() {
         strncpy(const_cast<char *>(uartMessage), receivedData.c_str(), sizeof(uartMessage) - 1); //Sends it to UARTDebugScreen
         if (receivedData.equalsIgnoreCase("day")) {
             dayHasChanged = true;
-            Serial.println("Received command: dayHasChanged = true");
+            //Serial.println("Received command: dayHasChanged = true");
         } else if (receivedData.equalsIgnoreCase("noday")) {
             dayHasChanged = false;
-            Serial.println("Received command: dayHasChanged = false");
+            //Serial.println("Received command: dayHasChanged = false");
         } else {
-            Serial.print("Unknown command: ");
+            //Serial.print("Unknown command: ");
             Serial.println(receivedData);
         }
     }

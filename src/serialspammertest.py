@@ -39,12 +39,12 @@ def generate_data():
     ]
     return ",".join(f"{v:.2f}" if isinstance(v, float) else str(v) for v in data_values)
 
-for i in range(10):
+for i in range(1000):
     data = generate_data()
     if i % 2 == 0:
-        delay = random.uniform(1000, 1500) / 1000
+        delay = random.uniform(1800, 2000) / 1000
     else:
-        delay = random.uniform(1000, 1500) / 1000
+        delay = random.uniform(2000, 2200) / 1000
     ser.write((data + "\n").encode())  # Send the data
     print(f"Sent: {data} (Delay: {delay*1000:.1f}ms)")
 
