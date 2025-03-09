@@ -112,6 +112,7 @@ void Loads::calculateLoadCapacity() {
     // if (currentLoad3Call) {
     //     currentTotalLoad += currentLoad3;
     // }
+    totalLoadCapacity = 0;
     for (int i = 0; i < 2; i++) {
         totalLoadCapacity += currentLoad[i]*currentLoadStatus[i];
     }
