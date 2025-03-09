@@ -27,7 +27,7 @@ public:
             totalEnergy,
             mainsCapacity;
 
-    uint8_t batteryCapacity{0};
+    int8_t batteryCapacity{-1};
     float totalAvailableCapacity{0};
     float totalAvailableCapacityMain{0};
     float loadDeficit{0};

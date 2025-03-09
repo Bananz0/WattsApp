@@ -24,8 +24,8 @@ This project includes code and resources from third-party sources. The following
 - **Author(s):** [Steve Clements](https://github.com/The-Black-Pig/)
 - **Used for:** Using XOR checksums for serial communications
 
-### 2. [Checksum](https://github.com/The-Black-Pig/XOR_checksum/tree/master)
-- **Author(s):** [Bolder Flight Systems](https://github.com/bolderflight/checksum)
+### 2. [Checksum](https://github.com/bolderflight/checksum)
+- **Author(s):** [Bolder Flight Systems](https://github.com/bolderflight)
 - **Used for:** This library contains clases and methods for computing common checksums. This library is compatible with Arduino and with CMake build systems.
 
 

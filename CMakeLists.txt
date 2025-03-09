@@ -88,7 +88,7 @@ set(CMAKE_CXX_FLAGS "${CXXFLAGS}")
 set(CMAKE_ASM_FLAGS   "${CFLAGS}")
 
 # Project setup
-include_directories(${INC_PATH} ${SRC_PATH} ${LIB_PATH} ${FONT_PATH} ${ARDUINO_PATH})
+include_directories(${INC_PATH} ${SRC_PATH} ${LIB_PATH} ${FONT_PATH} ${ARDUINO_PATH} ${LIB_PATH}/checksum)
 
 add_executable(${PROJECT_NAME} ${SRC_FILES} ${LIB_FILES} ${ARDUINO_FILES})
 

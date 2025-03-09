@@ -5,15 +5,16 @@
 #ifndef ESP8266HANDLER_H
 #define ESP8266HANDLER_H
 
-#include "Loads.h"
-#include "Sources.h"
 #include <Arduino.h>
 #include <WiFiEsp/WiFiEsp.h>
+#include "Loads.h"
+#include "Sources.h"
 #include "WiFiHandler.h"
 
 #include <HardwareSerial.h>
 #include "globalVariables.h"
 #include "globalVariables.h"
+#include <checksum/checksum.h>
 
 class ESP8266Handler {
   public:

@@ -21,7 +21,7 @@ void ESP8266Handler::enableESP() {
 
 void ESP8266Handler::sendDataToWifi() {
     char dataString[100];
-    snprintf(dataString, sizeof(dataString),
+    const int len = snprintf(dataString, sizeof(dataString),
              "%.2f,%.2f,%.2f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.2f,%.2f,%d\n", //Format teh sring so it is parseable by the ESP
              //Renewable Stats
              static_cast<double>(sources->windTurbineCapacity), //Float
@@ -57,19 +57,21 @@ void ESP8266Handler::sendDataToWifi() {
              //timeUTC->tm_mday
              );
 
-    //Simple Checksum (XOR) I have included a library for possibly CRC checksums and will work on that latere
-    //TODO: Implement CRC Checksum from Checksum Library from Bolder Flight Systems
-
-    //Calculate chdcksum shere
-    uint8_t checksum = 0;
-    for (int i = 0; dataString[i] != '\0'; i++) {
-        checksum ^= dataString[i];
-    }
+    bfs::Fletcher16 chk;
+    const uint16_t result = chk.Compute(reinterpret_cast<uint8_t const *>(dataString), len);
     Serial.print(dataString);
     Serial.print("*");
-    Serial.println(checksum, HEX);
+    Serial.println(result, HEX);
 
-
+    //This was a simple XOR Checksum
+    // //Calculate chdcksum shere
+    // uint8_t checksum = 0;
+    // for (int i = 0; dataString[i] != '\0'; i++) {
+    //     checksum ^= dataString[i];
+    // }
+    // Serial.print(dataString);
+    // Serial.print("*");
+    // Serial.println(checksum, HEX);
 
     //Debug output to serial monitor
     //Serial.print("Sent to Wifi: ");
