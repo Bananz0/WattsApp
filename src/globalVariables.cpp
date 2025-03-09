@@ -30,4 +30,4 @@ volatile char uartMessage[] = "";
 
 volatile bool batteryDecrease = false, batteryIncrease = false;
 
-volatile uint8_t dayCount = 0, remainingDays = 24;
+volatile uint8_t dayCount = -1, remainingDays = 24;

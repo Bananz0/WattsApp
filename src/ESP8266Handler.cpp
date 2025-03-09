@@ -32,10 +32,10 @@ void ESP8266Handler::sendDataToWifi() {
              //Final Source
              static_cast<double>(sources->mainsCapacity),//Float
              //Busbar stuff
-             (double)sources->busbarVoltage,//Float
-             (double)sources->busbarCurrent,//Float
-             (double)sources->averagePower,//Float
-             (double)sources->totalEnergy,//Float
+             static_cast<double>(sources->busbarVoltage),//Float
+             static_cast<double>(sources->busbarCurrent),//Float
+             static_cast<double>(sources->averagePower),//Float
+             static_cast<double>(sources->totalEnergy),//Float
              //Load Statuses
              //Current Load Statuses
              loads->currentLoadStatus[0],
@@ -50,10 +50,10 @@ void ESP8266Handler::sendDataToWifi() {
              loads->loadOverride2,
              loads->loadOverride3,
              //TotalCapacityStuff
-             (double)sources->loadDeficit,
-             (double)loads->totalLoadCapacity,
+             static_cast<double>(sources->loadDeficit),
+             static_cast<double>(loads->totalLoadCapacity),
              //Day Statuses - Twice cause fuck it we ball (parity)
-             (int)dayCount
+             static_cast<int>(dayCount)
              //timeUTC->tm_mday
              );
 
