@@ -98,7 +98,7 @@ void parseCSVData(String data) {
   sourcesStatus.addField("averagePower", averagePower);
   sourcesStatus.addField("totalEnergy", totalEnergy);
 
-  // Load Status Data 
+  // Load Status Data
   loadStatus.clearFields();
   loadStatus.addField("load1Status", currentLoadStatus1);
   loadStatus.addField("load2Status", currentLoadStatus2);
@@ -126,14 +126,14 @@ bool validateChecksum(String data) {
 
   if (starIndex == -1) {
     Serial.println("No checksum delimiter found");
-    dataPart = data; // Treat the entire string as data for checksum calculation
+    dataPart = data;  // Treat the entire string as data for checksum calculation
 
     bfs::Fletcher16 chk;
     calculatedChecksum = chk.Compute(reinterpret_cast<const uint8_t*>(dataPart.c_str()), dataPart.length());
 
     Serial.print("Calculated checksum (no delimiter): ");
     Serial.println(calculatedChecksum, HEX);
-    return false; // Indicate that the checksum could not be validated properly
+    return false;  // Indicate that the checksum could not be validated properly
   } else {
     dataPart = data.substring(0, starIndex);
     checksumPart = data.substring(starIndex + 1);
@@ -156,9 +156,8 @@ bool validateChecksum(String data) {
       checksumValid = true;
     }
 
-    if (!checksumValid)
-    {
-        return false;
+    if (!checksumValid) {
+      return false;
     }
 
     return true;
