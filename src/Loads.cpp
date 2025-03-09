@@ -9,16 +9,9 @@ Loads::Loads(DigitalOutput* loadSwitcher, DigitalInput* loadCaller) : output(loa
      lastLoad2Call = false;
      lastLoad3Call = false;
 
-
-    //TODO: Not implemented variable load control
-    currentLoad1 = 1;
-    currentLoad2 = 1;
-    currentLoad3 = 1;
-
-    currentLoad[0] = 1;
-    currentLoad[1] = 1;
-    currentLoad[2] = 1;
-
+    currentLoad[0] = 1.2f;
+    currentLoad[1] = 2.0f;
+    currentLoad[2] = 0.8f;
 
     loadOverride1 = false;
     loadOverride2 = false;
@@ -42,22 +35,28 @@ void Loads::checkLoadCallChanges() {
     //load 1
     if (currentLoad1Call && !lastLoad1Call) {
         output->loadSwitch1(DigitalOutput::ON);  //Load 1 on
+        currentLoadStatus[0] = true;
     } else if (!currentLoad1Call && lastLoad1Call) {
         output->loadSwitch1(DigitalOutput::OFF); //OFF
+        currentLoadStatus[0] = false;
     }
 
     //load 2
     if (currentLoad2Call && !lastLoad2Call) {
         output->loadSwitch2(DigitalOutput::ON);  //ON
+        currentLoadStatus[1] = true;
     } else if (!currentLoad2Call && lastLoad2Call) {
         output->loadSwitch2(DigitalOutput::OFF); //OFF
+        currentLoadStatus[1] = false;
     }
 
     //load 3
     if (currentLoad3Call && !lastLoad3Call) {
         output->loadSwitch3(DigitalOutput::ON);  //ON
+        currentLoadStatus[2] = true;
     } else if (!currentLoad3Call && lastLoad3Call) {
         output->loadSwitch3(DigitalOutput::OFF); //OFF
+        currentLoadStatus[2] = false;
     }
 
     lastLoad1Call = currentLoad1Call;
@@ -113,5 +112,7 @@ void Loads::calculateLoadCapacity() {
     // if (currentLoad3Call) {
     //     currentTotalLoad += currentLoad3;
     // }
-    totalLoadCapacity = currentLoad[0]*currentLoad1Call + currentLoad[1]*currentLoad2Call + currentLoad[2]*currentLoad3Call;
+    for (int i = 0; i < 2; i++) {
+        totalLoadCapacity = currentLoad[i]*currentLoadStatus[i];
+    }
 }

@@ -67,6 +67,7 @@ void updateStats() {
     sources.readBusbarVoltage();
 
     sources.calculateTotalEnergyAndPower();
+    sources.calculateTotalAvailableCapacity();
 
     sources.totalEnergy = sources.averagePower * 100 / 1000;
 
@@ -154,7 +155,7 @@ void checkForDayChange() {
 
 }
 
-void controlAlgrithm() {
+void  controlAlgrithm() {
         //program automatically listens for calls for loads and updates.
         //could be a good idea to use that as a way to update the stats.
         //Could be also be a good idea to enable pin change interrupts for every one of the pins as the busbar could
@@ -175,22 +176,39 @@ void controlAlgrithm() {
         //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
 
         if (dayHasChanged) {
-            dayCount +=1;
-            remainingDays -= 1;
+            if (sources.dailyMainsChange != 0) {
+                sources.mainsCapacity += sources.dailyMainsChange;
+                sources.dailyMainsChange= 0;  // Reset
+            }
+
+            if (sources.dailyBatteryChange != 0) {
+                sources.batteryCapacity += sources.dailyBatteryChange;
+
+                //keep within range
+                if (sources.batteryCapacity < 0) {
+                    sources.batteryCapacity = 0;
+                }
+                if (sources.batteryCapacity > 24) {
+                    sources.batteryCapacity = 24;
+                }
+
+                sources.dailyBatteryChange = 0; //Reset
+            }
+
+            if (sources.mainsCapacity < 0) {
+                sources.mainsCapacity = 0;
+            }
+            if (sources.mainsCapacity > 2) {
+                sources.mainsCapacity = 2;
+            }
+
+            analogueOutput.setMainsCapacity(sources.mainsCapacity);
+
+            dayCount = 1;
+            remainingDays-=1;
+            dayHasChanged = false;
 
             esp8266Handler.sendDataToWifi();
-
-            //TODO: update battery stats here maybe?
-            if (batteryDecrease) {
-                sources.batteryCapacity-=1;
-                batteryDecrease = false;
-            }
-            if (batteryIncrease) {
-                sources.batteryCapacity+=1;
-                batteryIncrease = false;
-            }
-
-            dayHasChanged = false;
         }
 
 
@@ -202,7 +220,7 @@ void controlAlgrithm() {
         //Deplete battery capacity if the capacity can last days close to the end of the "Simulation"
         if ((sources.batteryCapacity > remainingDays)) {
             sources.requestMains(0);
-            sources.requestBattery(0);
+            sources.requestBattery(1);
         }
 
         //This should check for the available load capacity and the renewables capacity. If not sufficient, it should call the battery.
@@ -210,7 +228,7 @@ void controlAlgrithm() {
 
         if (netCapacity<0 && netCapacity!=0) { //redundant but idc
             if (sources.batteryCapacity > 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
-                sources.requestBattery((-1.0 * static_cast<int>(netCapacity))); // We can only discharge 1A per day
+                sources.requestBattery(1); // We can only discharge 1A per day
             }  else if (sources.batteryCapacity < 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
                 sources.requestMains(-1 * netCapacity);
             }
@@ -282,7 +300,7 @@ int main() {
 
     // Maximum battery capacity = 24Ah
     // 1 Hour Simulation time = 1 Min Runtime
-    dayCount = 0, remainingDays = 24;
+    dayCount = 1, remainingDays = 25;
     // Default: Charge battery and turn all loads off.
     sources.requestMains(0);
     sources.chargeBattery();
@@ -301,7 +319,6 @@ int main() {
         display.carouselScreen(screen); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
         updateMainStats();
         controlAlgrithm();
-        esp8266Handler.sendDataToWifi(); //actually sends the data over serial0 to the esp hopefully.
 
         //requestMains(20);  //this is a hard request to test if the clamp works. Should trigger an error screen and TODO: Document this feature
         //wifiHandler.echoSerial();

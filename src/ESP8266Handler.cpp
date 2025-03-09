@@ -20,15 +20,42 @@ void ESP8266Handler::enableESP() {
 }
 
 void ESP8266Handler::sendDataToWifi() {
-    char dataString[200];
+    char dataString[100];
     snprintf(dataString, sizeof(dataString),
-             "%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%.2f,%.2f,%d,%d,%d\n", //Format teh sring so it is parseable by the ESP
-             sources->windTurbineCapacity, sources->pvCapacity,
-             sources->busbarVoltage, sources->busbarCurrent,
-             sources->totalRenewableCapacity, sources->batteryCapacity,
-             sources->mainsCapacity, dayCount, loads->totalLoadCapacity, sources->loadDeficit,
-             remainingDays, utc,
-             loads->currentLoad1);
+             "%.2f,%.2f,%.2f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.2f,%.2f,%.f\n", //Format teh sring so it is parseable by the ESP
+             //Renewable Stats
+             sources->windTurbineCapacity, //Float
+             sources->pvCapacity,//Float
+             sources->totalRenewableCapacity,//Float
+             //Battery Stores
+             sources->batteryCapacity,//Float
+             //Final Source
+             sources->mainsCapacity,//Float
+             //Busbar stuff
+             sources->busbarVoltage,//Float
+             sources->busbarCurrent,//Float
+             sources->averagePower,//Float
+             sources->totalEnergy,//Float
+             //Load Statuses
+             //Current Load Statuses
+             loads->currentLoadStatus[0],
+             loads->currentLoadStatus[1],
+             loads->currentLoadStatus[2],
+             //Current Requests
+             loads->currentLoad1Call,
+             loads->currentLoad2Call,
+             loads->currentLoad3Call,
+             //Load Overicdes for when we can't supply enough power -definitiojn of over engineering.
+             loads->loadOverride1,
+             loads->loadOverride2,
+             loads->loadOverride3,
+             //TotalCapacityStuff
+             sources->loadDeficit,
+             loads->totalLoadCapacity,
+             //Day Statuses - Twice cause fuck it we ball (parity)
+             dayCount
+             //timeUTC->tm_mday
+             );
 
     //Calculate chdcksum shere
     uint8_t checksum = 0;

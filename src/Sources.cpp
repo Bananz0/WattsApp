@@ -22,27 +22,29 @@ Sources::Sources(AnalogueInput *sourceHandler, AnalogueOutput *mainsHandler, Dig
 Sources::~Sources() = default;
 
 void Sources::requestMains(float mainsCapacityIn) {
-    mainsHandler->setMainsCapacity(mainsCapacityIn);
-    mainsCapacity += mainsCapacityIn;
+    if (mainsCapacityIn > 0 && dailyMainsChange == 0) {
+        dailyMainsChange = 1; //Request increase
+    } else if (mainsCapacityIn < 0 && dailyMainsChange == 0) {
+        dailyMainsChange = -1; //Request decrease
+    }
 }
 
-void Sources::requestBattery(uint8_t batteryCapacityOut) {
-    batteryHandler->dischargeBattery();
-    if(batteryCapacity >= 1) {
-        batteryDecrease = true;
-        //batteryCapacity-=1;
+void Sources::requestBattery(bool requestDischarge) {
+    // Only allow a discharge request if no other battery operation is pending
+    if (requestDischarge && dailyBatteryChange == 0 && batteryCapacity > 0) {
+        dailyBatteryChange = -1; // Request discharge
     }
-    isBatteryCharging = false;
+    batteryHandler->dischargeBattery();
 }
 
 void Sources::chargeBattery() {
-    batteryHandler->chargeBattery();
-    if(batteryCapacity < 24) {
-        batteryCapacity+=1;
-        isBatteryCharging = true;
-    } else if(batteryCapacity >= 24) {
-        isBatteryCharging = false;
+    // Only allow a charge request if no other battery operation is pending
+    if (dailyBatteryChange == 0 && batteryCapacity < 24) {
+        dailyBatteryChange = 1; // Request charge
     }
+    batteryHandler->chargeBattery();
+
+    isBatteryCharging = true;
 }
 
 void Sources::readTurbineCapacity() {

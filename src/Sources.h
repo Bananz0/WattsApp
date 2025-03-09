@@ -27,7 +27,7 @@ public:
             totalEnergy,
             mainsCapacity;
 
-    uint8_t batteryCapacity{24};
+    uint8_t batteryCapacity{0};
     float totalAvailableCapacity{0};
     float totalAvailableCapacityMain{0};
     float loadDeficit{0};
@@ -37,7 +37,7 @@ public:
     ~Sources();
 
     void requestMains(float mainsCapacity);
-    void requestBattery(uint8_t batteryCapacityOut);
+    void requestBattery(bool requestDischarge);
     void chargeBattery();
 
     void readTurbineCapacity();
@@ -47,6 +47,9 @@ public:
 
     void calculateTotalAvailableCapacity();
     void calculateTotalEnergyAndPower();
+
+    int8_t dailyMainsChange = 0; //gets the mains change (+1 or -1)
+    int8_t dailyBatteryChange = 0; //gets the battery change (+1 or -1)
 };
 
 
