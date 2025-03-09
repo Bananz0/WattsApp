@@ -61,6 +61,10 @@ uint32_t lastScreenUpdateMillis = 0;
 uint32_t screenUpdateInterval = 2000;//2secs
 uint32_t lastStatsUpdateMillis = 0;
 uint32_t statsUpdateInterval = 100;//100ms
+uint32_t lastEspUpdateUpdateMillis = 0;
+uint32_t espUpdateInterval = 2000;//seconds2
+uint32_t lastDayCheckUpdateMillis = 0;
+uint32_t dayCheckUpdateInterval = 2000;
 
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
@@ -167,102 +171,117 @@ void checkForDayChange() {
 }
 
 void  controlAlgrithm() {
-        //program automatically listens for calls for loads and updates.
-        //could be a good idea to use that as a way to update the stats.
-        //Could be also be a good idea to enable pin change interrupts for every one of the pins as the busbar could
-        //change while the turbine capacity maintaining its original value.
-        //since 1 min is 1 hour and there is the potential of having the NTP, we could time the changes from the start
-        //to get the values from the TB instantly. not sure if the speed at which the change is detected nor the
-        //resolution of the scope
+    uint32_t currentMillis = millis();
+    //program automatically listens for calls for loads and updates.
+    //could be a good idea to use that as a way to update the stats.
+    //Could be also be a good idea to enable pin change interrupts for every one of the pins as the busbar could
+    //change while the turbine capacity maintaining its original value.
+    //since 1 min is 1 hour and there is the potential of having the NTP, we could time the changes from the start
+    //to get the values from the TB instantly. not sure if the speed at which the change is detected nor the
+    //resolution of the scope
 
-        //updateMainStats(); //Should update every change of pins or every 10 seconds
-        if (timeUTC->tm_sec % 5 == 0) {
-            checkForDayChange();
+    //updateMainStats(); //Should update every change of pins or every 10 seconds
+    //Impmelented proper time handling i hope
+    // if (timeUTC->tm_sec % 5 == 0) {
+    //     checkForDayChange();
+    // }
+
+    if (currentMillis - lastDayCheckUpdateMillis >= dayCheckUpdateInterval) {
+        lastStatsUpdateMillis = currentMillis;
+        checkForDayChange();
+    }
+
+
+
+    //Implement LabView Algorithm
+
+    //Still need to figure out how to accurately detect the changes in days without using a blocking _delay(6000) which would work but would have an effect in the other operations in the smart meter
+    //This is not accurate as there is no RTC on the board but could use NTP or add the clock later
+    //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
+
+    if (dayHasChanged) {
+        if (sources.dailyMainsChange != 0) {
+            sources.mainsCapacity += sources.dailyMainsChange;
+            sources.dailyMainsChange= 0;  // Reset
         }
 
-        //Implement LabView Algorithm
+        if (sources.dailyBatteryChange != 0) {
+            sources.batteryCapacity += sources.dailyBatteryChange;
 
-        //Still need to figure out how to accurately detect the changes in days without using a blocking _delay(6000) which would work but would have an effect in the other operations in the smart meter
-        //This is not accurate as there is no RTC on the board but could use NTP or add the clock later
-        //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
-
-        if (dayHasChanged) {
-            if (sources.dailyMainsChange != 0) {
-                sources.mainsCapacity += sources.dailyMainsChange;
-                sources.dailyMainsChange= 0;  // Reset
+            //keep within range
+            if (sources.batteryCapacity < 0) {
+                sources.batteryCapacity = 0;
+            }
+            if (sources.batteryCapacity > 24) {
+                sources.batteryCapacity = 24;
             }
 
-            if (sources.dailyBatteryChange != 0) {
-                sources.batteryCapacity += sources.dailyBatteryChange;
-
-                //keep within range
-                if (sources.batteryCapacity < 0) {
-                    sources.batteryCapacity = 0;
-                }
-                if (sources.batteryCapacity > 24) {
-                    sources.batteryCapacity = 24;
-                }
-
-                sources.dailyBatteryChange = 0; //Reset
-            }
-
-            if (sources.mainsCapacity < 0) {
-                sources.mainsCapacity = 0;
-            }
-            if (sources.mainsCapacity > 2) {
-                sources.mainsCapacity = 2;
-            }
-
-            analogueOutput.setMainsCapacity(sources.mainsCapacity);
-
-            dayCount += 1;
-            remainingDays-=1;
-            dayHasChanged = false;
-
-            esp8266Handler.sendDataToWifi();
+            sources.dailyBatteryChange = 0; //Reset
         }
 
-
-        //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
-        if ((sources.totalRenewableCapacity > loads.totalLoadCapacity)&&(sources.totalRenewableCapacity > (1 + loads.totalLoadCapacity))) {
-            sources.chargeBattery(); //Charges it by 1A
+        if (sources.mainsCapacity < 0) {
+            sources.mainsCapacity = 0;
+        }
+        if (sources.mainsCapacity > 2) {
+            sources.mainsCapacity = 2;
         }
 
-        //Deplete battery capacity if the capacity can last days close to the end of the "Simulation"
-        if ((sources.batteryCapacity > remainingDays)) {
-            sources.requestMains(0);
-            sources.requestBattery(1);
+        analogueOutput.setMainsCapacity(sources.mainsCapacity);
+
+        dayCount += 1;
+        remainingDays-=1;
+        dayHasChanged = false;
+    }
+
+
+    //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
+    if ((sources.totalRenewableCapacity > loads.totalLoadCapacity)&&(sources.totalRenewableCapacity > (1 + loads.totalLoadCapacity))) {
+        sources.chargeBattery(); //Charges it by 1A
+    }
+
+    //Deplete battery capacity if the capacity can last days close to the end of the "Simulation"
+    if ((sources.batteryCapacity > remainingDays)) {
+        sources.requestMains(0);
+        sources.requestBattery(1);
+    }
+
+    //This should check for the available load capacity and the renewables capacity. If not sufficient, it should call the battery.
+    //Ultimately if not available it should call the mains as a last option.
+
+    if (netCapacity<0 && netCapacity!=0) { //redundant but idc
+        if (sources.batteryCapacity > 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
+            sources.requestBattery(1); // We can only discharge 1A per day
+        }  else if (sources.batteryCapacity < 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
+            sources.requestMains(-1 * netCapacity);
         }
+        // break; // If the battery can sustain it break the if condition. Do not trust this cause im not sure if i should use break or continue. Will search later. - switched to elif
+    }
 
-        //This should check for the available load capacity and the renewables capacity. If not sufficient, it should call the battery.
-        //Ultimately if not available it should call the mains as a last option.
-
-        if (netCapacity<0 && netCapacity!=0) { //redundant but idc
-            if (sources.batteryCapacity > 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
-                sources.requestBattery(1); // We can only discharge 1A per day
-            }  else if (sources.batteryCapacity < 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
-                sources.requestMains(-1 * netCapacity);
+    //Last resort.
+    //Turn off loads if the battery capacity, renewables and main can't match the output of the loads required
+    //Will need to consider priority into all of these.
+    sources.loadDeficit =  sources.totalAvailableCapacity - loads.totalLoadCapacity;
+    if (sources.totalAvailableCapacity < loads.totalLoadCapacity) {
+        //will implement load priority
+        for (uint8_t loadCount = 0; loadCount < 3; loadCount++) {
+            if (loads.currentLoadStatus[loadCount] && loads.currentLoad[loadCount] > sources.totalAvailableCapacity ) {
+                loads.loadOverride[loadCount] = true;
+                loads.turnLoadOff(loadCount);
             }
-            // break; // If the battery can sustain it break the if condition. Do not trust this cause im not sure if i should use break or continue. Will search later. - switched to elif
         }
+    } else if (sources.totalAvailableCapacity > loads.totalLoadCapacity) {
+        for (bool & loadCount : loads.loadOverride) {
+            loadCount = false;
+        }
+    }
+}
 
-        //Last resort.
-        //Turn off loads if the battery capacity, renewables and main can't match the output of the loads required
-        //Will need to consider priority into all of these.
-        sources.loadDeficit =  sources.totalAvailableCapacity - loads.totalLoadCapacity;
-        if (sources.totalAvailableCapacity < loads.totalLoadCapacity) {
-            //will implement load priority
-            for (uint8_t loadCount = 0; loadCount < 3; loadCount++) {
-                if (loads.currentLoadStatus[loadCount] && loads.currentLoad[loadCount] > sources.totalAvailableCapacity ) {
-                    loads.loadOverride[loadCount] = true;
-                    loads.turnLoadOff(loadCount);
-                }
-            }
-        } else if (sources.totalAvailableCapacity > loads.totalLoadCapacity) {
-            for (bool & loadCount : loads.loadOverride) {
-                loadCount = false;
-            }
-        }
+void updateInfluxDB() {
+    uint32_t currentMillis = millis();
+    if (currentMillis - lastEspUpdateUpdateMillis >= espUpdateInterval) {
+        lastStatsUpdateMillis = currentMillis;
+        esp8266Handler.sendDataToWifi();
+    }
 }
 
 //ADC ISR
@@ -303,6 +322,8 @@ int main() {
     lastUtcUpdateMillis = millis();
     lastScreenUpdateMillis = millis();
     lastStatsUpdateMillis = millis();
+    lastDayCheckUpdateMillis = millis();
+    lastEspUpdateUpdateMillis = millis();
     //Boot and Initialization
     // debugSerial.println("Drawing boot sequence");
     display.drawBootSequence();
@@ -332,6 +353,7 @@ int main() {
         updateMainStats();
         controlAlgrithm();
         esp8266Handler.processSerialCommand();
+        updateInfluxDB();
 
         //requestMains(20);  //this is a hard request to test if the clamp works. Should trigger an error screen and TODO: Document this feature
         //wifiHandler.echoSerial();
