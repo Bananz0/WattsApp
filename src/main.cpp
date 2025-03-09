@@ -55,6 +55,13 @@ uint8_t lastScreenUpdateSecond = -1;
 uint16_t lastCounter = 0;
 String response;
 
+uint32_t lastUtcUpdateMillis = 0;
+uint32_t utcUpdateInterval = 1000;//1sec
+uint32_t lastScreenUpdateMillis = 0;
+uint32_t screenUpdateInterval = 2000;//2secs
+uint32_t lastStatsUpdateMillis = 0;
+uint32_t statsUpdateInterval = 100;//100ms
+
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
     //Measure available wind turbine capacity and PV capacity then calculate total renewable power capacity
@@ -76,43 +83,48 @@ void updateStats() {
 }
 
 void drawTime() {
-    if ((Counter % 5 == 0) && (Counter != lastCounter)) {
+    const uint32_t currentMillis = millis();
+    if (currentMillis - lastUtcUpdateMillis >= utcUpdateInterval) {
+        lastUtcUpdateMillis = currentMillis;
         utc++;
-        lastCounter = Counter;
     }
-    timeUTC = gmtime((time_t*)&utc); //Update time (hopefully)
+    timeUTC = gmtime(const_cast<time_t *>(&utc)); //Update time (hopefully)
     pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
-    updateCounter = Counter;
+    updateCounter = currentMillis;
 }
 
 void screenCarrousel() {
+    uint32_t currentMillis = millis();
 #ifdef SECOND_REVIEW_MODE
     screen = SEC_REV_SCREEN;
 #elif defined(UARTDEBUG)
     screen = UART_SCREEN;
 #elif defined(NORMAL_MODE)
     //cycle through the screens
-    if (timeUTC->tm_sec % displayDuration == 0 && timeUTC->tm_sec != lastScreenUpdateSecond) {
+    if (currentMillis - lastScreenUpdateMillis >= screenUpdateInterval) {
+        lastScreenUpdateMillis = currentMillis;
         if (emergencyScreen) {
             //Display screen for 5 seconds
             screen = ERROR_SCREEN;
             emergencyScreen = false;
+            lastScreenUpdateMillis = currentMillis - screenUpdateInterval + 5000;
         } else {
             //Subtracted to skip the alternate screens
             screen = static_cast<Screen>((screenPage + 1) % (SCREEN_COUNT-3) );
         }
-        lastScreenUpdateSecond = timeUTC->tm_sec;
     }
 #endif
 }
 
 void updateMainStats() {
+    uint32_t currentMillis = millis();
     if (LoadChangeFlag) {
         loads.checkLoadCallChanges();
+        LoadChangeFlag = false;
     }
-    if (updateCounter % 5 == 0) {
+    if (currentMillis - lastStatsUpdateMillis >= statsUpdateInterval) {
+        lastStatsUpdateMillis = currentMillis;
         updateStats();
-        updateCounter = 0;
     }
 }
 
@@ -259,10 +271,10 @@ ISR(ADC_vect){
     //ADCVoltage = (ADC * Vref) / 0x3FF; //Moved to main
     ADCConversionFlag = true;
 }
-//Counter ISR
+//Counter ISR - Moved to timer0 using milis()
 ISR(TIMER1_COMPA_vect) {
-   // PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
-    Counter++;
+    // PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
+    // Counter++;
     //utc++;
 }
 //Pin Change ISR
@@ -273,11 +285,11 @@ ISR(PCINT0_vect) {
 }
 
 int main() {
+    sei();   //Enable Global interrupts
     // debugSerial.println("Starting up...");
     finalizePorts();
     // debugSerial.println("Initialized ports");
     testLight(1);                              //Boot Light
-    sei();                                               //Enable Global interrupts
     // debugSerial.println("Tested light PB6 and enabled global interrupts");
 
     display.startDisplay(false);
@@ -287,9 +299,10 @@ int main() {
     display.setBacklight(DisplayHandler::LIGHT);
     display.setOrientation(DisplayHandler::LANDSCAPE);
     // debugSerial.println("Initialized display and set to Landscape");
-
-                                                                            //wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
-
+    //wifiHandler.connectToWiFi("\"Glen's XPS\"", "\"eesp8266\"");
+    lastUtcUpdateMillis = millis();
+    lastScreenUpdateMillis = millis();
+    lastStatsUpdateMillis = millis();
     //Boot and Initialization
     // debugSerial.println("Drawing boot sequence");
     display.drawBootSequence();

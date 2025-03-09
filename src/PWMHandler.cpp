@@ -9,11 +9,19 @@
 PWMHandler::PWMHandler() {}
 
 void PWMHandler::initializePWM() { //Initialize the PWM based on pg155 of the ilMatto datasheet
+    //System Timer
+    initializeTimer0();
     //Using PD5
     initializeTimer1();
     //Using PD7
     initializeTimer2();
 
+}
+
+void PWMHandler::initializeTimer0() {
+    TCCR0A |= (1 << CS01) | (1 << WGM00);
+    TCCR0B |= (1 << WGM01) | (1 << CS00);
+    TIMSK0 |= (1 << TOIE0);
 }
 
 void PWMHandler::setOutputVoltage(float voltage) { //PD6 and PD7 for Amplitude Modulation
