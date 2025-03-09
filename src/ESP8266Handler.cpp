@@ -8,6 +8,7 @@ ESP8266Handler::ESP8266Handler(Loads *loads, Sources *sources): loads(loads), so
     enableESP(); //Set the EN pin to High (dont remember what it was but will recheck the pin map;
     HardwareSerial *wifiSerial = &Serial;
     wifiSerial->begin(115200);
+    wifiSerial->setTimeout(1000);
     wifiSerial->println("ATMEGA_WIFI_SETUP_COMPLETE");
 }
 
