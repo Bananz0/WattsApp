@@ -22,20 +22,20 @@ void ESP8266Handler::enableESP() {
 void ESP8266Handler::sendDataToWifi() {
     char dataString[100];
     snprintf(dataString, sizeof(dataString),
-             "%.2f,%.2f,%.2f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.2f,%.2f,%.f\n", //Format teh sring so it is parseable by the ESP
+             "%.2f,%.2f,%.2f,%d,%.2f,%.2f,%.2f,%.2f,%.2f,%d,%d,%d,%d,%d,%d,%d,%d,%d,%.2f,%.2f,%d\n", //Format teh sring so it is parseable by the ESP
              //Renewable Stats
-             sources->windTurbineCapacity, //Float
-             sources->pvCapacity,//Float
-             sources->totalRenewableCapacity,//Float
+             static_cast<double>(sources->windTurbineCapacity), //Float
+             static_cast<double>(sources->pvCapacity),//Float
+             static_cast<double>(sources->totalRenewableCapacity),//Float
              //Battery Stores
-             sources->batteryCapacity,//Float
+             sources->batteryCapacity,//Int
              //Final Source
-             sources->mainsCapacity,//Float
+             static_cast<double>(sources->mainsCapacity),//Float
              //Busbar stuff
-             sources->busbarVoltage,//Float
-             sources->busbarCurrent,//Float
-             sources->averagePower,//Float
-             sources->totalEnergy,//Float
+             (double)sources->busbarVoltage,//Float
+             (double)sources->busbarCurrent,//Float
+             (double)sources->averagePower,//Float
+             (double)sources->totalEnergy,//Float
              //Load Statuses
              //Current Load Statuses
              loads->currentLoadStatus[0],
@@ -50,10 +50,10 @@ void ESP8266Handler::sendDataToWifi() {
              loads->loadOverride2,
              loads->loadOverride3,
              //TotalCapacityStuff
-             sources->loadDeficit,
-             loads->totalLoadCapacity,
+             (double)sources->loadDeficit,
+             (double)loads->totalLoadCapacity,
              //Day Statuses - Twice cause fuck it we ball (parity)
-             dayCount
+             (int)dayCount
              //timeUTC->tm_mday
              );
 
