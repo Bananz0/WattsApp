@@ -11,6 +11,8 @@ volatile float Vref = 3.3;                       //Reference Voltage, 3.3v
 volatile float ADCVoltage;              //Global ADC voltage variable and idk if this is good
 volatile bool ADCConversionFlag = false;   //Global ADC Conversion Complete Flag
 volatile bool LoadChangeFlag = false;      //Global Load Change Flag
+volatile bool dayHasChanged = false; //Global Day Has Changed variable
+
 volatile uint64_t ADCraw;
 
 // volatile EnergyStats energyStats;

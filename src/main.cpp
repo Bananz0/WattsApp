@@ -54,7 +54,6 @@ Screen screen{};
 uint8_t lastScreenUpdateSecond = -1;
 uint16_t lastCounter = 0;
 String response;
-bool dayHasChanged = false;
 
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
@@ -319,6 +318,7 @@ int main() {
         display.carouselScreen(screen); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
         updateMainStats();
         controlAlgrithm();
+        esp8266Handler.processSerialCommand();
 
         //requestMains(20);  //this is a hard request to test if the clamp works. Should trigger an error screen and TODO: Document this feature
         //wifiHandler.echoSerial();

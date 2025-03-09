@@ -77,3 +77,21 @@ void ESP8266Handler::sendDataToWifi() {
     //Serial.print("Sent to Wifi: ");
     //Serial.println(dataString);
 }
+
+void ESP8266Handler::processSerialCommand() {
+    if (Serial.available() > 0) {
+        String receivedData = Serial.readStringUntil('\r');
+        receivedData.trim();
+        strncpy(const_cast<char *>(uartMessage), receivedData.c_str(), sizeof(uartMessage) - 1); //Sends it to UARTDebugScreen
+        if (receivedData.equalsIgnoreCase("day")) {
+            dayHasChanged = true;
+            Serial.println("Received command: dayHasChanged = true");
+        } else if (receivedData.equalsIgnoreCase("noday")) {
+            dayHasChanged = false;
+            Serial.println("Received command: dayHasChanged = false");
+        } else {
+            Serial.print("Unknown command: ");
+            Serial.println(receivedData);
+        }
+    }
+}
