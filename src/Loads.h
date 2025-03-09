@@ -28,7 +28,7 @@ class Loads {
     bool currentLoad[3];
     bool currentLoadStatus[3];
     bool currentLoad1, currentLoad2, currentLoad3;
-    int totalLoadCapacity{};
+    int totalLoadCapacity{0};
 
     private:
     DigitalOutput* output;

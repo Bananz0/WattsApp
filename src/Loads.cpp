@@ -113,6 +113,6 @@ void Loads::calculateLoadCapacity() {
     //     currentTotalLoad += currentLoad3;
     // }
     for (int i = 0; i < 2; i++) {
-        totalLoadCapacity = currentLoad[i]*currentLoadStatus[i];
+        totalLoadCapacity += currentLoad[i]*currentLoadStatus[i];
     }
 }

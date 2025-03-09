@@ -57,6 +57,9 @@ void ESP8266Handler::sendDataToWifi() {
              //timeUTC->tm_mday
              );
 
+    //Simple Checksum (XOR) I have included a library for possibly CRC checksums and will work on that latere
+    //TODO: Implement CRC Checksum from Checksum Library from Bolder Flight Systems
+
     //Calculate chdcksum shere
     uint8_t checksum = 0;
     for (int i = 0; dataString[i] != '\0'; i++) {
