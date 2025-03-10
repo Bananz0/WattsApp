@@ -1,38 +1,80 @@
-flowchart TD
+graph TD
     subgraph "Power Sources"
-        RE["Renewable Sources"]
-        RE --> |Read| PV["PV Capacity"]
-        RE --> |Read| WT["Wind Turbine Capacity"]
-        PV & WT --> |Sum| TRC["Total Renewable Capacity"]
+        PV["PV Capacity\n(Analog Input)"]
+        WT["Wind Turbine Capacity\n(Analog Input)"]
         BAT["Battery (24Ah max)"]
-        MAINS["Mains Power"]
+        MAINS["Mains Power\n(Analog Output)"]
+        PV --> |Read from ADC\nAnalogueInput.cpp| PV_VAL["PV Value"]
+        WT --> |Read from ADC\nAnalogueInput.cpp| WT_VAL["Wind Turbine Value"]
+        BAT --> |Monitor Capacity| BAT_CAP["Battery Capacity Value"]
+        MAINS --> |Set Capacity\nAnalogueOutput.cpp| MAINS_VAL["Mains Capacity Value"]
+    end
+
+    subgraph "Time and Day Simulation"
+        TIMER["Timer Interrupt\n(Simulated Time)"]
+        TIMER --> |Increment Time| TIME["Current Time"]
+        TIME --> |Check Time Stats diff every 2sec| DAY_CHG{"Day Change Check"}
     end
 
     subgraph "Load Management"
-        L1["Load 1"]
-        L2["Load 2"]
-        L3["Load 3"]
-        LCAP["Calculate Total Load Capacity"]
-        L1 & L2 & L3 --> LCAP
+        L1["Load 1\n(Digital Input)"]
+        L2["Load 2\n(Digital Input)"]
+        L3["Load 3\n(Digital Input)"]
+        L1 --> |Read Digital Input\nDigitalInput.cpp| L1_REQ{"Load 1 Request"}
+        L2 --> |Read Digital Input\nDigitalInput.cpp| L2_REQ{"Load 2 Request"}
+        L3 --> |Read Digital Input\nDigitalInput.cpp| L3_REQ{"Load 3 Request"}
+        L1_REQ & L2_REQ & L3_REQ --> |Calculate Total Capacity\nLoads.cpp| LCAP["Total Load Capacity"]
+        L1_REQ --> |Control Digital Output\nDigitalOutput.cpp| L1_STATUS["Load 1 Status"]
+        L2_REQ --> |Control Digital Output\nDigitalOutput.cpp| L2_STATUS["Load 2 Status"]
+        L3_REQ --> |Control Digital Output\nDigitalOutput.cpp| L3_STATUS["Load 3 Status"]
     end
 
-    TRC --> NC["Calculate Net Capacity\n(Available - Required)"]
-    LCAP --> NC
-
-    NC --> CD{"Check Deficit"}
-    CD --> |Surplus| CHG["Charge Battery\nif >1A surplus"]
-    CD --> |Deficit| BD{"Check Battery"}
-
-    BD --> |"Battery >1Ah"| USBAT["Use Battery Power"]
-    BD --> |"Battery <1Ah"| UM["Use Mains Power"]
-
-    USBAT & UM --> CHECK{"Check if Power\nStill Insufficient"}
-
-    CHECK --> |Yes| DISABLE["Disable Loads\nby Priority"]
-    CHECK --> |No| NORMAL["Normal Operation"]
+    subgraph "Main Control Logic"
+        PV_VAL & WT_VAL --> |Calculate Total Renewable\nSources.cpp| TRC["Total Renewable Capacity"]
+        TRC & BAT_CAP & MAINS_VAL --> TAVCAP["Total Available Capacity"]
+        TAVCAP & LCAP --> NC["Calculate Net Capacity\n(Available - Required)"]
+        NC --> CD{"Check Deficit\n(Net Capacity < 0)"}
+        CD --> |Surplus| CHG["Charge Battery\n(if >1A surplus)"]
+        CD --> |Deficit| BD{"Check Battery\n(Capacity > 1Ah)"}
+        BD --> |Yes| USBAT["Use Battery Power\n(Discharge Battery)"]
+        BD --> |No| UM["Use Mains Power\n(Request from Mains)"]
+        USBAT & UM --> CHECK{"Check if Power\nStill Insufficient"}
+        CHECK --> |Yes| DISABLE["Disable Loads\nby Priority"]
+        CHECK --> |No| NORMAL["Normal Operation"]
+        DAY_CHG --> ALG_MOD["Algorithm Modifier"]
+    end
 
     subgraph "Safety Checks"
-        MON["Monitor Busbar\nVoltage & Current"]
-        MON --> SAFE{"Check Safety\nLimits"}
-        SAFE --> |"Exceeded"| EMG["Emergency Mode"]
+        VOLT["Busbar Voltage\n(Analog Input)"]
+        CURR["Busbar Current\n(Analog Input)"]
+        VOLT --> |Read from ADC\nAnalogueInput.cpp| VOLT_VAL["Voltage Value"]
+        CURR --> |Read from ADC\nAnalogueInput.cpp| CURR_VAL["Current Value"]
+        VOLT_VAL & CURR_VAL --> |Monitor Busbar\nVoltage & Current| MON["Monitor Busbar\nVoltage & Current"]
+        MON --> SAFE{"Check Safety\nLimits (Voltage, Current)"}
+        SAFE --> |Exceeded| EMG["Emergency Mode\n(Display Error Screen)"]
     end
+
+    subgraph "ESP8266 Communication"
+        ALL_DATA["All Sensor Data\n(Formatted as CSV)"]
+        NC --> ALL_DATA
+        PV_VAL --> ALL_DATA
+        WT_VAL --> ALL_DATA
+        VOLT_VAL --> ALL_DATA
+        CURR_VAL --> ALL_DATA
+        L1_STATUS --> ALL_DATA
+        L2_STATUS --> ALL_DATA
+        L3_STATUS --> ALL_DATA
+        ALL_DATA --> FORMAT["Format CSV string\nESP8266Handler.cpp"]
+        FORMAT --> CHECKSUM["Calculate Fletcher Checksum\nESP8266Handler.cpp"]
+        CHECKSUM --> WIFI_SEND["Send Data to ESP8266\n(Serial Communication)"]
+        WIFI_SEND --> INFLUX["Send to InfluxDB\n(Via WiFi)"]
+    end
+
+    EMG --> DISPLAY["Display Error on Screen"]
+    NORMAL --> DISPLAY["Display Normal Operation"]
+    ALG_MOD --> TAVCAP
+    style DISPLAY fill:#f9f,stroke:#333,stroke-width:2px
+    style FORMAT fill:#ccf,stroke:#333,stroke-width:2px
+    style CHECKSUM fill:#ccf,stroke:#333,stroke-width:2px
+    style WIFI_SEND fill:#ccf,stroke:#333,stroke-width:2px
+    style INFLUX fill:#ccf,stroke:#333,stroke-width:2px
