@@ -26,7 +26,8 @@ The WattsApp Smart Meter is designed to monitor and manage energy consumption in
 
 ## Software Components
 
-* **Arduino IDE:** [Specify Version Used]
+* **Arduino IDE:** For ESP8266 Development
+* **CLion 2024.3:** For ATMega644P Development
 * **Libraries:**
   * [Pictor](https://github.com/TBTerra/pictor/)
   * [arduino-core](https://github.com/arduino/ArduinoCore-avr/tree/master)
