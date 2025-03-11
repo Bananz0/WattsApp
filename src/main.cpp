@@ -65,6 +65,9 @@ uint32_t lastEspUpdateUpdateMillis = 0;
 uint32_t espUpdateInterval = 2500;//seconds1.5
 uint32_t lastDayCheckUpdateMillis = 0;
 uint32_t dayCheckUpdateInterval = 2000;//2 sec
+uint32_t lastDayUpdateMillis = 0;
+uint32_t dayUpdateInterval = 30000; //30sec check for day upadtes
+bool firstDay = true;
 
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
@@ -104,7 +107,7 @@ void screenCarrousel() {
 #elif defined(UARTDEBUG)
     screen = UART_SCREEN;
 #elif defined(NORMAL_MODE)
-    //cycle through the screens
+    //cycle through the screensF
     if (currentMillis - lastScreenUpdateMillis >= screenUpdateInterval) {
         lastScreenUpdateMillis = currentMillis;
         if (emergencyScreen) {
@@ -187,11 +190,9 @@ void  controlAlgrithm() {
     // }
 
     if (currentMillis - lastDayCheckUpdateMillis >= dayCheckUpdateInterval) {
-        lastStatsUpdateMillis = currentMillis;
+        lastDayCheckUpdateMillis = currentMillis;
         checkForDayChange();
     }
-
-
 
     //Implement LabView Algorithm
 
@@ -199,7 +200,8 @@ void  controlAlgrithm() {
     //This is not accurate as there is no RTC on the board but could use NTP or add the clock later
     //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
 
-    if (dayHasChanged) {
+    if (dayHasChanged && (firstDay || currentMillis - lastDayUpdateMillis >= dayUpdateInterval)) {
+        lastDayUpdateMillis = currentMillis;
         if (sources.dailyMainsChange != 0) {
             sources.mainsCapacity += sources.dailyMainsChange;
             sources.dailyMainsChange= 0;  // Reset
@@ -229,10 +231,20 @@ void  controlAlgrithm() {
         analogueOutput.setMainsCapacity(sources.mainsCapacity);
 
         dayCount += 1;
+        firstDay = false;
         remainingDays-=1;
         dayHasChanged = false;
+        dayChangeStartTime = millis();
+        hourCount = 0;
     }
 
+
+    //Increment hourCount based on simulated time for the pump timing.
+    if (currentMillis - dayChangeStartTime >= simulatedHourDuration) {
+        uint8_t incrementBy = (currentMillis - dayChangeStartTime) / simulatedHourDuration;
+        hourCount = (hourCount + incrementBy) % 24;
+        dayChangeStartTime = dayChangeStartTime + (incrementBy * simulatedHourDuration);
+    }
 
     //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
     if ((sources.totalRenewableCapacity > loads.totalLoadCapacity)&&(sources.totalRenewableCapacity > (1 + loads.totalLoadCapacity))) {
@@ -242,7 +254,7 @@ void  controlAlgrithm() {
     //Deplete battery capacity if the capacity can last days close to the end of the "Simulation"
     if ((sources.batteryCapacity > remainingDays)) {
         sources.requestMains(0);
-        sources.requestBattery(1);
+        sources.requestBattery(true);
     }
 
     //This should check for the available load capacity and the renewables capacity. If not sufficient, it should call the battery.
@@ -250,7 +262,7 @@ void  controlAlgrithm() {
 
     if (netCapacity<0 && netCapacity!=0) { //redundant but idc
         if (sources.batteryCapacity > 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
-            sources.requestBattery(1); // We can only discharge 1A per day
+            sources.requestBattery(true); // We can only discharge 1A per day
         }  else if (sources.batteryCapacity < 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
             sources.requestMains(-1 * netCapacity);
         }
@@ -349,6 +361,7 @@ int main() {
     lastStatsUpdateMillis = millis();
     lastDayCheckUpdateMillis = millis();
     lastEspUpdateUpdateMillis = millis();
+    dayChangeStartTime = millis();
     //Boot and Initialization
     // debugSerial.println("Drawing boot sequence");
     display.drawBootSequence();
@@ -358,7 +371,7 @@ int main() {
 
     // Maximum battery capacity = 24Ah
     // 1 Hour Simulation time = 1 Min Runtime
-    dayCount = -1, remainingDays = 24;
+    dayCount = 0, remainingDays = 24;
     // Default: Charge battery and turn all loads off.
     sources.requestMains(0);
     sources.chargeBattery();
