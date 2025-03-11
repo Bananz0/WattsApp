@@ -6,6 +6,7 @@
 #include <HardwareSerial.h>
 #include "Sources.h"
 #include "Loads.h"
+#include "Arduino.h"
 #include "globalVariables.h"
 #include "../assets/stripe_assets.h"
 
@@ -108,14 +109,13 @@ void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
 
 
 void DisplayHandler::drawBootSequence() {
-#ifdef NORMAL_MODE
     pictorDrawS(reinterpret_cast<const unsigned char *>(bootAuthors),teamPos,RED,BLACK, Mash,7);
     pictorDrawS(reinterpret_cast<const unsigned char *>(bootName),bootNamePos,GREEN,BLACK, Mash,4);
     pictorDrawS(reinterpret_cast<const unsigned char *>(bootVersion),bootVersionPos,BLUE,BLACK, Mash,4);
 
-    _delay_ms(3500);
+    //_delay_ms(3500); - This wa sblblokcking
+    delay(3500);
     clearScreen();
-#endif
 }
 
 void DisplayHandler::showBusbarScreen() {
