@@ -261,18 +261,44 @@ void  controlAlgrithm() {
     //Turn off loads if the battery capacity, renewables and main can't match the output of the loads required
     //Will need to consider priority into all of these.
     sources.loadDeficit =  sources.totalAvailableCapacity - loads.totalLoadCapacity;
+
+    // if (sources.totalAvailableCapacity < loads.totalLoadCapacity) {
+    //     //will implement load priority
+    //     for (uint8_t loadCount = 0; loadCount < 3; loadCount++) {
+    //         if (loads.currentLoadStatus[loadCount] && loads.currentLoad[loadCount] > sources.totalAvailableCapacity ) {
+    //             loads.loadOverride[loadCount] = true;
+    //             loads.turnLoadOff(loadCount);
+    //         }
+    //     }
+    // } else if (sources.totalAvailableCapacity > loads.totalLoadCapacity) {
+    //     for (bool & loadCount : loads.loadOverride) {
+    //         loadCount = false;
+    //     }
+    // }  //Original without actual load priorities
+
     if (sources.totalAvailableCapacity < loads.totalLoadCapacity) {
-        //will implement load priority
-        for (uint8_t loadCount = 0; loadCount < 3; loadCount++) {
-            if (loads.currentLoadStatus[loadCount] && loads.currentLoad[loadCount] > sources.totalAvailableCapacity ) {
-                loads.loadOverride[loadCount] = true;
-                loads.turnLoadOff(loadCount);
-            }
+        if (loads.currentLoadStatus[2] && loads.currentLoadCapacity[2] > sources.totalAvailableCapacity) { //Lighting
+            loads.loadOverride[2] = true;
+            loads.turnLoadOff(3);
         }
-    } else if (sources.totalAvailableCapacity > loads.totalLoadCapacity) {
-        for (bool & loadCount : loads.loadOverride) {
-            loadCount = false;
+        if (loads.currentLoadStatus[1] && loads.currentLoadCapacity[1] > sources.totalAvailableCapacity) { //Lifting
+            loads.loadOverride[1] = true;
+            loads.turnLoadOff(2);
         }
+        if (loads.currentLoadStatus[0] && loads.currentLoadCapacity[0] > sources.totalAvailableCapacity) { //Pumps
+            loads.loadOverride[0] = true;
+            loads.turnLoadOff(1);
+        }
+    }
+
+    int currentHour = hourCount;
+    if (currentHour >= 8 && currentHour < 22) {
+        //This will allow Load 1 ot work according to the final scenario
+        loads.loadOverride[0] = false;
+    } else {
+        //Hopefully force load1 off as it inst needed during that time.
+        loads.loadOverride[0] = true;
+        loads.turnLoadOff(1);
     }
 }
 

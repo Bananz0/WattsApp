@@ -9,17 +9,17 @@ Loads::Loads(DigitalOutput* loadSwitcher, DigitalInput* loadCaller) : output(loa
      lastLoad2Call = false;
      lastLoad3Call = false;
 
-    currentLoad[0] = 1.2f;
-    currentLoad[1] = 2.0f;
-    currentLoad[2] = 0.8f;
-
-    loadOverride1 = false;
-    loadOverride2 = false;
-    loadOverride3 = false;
+    currentLoadCapacity[0] = 1.2f;
+    currentLoadCapacity[1] = 2.0f;
+    currentLoadCapacity[2] = 0.8f;
 
     loadOverride[0] = false;
     loadOverride[1] = false;
     loadOverride[2] = false;
+
+    currentLoadStatus[0] = false;
+    currentLoadStatus[1] = false;
+    currentLoadStatus[2] = false;
 }
 
 Loads::~Loads()= default;
@@ -113,7 +113,7 @@ void Loads::calculateLoadCapacity() {
     //     currentTotalLoad += currentLoad3;
     // }
     totalLoadCapacity = 0;
-    for (int i = 0; i < 2; i++) {
-        totalLoadCapacity += currentLoad[i]*currentLoadStatus[i];
+    for (int i = 0; i < 3; i++) {
+        totalLoadCapacity += currentLoadCapacity[i]*currentLoadStatus[i];
     }
 }
