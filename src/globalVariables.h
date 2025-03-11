@@ -11,7 +11,7 @@
 extern volatile float Vref;                            //Reference Voltage, 3.3v
 extern volatile float ADCVoltage;             //Global - extern - ADC voltage variable and idk if this is good
 extern volatile bool ADCConversionFlag, LoadChangeFlag, dayHasChanged;
-extern volatile uint8_t dayCount , remainingDays;
+extern volatile uint8_t dayCount , remainingDays, hourCount ;
 extern volatile uint64_t ADCraw;
 
 // extern volatile float windTurbineCapacity;
@@ -55,6 +55,9 @@ extern volatile Screen screenPage, nextScreenPage,prevScreenPage;
 extern volatile bool emergencyScreen;
 extern volatile char emergencyMessage[100];
 extern volatile char uartMessage[40];
+
+extern volatile uint32_t dayChangeStartTime;  
+extern volatile uint32_t simulatedHourDuration;
 
 extern volatile bool batteryDecrease, batteryIncrease;
 
