@@ -61,7 +61,7 @@ void ESP8266Handler::sendDataToWifi() {
     String dataString = String(sources->windTurbineCapacity, 2) + "," +  //Float, 2 decimal places
                  String(sources->pvCapacity, 2) + "," +           //Float, 2 decimal places
                  String(sources->totalRenewableCapacity, 2) + "," + //Float, 2 decimal places
-                 String(sources->batteryCapacity) + "," +           //Int
+                 String(hourCount) + "," +           //Int
                  String(sources->mainsCapacity, 2) + "," +           //Float, 2 decimal places
                  String(sources->busbarVoltage, 2) + "," +         //Float, 2 decimal places
                  String(sources->busbarCurrent, 2) + "," +         //Float, 2 decimal places
@@ -78,7 +78,8 @@ void ESP8266Handler::sendDataToWifi() {
                  String(loads->loadOverride3) + "," +              //Int (bool represented as 0 or 1)
                  String(sources->loadDeficit, 2) + "," +           //Float, 2 decimal places
                  String(loads->totalLoadCapacity, 2) + "," +       //Float, 2 decimal places
-                 String(dayCount);                                    //Int
+                 String(dayCount)+ "," +                                    //Int
+                 String(hourCount);                                     //Int ;
 
     bfs::Fletcher16 chk;
     const uint16_t result = chk.Compute(reinterpret_cast<const uint8_t*>(dataString.c_str()), dataString.length());

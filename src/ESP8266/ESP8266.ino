@@ -83,6 +83,7 @@ void parseCSVData(String data) {
   float totalLoadCapacity = getValue(data, ',', 19).toFloat();
   //Current Day Status (i could use this for plotting the against the days)
   int dayCount = getValue(data, ',', 20).toInt();
+  int hourCount = getValue(data, ',', 21).toInt();
 
   // SourceData
   sourcesStatus.clearFields();
@@ -113,6 +114,8 @@ void parseCSVData(String data) {
   // General Stats data points
   generalStats.clearFields();
   generalStats.addField("day", dayCount);
+  generalStats.addField("day", dayCount);
+
 }
 
 bool validateChecksum(String data) {
