@@ -1,0 +1,25 @@
+┏[ glenm from  XPS][ 0.001s][ RAM: 13/15GB][ Tuesday at 10:45:18 PM][ master ≡  ?2 ~1]
+┖[~\optiboot_flash]
+└─Δ make atmega644p AVR_FREQ=12000000L BAUD_RATE=115200 LED=B7 LED_START_FLASHES=2 UART=0
+if not exist "bootloaders\atmega644p\12000000L" mkdir bootloaders\atmega644p\12000000L
+-n Using avr-gcc\
+E:/WinAVR//bin/avr-gcc -dumpversion
+7.3.0
+"\nUART = UART0\tLED_PIN = B7\t LED_FLASHES = 2\t SUPPORT_EEPROM = 0\t COPY_FLASH_PAGES = 0"
+"\x1B[1m\x1B[4m"
+process_begin: CreateProcess(NULL, sh baudcheck.tmp.sh, ...) failed.
+make (e=2): The system cannot find the file specified.
+make: [baudcheck] Error 2 (ignored)
+"\x1B[0m"
+E:/WinAVR//bin/avr-gcc -g -Wall -Os -fno-split-wide-types -mrelax -mmcu=atmega644p -DF_CPU=12000000L -DOPTIBOOT_CUSTOMVER=1 -DBAUD_RATE=115200 -DLED_START_FLASHES=2    -DLED=B7     -DUART=0   -c -o optiboot_flash.o optiboot_flash.c
+E:/WinAVR//bin/avr-gcc -g -Wall -Os -fno-split-wide-types -mrelax -mmcu=atmega644p -DF_CPU=12000000L -DOPTIBOOT_CUSTOMVER=1 -DBAUD_RATE=115200 -DLED_START_FLASHES=2    -DLED=B7     -DUART=0 -Wl,--section-start=.text=0xfc00 -Wl,--section-start=.version=0xfffe -Wl,--relax -nostartfiles -o bootloaders/atmega644p/12000000L/optiboot_flash_atmega644p_UART0_115200_12000000L_B7.elf optiboot_flash.o
+ECHO is off.
+E:/WinAVR//bin/avr-size bootloaders/atmega644p/12000000L/optiboot_flash_atmega644p_UART0_115200_12000000L_B7.elf
+   text    data     bss     dec     hex filename
+    506       0       0     506     1fa bootloaders/atmega644p/12000000L/optiboot_flash_atmega644p_UART0_115200_12000000L_B7.elf
+E:/WinAVR//bin/avr-objcopy -j .text -j .data -j .version --set-section-flags .version=alloc,load -O ihex bootloaders/atmega644p/12000000L/optiboot_flash_atmega644p_UART0_115200_12000000L_B7.elf bootloaders/atmega644p/12000000L/optiboot_flash_atmega644p_UART0_115200_12000000L_B7.hex
+"\nOutput file name: bootloaders/atmega644p/12000000L/optiboot_flash_atmega644p_UART0_115200_12000000L_B7.hex"
+rm bootloaders/atmega644p/12000000L/optiboot_flash_atmega644p_UART0_115200_12000000L_B7.elf optiboot_flash.o
+┏[ glenm from  XPS][ 0.51s][ RAM: 13/15GB][ Tuesday at 10:50:01 PM][ master ≡  ?2 ~1]
+┖[~\optiboot_flash]
+└─Δ
