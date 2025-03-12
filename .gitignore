@@ -33,7 +33,6 @@
 
 #AVR Related shit
 *.cof
-*.hex
 *.obj
 *.elf
 *.conf
