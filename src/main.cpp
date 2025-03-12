@@ -1,5 +1,6 @@
 #include "time.h" // NOLINT(*-deprecated-headers)
 #include <TimeHandler.h>
+#include "usbdrv/usbdrv.h"
 #include <WString.h>
 
 #include "globalVariables.h"
@@ -347,7 +348,7 @@ int main() {
     // debugSerial.println("Initialized ports");
     testLight(1);                              //Boot Light
     // debugSerial.println("Tested light PB6 and enabled global interrupts");
-
+    //usbInit();
     display.startDisplay(false);
     // debugSerial.println("Turned on display");
     display.clearScreen();

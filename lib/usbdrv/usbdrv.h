@@ -7,6 +7,9 @@
  * License: GNU GPL v2 (see License.txt), GNU GPL v3 or proprietary (CommercialLicense.txt)
  */
 
+#ifdef __cplusplus
+extern "C" {
+#endif
 #ifndef __usbdrv_h_included__
 #define __usbdrv_h_included__
 #include "usbconfig.h"
@@ -396,7 +399,7 @@ extern volatile schar   usbRxLen;
 /* ------------------------------------------------------------------------- */
 /* ----------------- Definitions for Descriptor Properties ----------------- */
 /* ------------------------------------------------------------------------- */
-/* This is advanced stuff. See usbconfig-prototype.h for more information
+/* This is advanced stuff. See usbconfig.h for more information
  * about the various methods to define USB descriptors. If you do nothing,
  * the default descriptors will be used.
  */
@@ -544,7 +547,7 @@ int usbDescriptorStringSerialNumber[];
 
 /* Derive Output, Input and DataDirection ports from port names */
 #ifndef USB_CFG_IOPORTNAME
-#error "You must define USB_CFG_IOPORTNAME in usbconfig.h, see usbconfig-prototype.h"
+#error "You must define USB_CFG_IOPORTNAME in usbconfig.h, see usbconfig.h"
 #endif
 
 #define USBOUT          USB_OUTPORT(USB_CFG_IOPORTNAME)
@@ -744,3 +747,6 @@ typedef struct usbRequest{
 /* ------------------------------------------------------------------------- */
 
 #endif /* __usbdrv_h_included__ */
+#ifdef __cplusplus
+}
+#endif

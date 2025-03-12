@@ -372,8 +372,8 @@ IMPLEMENT_ISR(INT7_vect, EXTERNAL_INT_7)
 IMPLEMENT_ISR(INT0_vect, EXTERNAL_INT_0)
 IMPLEMENT_ISR(INT1_vect, EXTERNAL_INT_1)
 
-#if defined(EICRA) && defined(ISC20)
-IMPLEMENT_ISR(INT2_vect, EXTERNAL_INT_2)
-#endif
+// #if defined(EICRA) && defined(ISC20)
+// IMPLEMENT_ISR(INT2_vect, EXTERNAL_INT_2)
+// #endif
 
 #endif
