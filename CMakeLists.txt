@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.31)
+cmake_minimum_required(VERSION 3.30)
 
 #set(PROG_TYPE usbasp)
 #set(PROG_TYPE c232hm)
