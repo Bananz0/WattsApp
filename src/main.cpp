@@ -335,19 +335,7 @@ ISR(TIMER1_COMPA_vect) {
     //utc++;
 }
 //Pin Change ISR
-ISR(PCINT5_vect) {
-    // Read Load Calls 1, 2 and 3
-    // loads.checkLoadCallChanges(); //Moved to main
-    LoadChangeFlag = true;
-}
-//Pin Change ISR
-ISR(PCINT6_vect) {
-    // Read Load Calls 1, 2 and 3
-    // loads.checkLoadCallChanges(); //Moved to main
-    LoadChangeFlag = true;
-}
-//Pin Change ISR
-ISR(PCINT7_vect) {
+ISR(PCINT0_vect) {
     // Read Load Calls 1, 2 and 3
     // loads.checkLoadCallChanges(); //Moved to main
     LoadChangeFlag = true;
