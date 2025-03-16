@@ -23,3 +23,19 @@ bool DigitalInput::readLoad2Call() { //Pin A6 Call for Load 2 (1 - on 0 - off)
 bool DigitalInput::readLoad3Call() { //Pin A7 Call for Load 3 (1 - on 0 - off)
     return (PINA & (1 << PINA7));
 }
+bool DigitalInput::readLoadCall(const uint8_t load) {
+    bool loadCall = false;
+    switch (load) {
+        case 0:
+            loadCall = readLoad1Call();
+        break;
+        case 1:
+            loadCall =  readLoad2Call();
+        break;
+        case 2:
+            loadCall = readLoad3Call();
+        break;
+        default:;
+    }
+    return loadCall;
+}

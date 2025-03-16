@@ -10,9 +10,11 @@
 class DigitalInput {
 public:
     DigitalInput();
-    bool readLoad1Call();
-    bool readLoad2Call();
-    bool readLoad3Call();
+    static bool readLoadCall(uint8_t load);
+private:
+    static bool readLoad1Call();
+    static bool readLoad2Call();
+    static bool readLoad3Call();
 };  //Third RJ45 Port C (0 to 2)=
 
 
