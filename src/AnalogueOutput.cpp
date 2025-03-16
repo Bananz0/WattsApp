@@ -2,6 +2,7 @@
 // Created by glenm on 2/2/2025.
 //
 
+#define SQRT2 1.414f
 #include "AnalogueOutput.h"
 #include <string.h>
 
@@ -15,16 +16,16 @@ void AnalogueOutput::setMainsCapacity(float mainsCapacity) { //Set Mains Capacit
     if (mainsCapacity < 0.0f) {
         mainsCapacity = 0.0f;
     } else {
-        if (mainsCapacity > 10.0f) {
-            mainsCapacity = 10.0f;
+        if (mainsCapacity > 2.0f) {
+            mainsCapacity = 2.0f;
             emergencyScreen = true;
-            strcpy(const_cast<char *>(emergencyMessage), "Mains\nCapacity\n> 10");
+            strcpy(const_cast<char *>(emergencyMessage), "Mains\nCapacity\n> 2");
             // memcpy(const_cast<char *>(emergencyMessage), "Mains\nCapacity\n> 10", sizeof("Mains\nCapacity\n> 10"));
         }
     }
-    //Voltage Scale - 0-10A scaled to 0-3.3v
-    scaledMainsCapacity = (mainsCapacity/10.0f) * Vref;
 
-    //All of this can be ignored as I have found a workaround from final scenario that limits the voltage output to 2v which the Il Matto can handle conveniently
-    pWMHandler.setOutputVoltage(mainsCapacity);
+    //Voltage Scale - 0-2A scaled to 0-2vrms
+    scaledMainsCapacity = mainsCapacity * SQRT2;
+
+    pWMHandler.setOutputVoltage(scaledMainsCapacity);
 }
