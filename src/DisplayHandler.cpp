@@ -65,6 +65,10 @@ DisplayHandler::DisplayHandler(Loads *loads, Sources *sources) : primaryColour(W
     load1Pos = {0 , 140};
     load2Pos = {105 , 140};
     load3Pos = {211 , 140};
+
+    call1Pos = {0 , 100};
+    call2Pos = {105 , 100};
+    call3Pos = {211 , 100};
 }
 
 void DisplayHandler::carouselScreen(Screen screen) { //May move away from this
@@ -160,12 +164,13 @@ void DisplayHandler::showTurbineScreen() {
 void DisplayHandler::showBatteryScreen() {
     sprintf(title, "BATTERY\nSTATUS");
     sprintf(text1, "Current: \n%0.2f AH", (double)sources->batteryCapacity);
+    sprintf(text2, "BattStat:\n %s", sources->isBatteryCharging? "ON " : "OFF");
     //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
     //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
-    //pictorDrawS(reinterpret_cast<unsigned char *>(text2),voltPos, RED,backgroundColour,OryxB,3);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text2),voltPos, loads->currentLoadStatus[0]?  GREEN: RED,backgroundColour,OryxB,3);
     //pictorDrawS(reinterpret_cast<unsigned char *>(text3),powerPos, DARK_GREEN,backgroundColour,OryxB,3);
 
     drawUIbattery();
@@ -196,14 +201,25 @@ void DisplayHandler::showLoadsScreen() {
     sprintf(title, "LOADS\nSTATUS");
     //TODO: implement load status
 
-    sprintf(text1, "Load\n  1\n %s", loads->currentLoad1Call? "ON" : "OFF");
-    sprintf(text2, "Load\n  2\n %s", loads->currentLoad2Call? "ON" : "OFF");
-    sprintf(text3, "Load\n  3\n %s", loads->currentLoad3Call? "ON" : "OFF");
+    sprintf(text1, "Load\n  1\n %s", loads->currentLoadStatus[0]? "ON " : "OFF");
+    sprintf(text2, "Load\n  2\n %s", loads->currentLoadStatus[1]? "ON " : "OFF");
+    sprintf(text3, "Load\n  3\n %s", loads->currentLoadStatus[2]? "ON " : "OFF");
+
+    sprintf(text4, "Call1:\n%s", loads->currentLoadCall[0]? "ON " : "OFF");
+    sprintf(text5, "Call2:\n%s", loads->currentLoadCall[1]? "ON " : "OFF");
+    sprintf(text6, "Call3:\n%s", loads->currentLoadCall[2]? "ON " : "OFF");
+
+
+
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title),titlePos, BLUE,backgroundColour,OryxB,5);
-    pictorDrawS(reinterpret_cast<unsigned char *>(text1),load1Pos, loads->currentLoad1Call?  GREEN: RED,backgroundColour,OryxB,3);
-    pictorDrawS(reinterpret_cast<unsigned char *>(text2),load2Pos, loads->currentLoad2Call?  GREEN: RED,backgroundColour,OryxB,3);
-    pictorDrawS(reinterpret_cast<unsigned char *>(text3),load3Pos, loads->currentLoad3Call?  GREEN: RED,backgroundColour,OryxB,3);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text1),load1Pos, loads->currentLoadStatus[0]?  GREEN: RED,backgroundColour,OryxB,3);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text2),load2Pos, loads->currentLoadStatus[1]?  GREEN: RED,backgroundColour,OryxB,3);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text3),load3Pos, loads->currentLoadStatus[2]?  GREEN: RED,backgroundColour,OryxB,3);
+
+    pictorDrawS(reinterpret_cast<unsigned char *>(text4),call1Pos, (loads->currentLoadCall[0]&&loads->currentLoadStatus[0])?  GREEN: RED,backgroundColour,OryxB,2);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text5),call2Pos, (loads->currentLoadCall[1]&&loads->currentLoadStatus[1])?  GREEN: RED,backgroundColour,OryxB,2);
+    pictorDrawS(reinterpret_cast<unsigned char *>(text6),call3Pos, (loads->currentLoadCall[2]&&loads->currentLoadStatus[2])?  GREEN: RED,backgroundColour,OryxB,2);
 }
 
 void DisplayHandler::showUARTScreen() {

@@ -20,7 +20,7 @@ public:
     point timePos{};
     //Sprite Pos
     point fanPos{};
-    point load1Pos{}, load2Pos{}, load3Pos{};
+    point load1Pos{}, load2Pos{}, load3Pos{}, call1Pos{}, call2Pos{}, call3Pos{};
     point busbarSPose{};
     point pvSpos{}; //PV Sprite Pos
 
@@ -72,7 +72,7 @@ private:
     solarCapacityPos{}, batteryCapacityPos{},turbineCapacityPos{};
 
     char bootName[10]{},bootVersion[10]{}, bootAuthors[10]{};
-    char title[40]{}, text2[40]{}, text1[40]{}, batteryStatus[40]{}, text3[40]{}, tempMessage[40]{};
+    char title[40]{}, text2[40]{}, text1[40]{}, batteryStatus[40]{}, text3[40]{}, tempMessage[40]{}, text4[40]{}, text5[40]{}, text6[40]{}, text7[40]{};
 
     Sources *sources;
     Loads *loads;
