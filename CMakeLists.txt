@@ -1,8 +1,9 @@
 cmake_minimum_required(VERSION 3.30)
 
-#set(PROG_TYPE usbasp)
+set(PROG_TYPE usbasp)
 #set(PROG_TYPE c232hm)
-set(PROG_TYPE arduino)
+#set(PROG_TYPE arduino)
+#Better done in main tbch
 
 # Variables regarding the AVR chip
 set(MCU   atmega644p)
