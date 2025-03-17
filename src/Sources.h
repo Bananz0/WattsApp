@@ -28,6 +28,8 @@ public:
             mainsCapacity;
 
     int8_t batteryCapacity{0};
+    int8_t hourMainsChange = {0};
+    int8_t hourBatteryChange = {0};
     float totalAvailableCapacity{0};
     float totalAvailableCapacityMain{0};
     float loadDeficit{0};
@@ -48,8 +50,7 @@ public:
     void calculateTotalAvailableCapacity();
     void calculateTotalEnergyAndPower();
 
-    int8_t dailyMainsChange = 0; //gets the mains change (+1 or -1)
-    int8_t dailyBatteryChange = 0; //gets the battery change (+1 or -1)
+
 };
 
 
