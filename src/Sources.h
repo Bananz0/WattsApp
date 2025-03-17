@@ -17,7 +17,7 @@ public:
     AnalogueOutput *mainsHandler;
     DigitalOutput *batteryHandler;
 
-    float windTurbineCapacity,
+     float windTurbineCapacity,
             pvCapacity,
             totalRenewableCapacity,
             busbarVoltage,
@@ -27,7 +27,7 @@ public:
             totalEnergy,
             mainsCapacity;
 
-    int8_t batteryCapacity{-1};
+    int8_t batteryCapacity{0};
     float totalAvailableCapacity{0};
     float totalAvailableCapacityMain{0};
     float loadDeficit{0};
@@ -36,9 +36,9 @@ public:
     Sources(AnalogueInput *sourceHandler, AnalogueOutput *mainsHandler,DigitalOutput *batteryHandler);
     ~Sources();
 
-    void requestMains(float mainsCapacity);
+    void requestMains(float mainsCapacityIn);
     void requestBattery(bool requestDischarge);
-    void chargeBattery();
+    void chargeBattery(bool requestCharge);
 
     void readTurbineCapacity();
     void readPvCapacity();
