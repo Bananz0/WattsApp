@@ -21,13 +21,13 @@ class Loads {
 
     void calculateLoadCapacity();
 
-    bool lastLoad1Call, lastLoad2Call, lastLoad3Call;
-    bool currentLoad1Call{}, currentLoad2Call{}, currentLoad3Call{};
-    bool loadOverride1, loadOverride2, loadOverride3;
-    bool loadOverride[3];
-    float currentLoadCapacity[3];
-    bool currentLoadStatus[3];
-    bool currentLoad1, currentLoad2, currentLoad3;
+    bool loadOverride[3]{false};
+    bool lastLoadCall[3]{false};
+
+    bool currentLoadCall[3]{false};
+    bool currentLoadStatus[3]{false};
+
+    float currentLoadCapacity[3]{0.0f};
     float totalLoadCapacity{0};
 
     private:

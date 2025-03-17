@@ -5,9 +5,9 @@
 #include "Loads.h"
 
 Loads::Loads(DigitalOutput* loadSwitcher, DigitalInput* loadCaller) : output(loadSwitcher), input(loadCaller) {
-     lastLoad1Call = false;
-     lastLoad2Call = false;
-     lastLoad3Call = false;
+     lastLoadCall[0] = false;
+     lastLoadCall[1] = false;
+     lastLoadCall[2] = false;
 
     currentLoadCapacity[0] = 1.2f;
     currentLoadCapacity[1] = 2.0f;
@@ -17,6 +17,10 @@ Loads::Loads(DigitalOutput* loadSwitcher, DigitalInput* loadCaller) : output(loa
     loadOverride[1] = false;
     loadOverride[2] = false;
 
+    currentLoadCall[0] = false;
+    currentLoadCall[1] = false;
+    currentLoadCall[2] = false;
+
     currentLoadStatus[0] = false;
     currentLoadStatus[1] = false;
     currentLoadStatus[2] = false;
@@ -25,57 +29,60 @@ Loads::Loads(DigitalOutput* loadSwitcher, DigitalInput* loadCaller) : output(loa
 Loads::~Loads()= default;
 
 void Loads::checkLoadCallChanges() {
+    // currentLoadCall[0] = input->readLoad1Call();
+    // currentLoadCall[1] = input->readLoad2Call();
+    // currentLoadCall[2] = input->readLoad3Call();
+    for (int loadCount = 0; loadCount < 3; loadCount++) {
+        currentLoadCall[loadCount] = DigitalInput::readLoadCall(loadCount);
+    }
+    //emergencyScreen = currentLoadCall[0] || currentLoadCall[1] || currentLoadCall[2];
 
-
-    currentLoad1Call = input->readLoad1Call();
-    currentLoad2Call = input->readLoad2Call();
-    currentLoad3Call = input->readLoad3Call();
-    //emergencyScreen = currentLoad1Call || currentLoad2Call || currentLoad3Call;
-
+    //Commented out currentLoadStatus updates from the loadcall
     //load 1
-    if (currentLoad1Call && !lastLoad1Call) {
-        output->loadSwitch1(DigitalOutput::ON);  //Load 1 on
-        currentLoadStatus[0] = true;
-    } else if (!currentLoad1Call && lastLoad1Call) {
-        output->loadSwitch1(DigitalOutput::OFF); //OFF
-        currentLoadStatus[0] = false;
+    //Jackson's code which prevents hysterisis actually. NIce implementation
+    if (currentLoadCall[0] && !lastLoadCall[0]) {
+        DigitalOutput::loadSwitch1(DigitalOutput::ON);  //Load 1 on
+       // currentLoadStatus[0] = true;
+    } else if (!currentLoadCall[0] && lastLoadCall[0]) {
+        DigitalOutput::loadSwitch1(DigitalOutput::OFF); //OFF
+        //currentLoadStatus[0] = false;
     }
 
     //load 2
-    if (currentLoad2Call && !lastLoad2Call) {
-        output->loadSwitch2(DigitalOutput::ON);  //ON
-        currentLoadStatus[1] = true;
-    } else if (!currentLoad2Call && lastLoad2Call) {
-        output->loadSwitch2(DigitalOutput::OFF); //OFF
-        currentLoadStatus[1] = false;
+    if (currentLoadCall[1] && !lastLoadCall[1]) {
+        DigitalOutput::loadSwitch2(DigitalOutput::ON);  //ON
+        //currentLoadStatus[1] = true;
+    } else if (!currentLoadCall[1] && lastLoadCall[1]) {
+        DigitalOutput::loadSwitch2(DigitalOutput::OFF); //OFF
+        //currentLoadStatus[1] = false;
     }
 
     //load 3
-    if (currentLoad3Call && !lastLoad3Call) {
-        output->loadSwitch3(DigitalOutput::ON);  //ON
-        currentLoadStatus[2] = true;
-    } else if (!currentLoad3Call && lastLoad3Call) {
-        output->loadSwitch3(DigitalOutput::OFF); //OFF
-        currentLoadStatus[2] = false;
+    if (currentLoadCall[2] && !lastLoadCall[2]) {
+        DigitalOutput::loadSwitch3(DigitalOutput::ON);  //ON
+        //currentLoadStatus[2] = true;
+    } else if (!currentLoadCall[2] && lastLoadCall[2]) {
+        DigitalOutput::loadSwitch3(DigitalOutput::OFF); //OFF
+        //currentLoadStatus[2] = false;
     }
 
-    lastLoad1Call = currentLoad1Call;
-    lastLoad2Call = currentLoad2Call;
-    lastLoad3Call = currentLoad3Call;
+    lastLoadCall[0] = currentLoadCall[0];
+    lastLoadCall[1] = currentLoadCall[1];
+    lastLoadCall[2] = currentLoadCall[2];
 }
 
 void Loads::turnLoadOn(uint8_t load) {
     switch (load) {
         case 1:
-            output->loadSwitch1(DigitalOutput::ON);
+            DigitalOutput::loadSwitch1(DigitalOutput::ON);
             currentLoadStatus[0] = true;
         break;
         case 2:
-            output->loadSwitch2(DigitalOutput::ON);
+            DigitalOutput::loadSwitch2(DigitalOutput::ON);
             currentLoadStatus[1] = true;
         break;
         case 3:
-            output->loadSwitch3(DigitalOutput::ON);
+            DigitalOutput::loadSwitch3(DigitalOutput::ON);
             currentLoadStatus[2] = true;
         break;
         default:
@@ -86,15 +93,15 @@ void Loads::turnLoadOn(uint8_t load) {
 void Loads::turnLoadOff(uint8_t load) {
     switch (load) {
         case 1:
-            output->loadSwitch1(DigitalOutput::OFF);
+            DigitalOutput::loadSwitch1(DigitalOutput::OFF);
             currentLoadStatus[0] = false;
         break;
         case 2:
-            output->loadSwitch2(DigitalOutput::OFF);
+            DigitalOutput::loadSwitch2(DigitalOutput::OFF);
             currentLoadStatus[1] = false;
         break;
         case 3:
-            output->loadSwitch3(DigitalOutput::OFF);
+            DigitalOutput::loadSwitch3(DigitalOutput::OFF);
             currentLoadStatus[2] = false;
         break;
         default:
@@ -103,13 +110,13 @@ void Loads::turnLoadOff(uint8_t load) {
 }
 
 void Loads::calculateLoadCapacity() {
-    // if (currentLoad1Call) {
+    // if (currentLoadCall[0]) {
     //     currentTotalLoad += currentLoad1;
     // }
-    // if (currentLoad2Call) {
+    // if (currentLoadCall[1]) {
     //     currentTotalLoad += currentLoad2;
     // }
-    // if (currentLoad3Call) {
+    // if (currentLoadCall[2]) {
     //     currentTotalLoad += currentLoad3;
     // }
     totalLoadCapacity = 0;
