@@ -11,7 +11,7 @@ volatile float Vref = 3.3;                       //Reference Voltage, 3.3v
 volatile float ADCVoltage;              //Global ADC voltage variable and idk if this is good
 volatile bool ADCConversionFlag = false;   //Global ADC Conversion Complete Flag
 volatile bool LoadChangeFlag = false;      //Global Load Change Flag
-volatile bool dayHasChanged = false; //Global Day Has Changed variable
+volatile bool hourHasChanged = false; //Global Day Has Changed variable
 
 volatile uint64_t ADCraw;
 
@@ -32,6 +32,5 @@ volatile char uartMessage[] = "";
 
 volatile bool batteryDecrease = false, batteryIncrease = false;
 
-volatile uint8_t dayCount = 0, remainingDays = 24,hourCount = 0;
-volatile uint32_t dayChangeStartTime = 0;
-volatile uint32_t simulatedHourDuration = 2500;
+volatile uint8_t hourCount = 0, remainingHours = 24;
+volatile uint32_t hourChangeStartTime = 0;
