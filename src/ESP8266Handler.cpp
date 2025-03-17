@@ -77,9 +77,7 @@ void ESP8266Handler::sendDataToWifi() {
                  String(loads->loadOverride[1]) + "," +              //Int (bool represented as 0 or 1)
                  String(loads->loadOverride[2]) + "," +              //Int (bool represented as 0 or 1)
                  String(sources->loadDeficit, 2) + "," +           //Float, 2 decimal place
-                 // String(sources->totalAvailableCapacity, 2) + "," +           //Float, 2 decimal places
                  String(loads->totalLoadCapacity, 2) + "," +       //Float, 2 decimal places
-                 String(hourCount)+ "," +                                    //Int
                  String(hourCount);                                     //Int ;
 
     bfs::Fletcher16 chk;
@@ -108,11 +106,11 @@ void ESP8266Handler::processSerialCommand() {
         String receivedData = Serial.readStringUntil('\r');
         receivedData.trim();
         strncpy(const_cast<char *>(uartMessage), receivedData.c_str(), sizeof(uartMessage) - 1); //Sends it to UARTDebugScreen
-        if (receivedData.equalsIgnoreCase("day")) {
-            dayHasChanged = true;
+        if (receivedData.equalsIgnoreCase("hour")) {
+            hourHasChanged = true;
             //Serial.println("Received command: dayHasChanged = true");
-        } else if (receivedData.equalsIgnoreCase("noday")) {
-            dayHasChanged = false;
+        } else if (receivedData.equalsIgnoreCase("nohour")) {
+            hourHasChanged = false;
             //Serial.println("Received command: dayHasChanged = false");
         } else {
             //Serial.print("Unknown command: ");

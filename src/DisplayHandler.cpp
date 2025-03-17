@@ -164,7 +164,7 @@ void DisplayHandler::showTurbineScreen() {
 void DisplayHandler::showBatteryScreen() {
     sprintf(title, "BATTERY\nSTATUS");
     sprintf(text1, "Current: \n%0.2f AH", (double)sources->batteryCapacity);
-    sprintf(text2, "BattStat:\n %s", sources->isBatteryCharging? "ON " : "OFF");
+    sprintf(text2, "BattStat:\n %s", sources->isBatteryCharging? "Charging " : "Standby");
     //sprintf(text2, "Volatage: \n%00.2fV", (double)sources->busbarVoltage);
     //sprintf(text3, "Power: \n%0000.2fVA", (double)sources->busbarPower);
 
@@ -190,11 +190,11 @@ void DisplayHandler::showDayCountScreen() {
     strncpy(tempMessage, const_cast<char *>(emergencyMessage), sizeof(tempMessage)); //Ignore error - compiles
 
     sprintf(title, "DAY\nSTATUS");
-    sprintf(text1, "Current: \n%u Days", dayCount);
+    sprintf(text1, "Current: \n%u/24 Hours", hourCount);
 
     pictorDrawS(reinterpret_cast<unsigned char *>(title) ,titlePos, BLUE,backgroundColour,OryxB,5);
     pictorDrawS(reinterpret_cast<unsigned char *>(text1),currentPos, YELLOW,backgroundColour,OryxB,3);
-    //TODO: Exclamation mark sprite
+    //TODO: Make Loading Bar for 24 Hours
 }
 
 void DisplayHandler::showLoadsScreen() {

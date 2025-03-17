@@ -23,7 +23,7 @@ class ESP8266Handler {
 
     void enableESP();
     void sendDataToWifi();
-    void processSerialCommand();
+    static void processSerialCommand();
 
     private:
       Loads *loads;
