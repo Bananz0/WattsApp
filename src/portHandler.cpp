@@ -36,6 +36,8 @@ void finalizePorts() {
 
 
     DDRA |=  _BV(4) /*Potential ESP8266 Enable Pin*/;
+    PORTA &= ~(1 << PORTA4);
+
 
 
     //PORT B AND C ARE USED FOR THE DISPLAY
@@ -61,4 +63,10 @@ void finalizePorts() {
          | _BV(4) /*Load 1 Switch*/
          | _BV(5) /*Load 2 Switch*/
          | _BV(6) /*Load 3 Switch*/); //this took way tooo long bruh
+    PORTD &= ~(1 << PORTD2);
+    PORTD &= ~(1 << PORTD3);
+    PORTD &= ~(1 << PORTD4);
+    PORTD &= ~(1 << PORTD5);
+    PORTD &= ~(1 << PORTD6);
+
 }
