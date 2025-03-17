@@ -1,4 +1,4 @@
-#include "time.h" // NOLINT(*-deprecated-headers)
+﻿#include "time.h" // NOLINT(*-deprecated-headers)
 #include <TimeHandler.h>
 #include "usbdrv/usbdrv.h"
 #include <WString.h>
@@ -6,7 +6,6 @@
 #include "globalVariables.h"
 
 #include <avr/io.h>
-#include <util/delay.h>
 #include <avr/interrupt.h>
 
 #include "debug.h"
@@ -48,7 +47,6 @@ TimeHandler timeHandler;
 HardwareSerial *wifiSerial = &Serial;
 ESP8266Handler esp8266Handler(&loads, &sources);
 
-float netCapacity = 0;
 uint16_t displayDuration = 2;
 uint16_t updateCounter = 0;
 Screen screen{};
@@ -59,16 +57,18 @@ String response;
 uint32_t lastUtcUpdateMillis = 0;
 uint32_t utcUpdateInterval = 1000;//1sec
 uint32_t lastScreenUpdateMillis = 0;
-uint32_t screenUpdateInterval = 2000;//2secs
+uint32_t screenUpdateInterval = 5000;//2secs
 uint32_t lastStatsUpdateMillis = 0;
 uint32_t statsUpdateInterval = 100;//100ms
 uint32_t lastEspUpdateUpdateMillis = 0;
 uint32_t espUpdateInterval = 2500;//seconds1.5
-uint32_t lastDayCheckUpdateMillis = 0;
-uint32_t dayCheckUpdateInterval = 2000;//2 sec
-uint32_t lastDayUpdateMillis = 0;
-uint32_t dayUpdateInterval = 30000; //30sec check for day upadtes
-bool firstDay = true;
+uint32_t lastHourCheckUpdateMillis = 0;
+uint32_t hourCheckUpdateInterval = 2000;//2 sec
+uint32_t simulatedSecondCounter = 0;
+uint32_t lastSimulatedSecondUpdateMillis = 0;
+uint32_t simulatedSecondUpdateInterval = 1000; //Update every 1 second
+uint8_t simulatedSeconds = 0;
+uint8_t simulatedHourUpdateThresholdSeconds = 55; //when hto start checkign for the new hour or "simulated day"
 
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
@@ -87,7 +87,6 @@ void updateStats() {
 
     loads.calculateLoadCapacity();
 
-    netCapacity = sources.totalAvailableCapacity -  loads.totalLoadCapacity;
 }
 
 void drawTime() {
@@ -136,10 +135,10 @@ void updateMainStats() {
     }
 }
 
-void checkForDayChange() {
+void checkForHourChange() {
     //Copy all the stats to a temporary store. Array or struct could work
     const float sourcesStats[4] = {sources.busbarVoltage, sources.busbarCurrent, sources.pvCapacity, sources.windTurbineCapacity};
-    bool loadStats[3] = {loads.currentLoad1Call, loads.currentLoad2Call, loads.currentLoad3Call};
+    bool loadStats[3] = {loads.currentLoadCall[0], loads.currentLoadCall[1], loads.currentLoadCall[2]};
 
     static float sourceStatsBuffer[4] = {0};
     static bool loadsStatsBuffer[3] = {false};
@@ -153,7 +152,7 @@ void checkForDayChange() {
     for (int i = 0; i < 4; i++) {
         if ((sourceStatsBuffer[i]!=0)&&(sourcesStats[i]!=0)) {
             percentStatsDifference[i] = (sourcesStats[i] - sourceStatsBuffer[i])/ sourceStatsBuffer[i] * 100;
-            abs(percentStatsDifference[i]) > 10 ? percentStatsDifferenceCount++ : 0;
+            abs(percentStatsDifference[i]) > 2 ? percentStatsDifferenceCount++ : 0;
         }
     }
 
@@ -170,46 +169,45 @@ void checkForDayChange() {
         sourceStatsBuffer[i] = sourcesStats[i];
     }
 
-    dayHasChanged = (percentStatsDifferenceCount > 2) || loadStatsDifferent;
-
+    hourHasChanged = (percentStatsDifferenceCount > 2) || loadStatsDifferent;
+    hourHasChanged = true;
 }
 
 void  controlAlgrithm() {
     uint32_t currentMillis = millis();
-    //program automatically listens for calls for loads and updates.
-    //could be a good idea to use that as a way to update the stats.
-    //Could be also be a good idea to enable pin change interrupts for every one of the pins as the busbar could
-    //change while the turbine capacity maintaining its original value.
-    //since 1 min is 1 hour and there is the potential of having the NTP, we could time the changes from the start
-    //to get the values from the TB instantly. not sure if the speed at which the change is detected nor the
-    //resolution of the scope
+    float availableCapacity = sources.totalRenewableCapacity;
 
-    //updateMainStats(); //Should update every change of pins or every 10 seconds
-    //Impmelented proper time handling i hope
-    // if (timeUTC->tm_sec % 5 == 0) {
-    //     checkForDayChange();
-    // }
+    //Simulated time changes with teh correction if undershot and cap it to 60 cause the avr is slower
+    if (currentMillis - lastSimulatedSecondUpdateMillis >= simulatedSecondUpdateInterval) {
+        lastSimulatedSecondUpdateMillis = currentMillis;
+        simulatedSeconds++;
 
-    if (currentMillis - lastDayCheckUpdateMillis >= dayCheckUpdateInterval) {
-        lastDayCheckUpdateMillis = currentMillis;
-        checkForDayChange();
+        if (simulatedSeconds >= 60) {
+            simulatedSeconds = 0;
+            hourHasChanged = true;
+        } else if (simulatedSeconds >= simulatedHourUpdateThresholdSeconds) {
+            checkForHourChange();
+        }
+
+        if (hourHasChanged) {
+            // Reset simulated seconds if a change is detected
+            simulatedSeconds = 0;
+        }
     }
-
     //Implement LabView Algorithm
 
     //Still need to figure out how to accurately detect the changes in days without using a blocking _delay(6000) which would work but would have an effect in the other operations in the smart meter
     //This is not accurate as there is no RTC on the board but could use NTP or add the clock later
     //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
 
-    if (dayHasChanged && (firstDay || currentMillis - lastDayUpdateMillis >= dayUpdateInterval)) {
-        lastDayUpdateMillis = currentMillis;
-        if (sources.dailyMainsChange != 0) {
-            sources.mainsCapacity += sources.dailyMainsChange;
-            sources.dailyMainsChange= 0;  // Reset
+    if (hourHasChanged) {
+        if (sources.hourMainsChange != 0) {
+            sources.mainsCapacity += sources.hourMainsChange;
+            sources.hourMainsChange= 0;  // Reset
         }
 
-        if (sources.dailyBatteryChange != 0) {
-            sources.batteryCapacity += sources.dailyBatteryChange;
+        if (sources.hourBatteryChange != 0) {
+            sources.batteryCapacity += sources.hourBatteryChange;
 
             //keep within range
             if (sources.batteryCapacity < 0) {
@@ -218,9 +216,8 @@ void  controlAlgrithm() {
             if (sources.batteryCapacity > 24) {
                 sources.batteryCapacity = 24;
             }
-
-            sources.dailyBatteryChange = 0; //Reset
         }
+        sources.hourBatteryChange = 0;
 
         if (sources.mainsCapacity < 0) {
             sources.mainsCapacity = 0;
@@ -231,88 +228,114 @@ void  controlAlgrithm() {
 
         analogueOutput.setMainsCapacity(sources.mainsCapacity);
 
-        dayCount += 1;
-        firstDay = false;
-        remainingDays-=1;
-        dayHasChanged = false;
-        dayChangeStartTime = millis();
-        hourCount = 0;
+        hourCount += 1;
+        //firstDay = false;
+        remainingHours-=1;
+        hourHasChanged = false;
+        hourChangeStartTime = millis();
     }
 
-
-    //Increment hourCount based on simulated time for the pump timing.
-    if (currentMillis - dayChangeStartTime >= simulatedHourDuration) {
-        uint8_t incrementBy = (currentMillis - dayChangeStartTime) / simulatedHourDuration;
-        hourCount = (hourCount + incrementBy) % 24;
-        dayChangeStartTime = dayChangeStartTime + (incrementBy * simulatedHourDuration);
-    }
-
-    //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
-    if ((sources.totalRenewableCapacity > loads.totalLoadCapacity)&&(sources.totalRenewableCapacity > (1 + loads.totalLoadCapacity))) {
-        sources.chargeBattery(); //Charges it by 1A
-    }
-
-    //Deplete battery capacity if the capacity can last days close to the end of the "Simulation"
-    if ((sources.batteryCapacity > remainingDays)) {
-        sources.requestMains(0);
-        sources.requestBattery(true);
-    }
-
-    //This should check for the available load capacity and the renewables capacity. If not sufficient, it should call the battery.
-    //Ultimately if not available it should call the mains as a last option.
-
-    if (netCapacity<0 && netCapacity!=0) { //redundant but idc
-        if (sources.batteryCapacity > 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
-            sources.requestBattery(true); // We can only discharge 1A per day
-        }  else if (sources.batteryCapacity < 1 && sources.totalRenewableCapacity < loads.totalLoadCapacity) {
-            sources.requestMains(-1 * netCapacity);
-        }
-        // break; // If the battery can sustain it break the if condition. Do not trust this cause im not sure if i should use break or continue. Will search later. - switched to elif
-    }
 
     //Last resort.
     //Turn off loads if the battery capacity, renewables and main can't match the output of the loads required
-    //Will need to consider priority into all of these.
+    //Will need to consider priority into all of these. -- Old remnant i will prob not delete this
     sources.loadDeficit =  sources.totalAvailableCapacity - loads.totalLoadCapacity;
 
-    // if (sources.totalAvailableCapacity < loads.totalLoadCapacity) {
-    //     //will implement load priority
-    //     for (uint8_t loadCount = 0; loadCount < 3; loadCount++) {
-    //         if (loads.currentLoadStatus[loadCount] && loads.currentLoad[loadCount] > sources.totalAvailableCapacity ) {
-    //             loads.loadOverride[loadCount] = true;
-    //             loads.turnLoadOff(loadCount);
-    //         }
-    //     }
-    // } else if (sources.totalAvailableCapacity > loads.totalLoadCapacity) {
-    //     for (bool & loadCount : loads.loadOverride) {
-    //         loadCount = false;
-    //     }
-    // }  //Original without actual load priorities
-
-    if (sources.totalAvailableCapacity < loads.totalLoadCapacity) {
-        if (loads.currentLoadStatus[2] && loads.currentLoadCapacity[2] > sources.totalAvailableCapacity) { //Lighting
-            loads.loadOverride[2] = true;
-            loads.turnLoadOff(3);
-        }
-        if (loads.currentLoadStatus[1] && loads.currentLoadCapacity[1] > sources.totalAvailableCapacity) { //Lifting
-            loads.loadOverride[1] = true;
-            loads.turnLoadOff(2);
-        }
-        if (loads.currentLoadStatus[0] && loads.currentLoadCapacity[0] > sources.totalAvailableCapacity) { //Pumps
-            loads.loadOverride[0] = true;
-            loads.turnLoadOff(1);
+    //Moving away from Hysterisis, this is getting too complicated to debug and follow but it works and doesnt charge the battery - also aold remnant
+    float neededCapacity = 0;
+    //Finds teh needed capacity from the loads to request the main if necessary
+    for (int loadCoumt = 0; loadCoumt < 3; loadCoumt++) {
+        if(!loads.loadOverride[loadCoumt] && loads.currentLoadCall[loadCoumt]) {
+            if(loadCoumt != 0 || (loadCoumt == 0 && (hourCount >= 8 && hourCount <= 22))) {
+                neededCapacity += loads.currentLoadCapacity[loadCoumt];
+            }
         }
     }
 
-    int currentHour = hourCount;
-    if (currentHour >= 8 && currentHour < 22) {
-        //This will allow Load 1 ot work according to the final scenario
-        loads.loadOverride[0] = false;
+    //Check iff the battery can be used and if ot call the mains.
+    float mainsRequest = 0;
+
+    if (neededCapacity > availableCapacity) {
+        //If we have battery discharge request mains from available energy
+        if (sources.batteryCapacity > 0) {
+            sources.requestBattery(true); //Request battery charge caps battery change with capacity
+            neededCapacity -=1; //transfer the capacity from teh needed to the available
+            availableCapacity +=1;
+        }
+
+        mainsRequest = neededCapacity - availableCapacity;
+
+        if (mainsRequest > 0 ) { //clamp the mains
+            if (mainsRequest > 2) {
+                mainsRequest = 2;
+            }
+            sources.requestMains(mainsRequest);
+            availableCapacity += mainsRequest;  // Add mains power to the total
+        }
     } else {
-        //Hopefully force load1 off as it inst needed during that time.
-        loads.loadOverride[0] = true;
-        loads.turnLoadOff(1);
+        sources.requestMains(0);
+        sources.requestBattery(false); //If not in use disable battery
     }
+
+    //Load calculations
+    for (int loadCoumt = 0; loadCoumt < 3; loadCoumt++) {
+        bool shouldTurnOn = false;
+
+        // Decide if it should be running
+        if(!loads.loadOverride[loadCoumt] && loads.currentLoadCall[loadCoumt]) {
+            //Additional check for Load 0's time restriction:
+            if(loadCoumt != 0 || (loadCoumt == 0 && (hourCount >= 8 && hourCount <= 22))) {
+                // Check if there is sufficient power before turning on the load:
+                if(availableCapacity >= loads.currentLoadCapacity[loadCoumt]) {
+                    shouldTurnOn = true;
+                    availableCapacity -= loads.currentLoadCapacity[loadCoumt];
+                } else {
+                    shouldTurnOn = false;  // Not enough capacity to turn on, overide it
+                    loads.loadOverride[loadCoumt] = true;
+                }
+            } else {
+                shouldTurnOn = false; // Outside of load0's time window.
+            }
+        } else {
+            shouldTurnOn = false; // There is an overide or no load call. Leave it off
+        }
+
+        // switch the load on or off.
+        if (shouldTurnOn) {
+            loads.turnLoadOn(loadCoumt + 1);
+        }
+        else {
+            loads.turnLoadOff(loadCoumt + 1);
+            // reset the load override
+            loads.loadOverride[loadCoumt] = false;
+        }
+    }
+
+    //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
+    //And check that only the renewable is used by adding the capacity to the cap buffer
+    //Charge battery if there is available surplus capacity and we do not request for mains in load
+    float availableRenewableEnergy = sources.totalRenewableCapacity - neededCapacity;
+    if (availableRenewableEnergy >= 1) {
+        sources.chargeBattery(true); //Charges it by 1A
+    } else {
+        sources.chargeBattery(false);
+    }
+
+    //This should check for the available load capacity and the renewables capacity. If not sufficient, it should call the battery.
+    //ultimately if not available it should call the mains as a last option. -- This might be wrong as I should call teh mains if tehre is not enough available capacity and were trying to turn on a load prob
+    // if (sources.loadDeficit<0) {
+    //     if (sources.batteryCapacity > 0) {
+    //         sources.requestBattery(true); // We can only discharge 1A per day
+    //     }  else if (sources.batteryCapacity <= 0 ){
+    //         sources.requestBattery(false);
+    //         if (abs(sources.loadDeficit)>2) {
+    //             sources.loadDeficit=2;
+    //         }
+    //         sources.requestMains(-1 * sources.loadDeficit); //Limit to available capacity
+    //         availableCapacity += sources.mainsCapacity;
+    //     }
+    //     // break; // If the battery can sustain it break the if condition. Do not trust this cause im not sure if i should use break or continue. Will search later. - switched to elif
+    // }
 }
 
 void updateInfluxDB() {
@@ -360,29 +383,28 @@ int main() {
     lastUtcUpdateMillis = millis();
     lastScreenUpdateMillis = millis();
     lastStatsUpdateMillis = millis();
-    lastDayCheckUpdateMillis = millis();
+    lastHourCheckUpdateMillis = millis();
     lastEspUpdateUpdateMillis = millis();
-    dayChangeStartTime = millis();
+    hourChangeStartTime = millis();
     //Boot and Initialization
     // debugSerial.println("Drawing boot sequence");
     display.drawBootSequence();
     // debugSerial.println("Boot Complete...starting program");
 
     //Start of the LabView Algorighm
-
+    //Moved LV algorightm to a seperate funcigton
     // Maximum battery capacity = 24Ah
     // 1 Hour Simulation time = 1 Min Runtime
-    dayCount = 0, remainingDays = 24;
-    // Default: Charge battery and turn all loads off.
+    hourCount = 0, remainingHours = 24;
+    // Default: Charge battery and turn all loads off, turn off batt req and batt chrg
     sources.requestMains(0);
-    sources.chargeBattery();
+    sources.chargeBattery(false);
+    sources.requestBattery(false);
     loads.turnLoadOff(1);
     loads.turnLoadOff(2);
     loads.turnLoadOff(3);
     loads.checkLoadCallChanges();
-
-//   wifiSerial->begin(115200);
-
+    updateMainStats();
 
     // ReSharper disable once CppDFAEndlessLoop - CLion complains about forever while loop
     while (true) {
@@ -393,7 +415,6 @@ int main() {
         controlAlgrithm();
         //esp8266Handler.processSerialCommand();
         updateInfluxDB();
-
         //requestMains(20);  //this is a hard request to test if the clamp works. Should trigger an error screen and TODO: Document this feature
         //wifiHandler.echoSerial();
     }
