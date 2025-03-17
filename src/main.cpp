@@ -33,15 +33,15 @@
 
 
 //Moved all timer functions to PWMHandler for central management (changed ports cause of display later on)
-AnalogueInput analogueInput;                        //Starts the ADC up in the AI (analog input) constructor    PORTA1
-AnalogueOutput analogueOutput;                      //Starts the PWM up in the AO (analog output) constructor   PORTD7
-DigitalInput digitalInput;                          //Start the Digital ISR                                     PORTC0-2
-DigitalOutput digitalOutput;                        //very basic                                                PORTC3-7
+AnalogueInput analogueInput; //Starts the ADC up in the AI (analog input) constructor    PORTA1
+AnalogueOutput analogueOutput; //Starts the PWM up in the AO (analog output) constructor   PORTD7
+DigitalInput digitalInput; //Start the Digital ISR                                     PORTC0-2
+DigitalOutput digitalOutput; //very basic                                                PORTC3-7
 
-Loads loads(&digitalOutput,&digitalInput);
-Sources sources(&analogueInput, &analogueOutput,&digitalOutput);
+Loads loads(&digitalOutput, &digitalInput);
+Sources sources(&analogueInput, &analogueOutput, &digitalOutput);
 
-DisplayHandler display(&loads,&sources);
+DisplayHandler display(&loads, &sources);
 TimeHandler timeHandler;
 
 HardwareSerial *wifiSerial = &Serial;
@@ -55,20 +55,20 @@ uint16_t lastCounter = 0;
 String response;
 
 uint32_t lastUtcUpdateMillis = 0;
-uint32_t utcUpdateInterval = 1000;//1sec
+uint32_t utcUpdateInterval = 1000; //1sec
 uint32_t lastScreenUpdateMillis = 0;
-uint32_t screenUpdateInterval = 5000;//2secs
+uint32_t screenUpdateInterval = 5000; //2secs
 uint32_t lastStatsUpdateMillis = 0;
-uint32_t statsUpdateInterval = 100;//100ms
+uint32_t statsUpdateInterval = 100; //100ms
 uint32_t lastEspUpdateUpdateMillis = 0;
-uint32_t espUpdateInterval = 2500;//seconds1.5
-uint32_t lastHourCheckUpdateMillis = 0;
-uint32_t hourCheckUpdateInterval = 2000;//2 sec
+uint32_t espUpdateInterval = 2500; //seconds1.5
 uint32_t simulatedSecondCounter = 0;
 uint32_t lastSimulatedSecondUpdateMillis = 0;
 uint32_t simulatedSecondUpdateInterval = 1000; //Update every 1 second
 uint8_t simulatedSeconds = 0;
 uint8_t simulatedHourUpdateThresholdSeconds = 55; //when hto start checkign for the new hour or "simulated day"
+uint32_t firstRunTimer = 0;
+bool firstHour = false;
 
 void updateStats() {
     //Time Interrupt - Moved the div/10 to main
@@ -86,7 +86,6 @@ void updateStats() {
     sources.totalEnergy = sources.averagePower * 100 / 1000;
 
     loads.calculateLoadCapacity();
-
 }
 
 void drawTime() {
@@ -96,7 +95,7 @@ void drawTime() {
         utc++;
     }
     timeUTC = gmtime(const_cast<time_t *>(&utc)); //Update time (hopefully)
-    pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()),display.timePos,WHITE,RED, Mash,1);
+    pictorDrawS(reinterpret_cast<const unsigned char *>(timeHandler.returnTime()), display.timePos,WHITE,RED, Mash, 1);
     updateCounter = currentMillis;
 }
 
@@ -117,7 +116,7 @@ void screenCarrousel() {
             lastScreenUpdateMillis = currentMillis - screenUpdateInterval + 5000;
         } else {
             //Subtracted to skip the alternate screens
-            screen = static_cast<Screen>((screenPage + 1) % (SCREEN_COUNT-3) );
+            screen = static_cast<Screen>((screenPage + 1) % (SCREEN_COUNT - 3));
         }
     }
 #endif
@@ -137,7 +136,9 @@ void updateMainStats() {
 
 void checkForHourChange() {
     //Copy all the stats to a temporary store. Array or struct could work
-    const float sourcesStats[4] = {sources.busbarVoltage, sources.busbarCurrent, sources.pvCapacity, sources.windTurbineCapacity};
+    const float sourcesStats[4] = {
+        sources.busbarVoltage, sources.busbarCurrent, sources.pvCapacity, sources.windTurbineCapacity
+    };
     bool loadStats[3] = {loads.currentLoadCall[0], loads.currentLoadCall[1], loads.currentLoadCall[2]};
 
     static float sourceStatsBuffer[4] = {0};
@@ -150,9 +151,9 @@ void checkForHourChange() {
 
     //Calcultae the difference between the two (for sources)
     for (int i = 0; i < 4; i++) {
-        if ((sourceStatsBuffer[i]!=0)&&(sourcesStats[i]!=0)) {
-            percentStatsDifference[i] = (sourcesStats[i] - sourceStatsBuffer[i])/ sourceStatsBuffer[i] * 100;
-            abs(percentStatsDifference[i]) > 2 ? percentStatsDifferenceCount++ : 0;
+        if ((sourceStatsBuffer[i] != 0) && (sourcesStats[i] != 0)) {
+            percentStatsDifference[i] = (sourcesStats[i] - sourceStatsBuffer[i]) / sourceStatsBuffer[i] * 100;
+            abs(percentStatsDifference[i]) > 1 ? percentStatsDifferenceCount++ : 0;
         }
     }
 
@@ -169,13 +170,26 @@ void checkForHourChange() {
         sourceStatsBuffer[i] = sourcesStats[i];
     }
 
-    hourHasChanged = (percentStatsDifferenceCount > 2) || loadStatsDifferent;
-    hourHasChanged = true;
+    hourHasChanged = (percentStatsDifferenceCount > 1) || loadStatsDifferent;
 }
 
-void  controlAlgrithm() {
+void controlAlgrithm() {
     uint32_t currentMillis = millis();
+    sources.calculateTotalAvailableCapacity();
     float availableCapacity = sources.totalRenewableCapacity;
+
+
+    //cant get the first hour to run well so i set it here.
+    if (firstHour) {
+        if (firstRunTimer == 0) {
+            firstRunTimer = currentMillis;
+            simulatedHourUpdateThresholdSeconds = 1;
+        } else if (currentMillis - firstRunTimer >= 1) {
+            hourHasChanged = true;
+            simulatedHourUpdateThresholdSeconds = 55; // Reset to normal
+            firstHour = false;
+        }
+    }
 
     //Simulated time changes with teh correction if undershot and cap it to 60 cause the avr is slower
     if (currentMillis - lastSimulatedSecondUpdateMillis >= simulatedSecondUpdateInterval) {
@@ -203,7 +217,7 @@ void  controlAlgrithm() {
     if (hourHasChanged) {
         if (sources.hourMainsChange != 0) {
             sources.mainsCapacity += sources.hourMainsChange;
-            sources.hourMainsChange= 0;  // Reset
+            sources.hourMainsChange = 0; // Reset
         }
 
         if (sources.hourBatteryChange != 0) {
@@ -227,54 +241,52 @@ void  controlAlgrithm() {
         }
 
         analogueOutput.setMainsCapacity(sources.mainsCapacity);
+        sources.mainsCapacity = 0;
 
         hourCount += 1;
-        //firstDay = false;
-        remainingHours-=1;
+        firstHour = false;
+        remainingHours -= 1;
         hourHasChanged = false;
-        hourChangeStartTime = millis();
     }
-
 
     //Last resort.
     //Turn off loads if the battery capacity, renewables and main can't match the output of the loads required
     //Will need to consider priority into all of these. -- Old remnant i will prob not delete this
-    sources.loadDeficit =  sources.totalAvailableCapacity - loads.totalLoadCapacity;
+    sources.loadDeficit = sources.totalAvailableCapacity - loads.totalLoadCapacity;
 
     //Moving away from Hysterisis, this is getting too complicated to debug and follow but it works and doesnt charge the battery - also aold remnant
     float neededCapacity = 0;
-    //Finds teh needed capacity from the loads to request the main if necessary
-    for (int loadCoumt = 0; loadCoumt < 3; loadCoumt++) {
-        if(!loads.loadOverride[loadCoumt] && loads.currentLoadCall[loadCoumt]) {
-            if(loadCoumt != 0 || (loadCoumt == 0 && (hourCount >= 8 && hourCount <= 22))) {
-                neededCapacity += loads.currentLoadCapacity[loadCoumt];
+    // Finds the needed capacity from the loads to request the mains if necessary
+    for (int loadCount = 0; loadCount < 3; loadCount++) {
+        if (!loads.loadOverride[loadCount] && loads.currentLoadCall[loadCount]) {
+            if (loadCount != 0 || (loadCount == 0 && (hourCount >= 8 && hourCount <= 22))) {
+                neededCapacity += loads.currentLoadCapacity[loadCount];
             }
         }
     }
 
-    //Check iff the battery can be used and if ot call the mains.
-    float mainsRequest = 0;
+    // **Step 1: Check if battery can be used**
+    if (neededCapacity > availableCapacity && sources.batteryCapacity > 0) {
+        sources.requestBattery(true);
+        neededCapacity -= 1;
+        availableCapacity += 1;
+    }
 
-    if (neededCapacity > availableCapacity) {
-        //If we have battery discharge request mains from available energy
-        if (sources.batteryCapacity > 0) {
-            sources.requestBattery(true); //Request battery charge caps battery change with capacity
-            neededCapacity -=1; //transfer the capacity from teh needed to the available
-            availableCapacity +=1;
+    // **Step 2: Re-check if mains is needed after battery discharge**
+    if (neededCapacity > availableCapacity + 0.001f) {
+        float mainsRequest = neededCapacity - availableCapacity;
+
+        // Clamp mains request
+        if (mainsRequest > 2) {
+            mainsRequest = 2;
         }
 
-        mainsRequest = neededCapacity - availableCapacity;
+        sources.requestMains(mainsRequest);
+        availableCapacity += mainsRequest;
+    }
 
-        if (mainsRequest > 0 ) { //clamp the mains
-            if (mainsRequest > 2) {
-                mainsRequest = 2;
-            }
-            sources.requestMains(mainsRequest);
-            availableCapacity += mainsRequest;  // Add mains power to the total
-        }
-    } else {
-        sources.requestMains(0);
-        sources.requestBattery(false); //If not in use disable battery
+    if (sources.batteryCapacity == 0) {
+        sources.requestBattery(false);
     }
 
     //Load calculations
@@ -282,15 +294,15 @@ void  controlAlgrithm() {
         bool shouldTurnOn = false;
 
         // Decide if it should be running
-        if(!loads.loadOverride[loadCoumt] && loads.currentLoadCall[loadCoumt]) {
+        if (!loads.loadOverride[loadCoumt] && loads.currentLoadCall[loadCoumt]) {
             //Additional check for Load 0's time restriction:
-            if(loadCoumt != 0 || (loadCoumt == 0 && (hourCount >= 8 && hourCount <= 22))) {
+            if (loadCoumt != 0 || (loadCoumt == 0 && (hourCount >= 8 && hourCount <= 22))) {
                 // Check if there is sufficient power before turning on the load:
-                if(availableCapacity >= loads.currentLoadCapacity[loadCoumt]) {
+                if (availableCapacity >= loads.currentLoadCapacity[loadCoumt]) {
                     shouldTurnOn = true;
                     availableCapacity -= loads.currentLoadCapacity[loadCoumt];
                 } else {
-                    shouldTurnOn = false;  // Not enough capacity to turn on, overide it
+                    shouldTurnOn = false; // Not enough capacity to turn on, overide it
                     loads.loadOverride[loadCoumt] = true;
                 }
             } else {
@@ -303,8 +315,7 @@ void  controlAlgrithm() {
         // switch the load on or off.
         if (shouldTurnOn) {
             loads.turnLoadOn(loadCoumt + 1);
-        }
-        else {
+        } else {
             loads.turnLoadOff(loadCoumt + 1);
             // reset the load override
             loads.loadOverride[loadCoumt] = false;
@@ -312,31 +323,152 @@ void  controlAlgrithm() {
     }
 
     //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
-    //And check that only the renewable is used by adding the capacity to the cap buffer
+    //And check that only t he renewable is used by adding the capacity to the cap buffer
     //Charge battery if there is available surplus capacity and we do not request for mains in load
-    float availableRenewableEnergy = sources.totalRenewableCapacity - neededCapacity;
-    if (availableRenewableEnergy >= 1) {
+    if (sources.totalRenewableCapacity >= 1) {
         sources.chargeBattery(true); //Charges it by 1A
-    } else {
+    }
+    if (sources.totalRenewableCapacity <= 0.9f) {
         sources.chargeBattery(false);
     }
-
-    //This should check for the available load capacity and the renewables capacity. If not sufficient, it should call the battery.
-    //ultimately if not available it should call the mains as a last option. -- This might be wrong as I should call teh mains if tehre is not enough available capacity and were trying to turn on a load prob
-    // if (sources.loadDeficit<0) {
-    //     if (sources.batteryCapacity > 0) {
-    //         sources.requestBattery(true); // We can only discharge 1A per day
-    //     }  else if (sources.batteryCapacity <= 0 ){
-    //         sources.requestBattery(false);
-    //         if (abs(sources.loadDeficit)>2) {
-    //             sources.loadDeficit=2;
-    //         }
-    //         sources.requestMains(-1 * sources.loadDeficit); //Limit to available capacity
-    //         availableCapacity += sources.mainsCapacity;
-    //     }
-    //     // break; // If the battery can sustain it break the if condition. Do not trust this cause im not sure if i should use break or continue. Will search later. - switched to elif
-    // }
 }
+
+// void controlAlgrithm() {
+//     uint32_t currentMillis = millis();
+//
+//     // ... Simulated time code (as before) ...
+//
+//     sources.calculateTotalAvailableCapacity();
+//     float availableCapacityG = sources.totalRenewableCapacity + sources.batteryCapacity;
+//     float neededCapacity = 0;
+//
+//     // Finds the needed capacity from the loads to request the mains if necessary
+//     for (int loadCount = 0; loadCount < 3; loadCount++) {
+//         if (!loads.loadOverride[loadCount] && loads.currentLoadCall[loadCount]) {
+//             if (loadCount != 0 || (loadCount == 0 && (hourCount >= 8 && hourCount <= 22))) {
+//                 neededCapacity += loads.currentLoadCapacity[loadCount];
+//             }
+//         }
+//     }
+//
+//     // **Step 1: Check if battery can be used**
+//     if (neededCapacity > availableCapacityG && sources.batteryCapacity > 0) {
+//         sources.requestBattery(true);
+//         neededCapacity -= 1;
+//         availableCapacityG -= 1;
+//     } else {
+//         sources.requestBattery(false); //turn of the battery if its not needed
+//     }
+//
+//     // **Step 2: Re-check if mains is needed after battery discharge**
+//     float mainsRequest = 0;
+//
+//     if (neededCapacity > availableCapacityG + 0.001f) {
+//         mainsRequest = neededCapacity - availableCapacityG;
+//
+//         // Clamp mains request
+//         if (mainsRequest > 2) {
+//             mainsRequest = 2;
+//         }
+//     } else {
+//         mainsRequest = 0; //reduce the main capacity if reneweables and battery are avialble
+//     }
+//
+//     sources.requestMains(mainsRequest);
+//
+//     //Now Update this after mains is set.
+//     availableCapacityG = sources.totalRenewableCapacity + mainsRequest;
+//
+//     //Load calculations
+//     for (int loadCoumt = 0; loadCoumt < 3; loadCoumt++) {
+//         bool shouldTurnOn = false;
+//
+//         // Decide if it should be running
+//         if (!loads.loadOverride[loadCoumt] && loads.currentLoadCall[loadCoumt]) {
+//             //Additional check for Load 0's time restriction:
+//             if (loadCoumt != 0 || (loadCoumt == 0 && (hourCount >= 8 && hourCount <= 22))) {
+//                 // Check if there is sufficient power before turning on the load:
+//                 if (availableCapacityG >= loads.currentLoadCapacity[loadCoumt]) {
+//                     shouldTurnOn = true;
+//                     availableCapacityG -= loads.currentLoadCapacity[loadCoumt];
+//                 } else {
+//                     shouldTurnOn = false; // Not enough capacity to turn on, overide it
+//                     loads.loadOverride[loadCoumt] = true;
+//                 }
+//             } else {
+//                 shouldTurnOn = false; // Outside of load0's time window.
+//             }
+//         } else {
+//             shouldTurnOn = false; // There is an overide or no load call. Leave it off
+//         }
+//
+//         // switch the load on or off.
+//         if (shouldTurnOn) {
+//             loads.turnLoadOn(loadCoumt + 1);
+//         } else {
+//             loads.turnLoadOff(loadCoumt + 1);
+//             // reset the load override
+//             loads.loadOverride[loadCoumt] = false;
+//         }
+//     }
+//
+//     //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
+//     //And check that only t he renewable is used by adding the capacity to the cap buffer
+//     //Charge battery if there is available surplus capacity and we do not request for mains in load
+//     if (sources.totalRenewableCapacity >= 1) {
+//         sources.chargeBattery(true); //Charges it by 1A
+//     }
+//     if (sources.totalRenewableCapacity <= 0.9f) {
+//         sources.chargeBattery(false);
+//     }
+//
+//     // // Load Shedding Logic: Prioritize to Minimize Impact on Houses Saved
+//     // if (neededCapacity > availableCapacityG) {
+//     //     float deficit = neededCapacity - availableCapacityG;
+//     //
+//     //     // Array to store the houses lost PER unit of load capacity shed.
+//     //     float housesLostPerCapacity[3] = {0.0f};
+//     //
+//     //     //Calculate houses lost per capacity for each load if its active and not overridden
+//     //     for(int i = 0; i < 3; i++){
+//     //         if (loads.currentLoadCall[i] && !loads.loadOverride[i]){
+//     //              switch(i) {
+//     //                 case 0:  // Pumps (Load 1)
+//     //                     housesLostPerCapacity[i] = 4.0f * hourCount / loads.currentLoadCapacity[i];  //4 * t / loads.currentLoadCapacity[i];
+//     //                     break;
+//     //                 case 1:  // Lifting Equipment (Load 2)
+//     //                     housesLostPerCapacity[i] = 3.0f * hourCount / loads.currentLoadCapacity[i]; // 3 * t / loads.currentLoadCapacity[i];
+//     //                     break;
+//     //                 case 2:  // Lighting (Load 3)
+//     //                     housesLostPerCapacity[i] = 1.0f * hourCount / loads.currentLoadCapacity[i]; // 1 * t / loads.currentLoadCapacity[i];
+//     //                     break;
+//     //             }
+//     //         } else {
+//     //             housesLostPerCapacity[i] = 99.0f;  // Set to a high value so it wont get picked
+//     //         }
+//     //     }
+//     //
+//     //     //Find the maximum losses from the array to turn off in the loadshed
+//     //     int loadToShed = 0;
+//     //     float minLoss = 98.0f;  // Start with a high value
+//     //
+//     //     //Iterate throught array
+//     //     for(int i = 0; i < 3; i++){
+//     //         //Check if current index is active and less than
+//     //         if (housesLostPerCapacity[i] < minLoss){
+//     //             //set the load number that wil be shedded
+//     //             loadToShed = i;
+//     //             //set a new minimum
+//     //             minLoss = housesLostPerCapacity[i];
+//     //         }
+//     //     }
+//     //
+//     //     //Override the load so we do not request anymore or turn on anymore in the calculations
+//     //     loads.loadOverride[loadToShed] = true;
+//     //     //Turn of the load
+//     //     loads.turnLoadOff(loadToShed + 1);
+//     // }
+// }
 
 void updateInfluxDB() {
     uint32_t currentMillis = millis();
@@ -345,18 +477,21 @@ void updateInfluxDB() {
         esp8266Handler.sendDataToWifi();
     }
 }
+
 //ADC ISR
-ISR(ADC_vect){
+ISR(ADC_vect) {
     ADCraw = ADC;
     //ADCVoltage = (ADC * Vref) / 0x3FF; //Moved to main
     ADCConversionFlag = true;
 }
+
 //Counter ISR - Moved to timer0 using milis()
 ISR(TIMER1_COMPA_vect) {
     // PORTC ^= (1 << PC7); //for testing - interrupt doesn't work with functions in it for some reason
     // Counter++;
     //utc++;
 }
+
 //Pin Change ISR
 ISR(PCINT0_vect) {
     // Read Load Calls 1, 2 and 3
@@ -365,11 +500,11 @@ ISR(PCINT0_vect) {
 }
 
 int main() {
-    sei();   //Enable Global interrupts
+    sei(); //Enable Global interrupts
     // debugSerial.println("Starting up...");
     finalizePorts();
     // debugSerial.println("Initialized ports");
-    testLight(1);                              //Boot Light
+    testLight(1); //Boot Light
     // debugSerial.println("Tested light PB6 and enabled global interrupts");
     //usbInit();
     display.startDisplay(false);
@@ -383,9 +518,7 @@ int main() {
     lastUtcUpdateMillis = millis();
     lastScreenUpdateMillis = millis();
     lastStatsUpdateMillis = millis();
-    lastHourCheckUpdateMillis = millis();
     lastEspUpdateUpdateMillis = millis();
-    hourChangeStartTime = millis();
     //Boot and Initialization
     // debugSerial.println("Drawing boot sequence");
     display.drawBootSequence();
@@ -403,15 +536,14 @@ int main() {
     loads.turnLoadOff(1);
     loads.turnLoadOff(2);
     loads.turnLoadOff(3);
-    loads.checkLoadCallChanges();
-    updateMainStats();
-
     // ReSharper disable once CppDFAEndlessLoop - CLion complains about forever while loop
     while (true) {
         drawTime();
-        screenCarrousel();  //screen - variable to give to display.carrouselScreen() below
-        display.carouselScreen(screen); //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
+        screenCarrousel(); //screen - variable to give to display.carrouselScreen() below
+        display.carouselScreen(screen);
+        //Screen - 1. screen (normal carrousel), others - BUSBAR_SCREEN, UART_SCREEN and so o
         updateMainStats();
+        loads.checkLoadCallChanges();
         controlAlgrithm();
         //esp8266Handler.processSerialCommand();
         updateInfluxDB();

@@ -21,17 +21,37 @@ Sources::Sources(AnalogueInput *sourceHandler, AnalogueOutput *mainsHandler, Dig
 
 Sources::~Sources() = default;
 
-void Sources::requestMains(const float mainsCapacityIn) {
-    if (mainsCapacityIn > 0 && hourMainsChange == 0) {
-        hourMainsChange = 1; //Request increase
-    } else if (mainsCapacityIn < 0 && hourMainsChange == 0) {
-        hourMainsChange = -1; //Request decrease
-    }
+void Sources::requestMains(float mainsCapacityIn) {
+    // Clamp the request between 0 and 2
+    if (mainsCapacityIn < 0) mainsCapacityIn = 0;
+    else if (mainsCapacityIn > 2) mainsCapacityIn = 2;
+
+    // Apply the request immediately to mainsCapacity
+    mainsCapacity = mainsCapacityIn;
+
+    // Update the analogue output immediately
+    mainsHandler->setMainsCapacity(mainsCapacity);
 }
+//
+// void requestMains(float request) {
+//     // Clamp the request between 0 and 2
+//     if (request < 0) request = 0;
+//     else if (request > 2) request = 2;
+//
+//     // Apply the request immediately to mainsCapacity
+//     mainsCapacity = request;
+//
+//     // Track hourly change (optional, if needed for logging)
+//     hourMainsChange += request;
+//
+//     // Update the analogue output immediately
+//     analogueOutput.setMainsCapacity(mainsCapacity);
+// }
 
 void Sources::requestBattery(bool requestDischarge) {
     if (batteryCapacity == 0) {
         requestDischarge = false;
+        DigitalOutput::dischargeBattery(false);
     }
     // Only allow a discharge request if no other battery operation is pending
     if (requestDischarge && hourBatteryChange == 0 && batteryCapacity > 0) {
@@ -53,7 +73,7 @@ void Sources::chargeBattery(bool requestCharge) {
             hourBatteryChange = 1; // Request charge
             isBatteryCharging = true;
         }
-    } else if (!requestCharge) {
+    } else {
         DigitalOutput::chargeBattery(false);
     }
 }

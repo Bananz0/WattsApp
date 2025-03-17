@@ -108,13 +108,13 @@ void ESP8266Handler::processSerialCommand() {
         strncpy(const_cast<char *>(uartMessage), receivedData.c_str(), sizeof(uartMessage) - 1); //Sends it to UARTDebugScreen
         if (receivedData.equalsIgnoreCase("hour")) {
             hourHasChanged = true;
-            //Serial.println("Received command: dayHasChanged = true");
+            Serial.println("Received command: dayHasChanged = true");
         } else if (receivedData.equalsIgnoreCase("nohour")) {
             hourHasChanged = false;
-            //Serial.println("Received command: dayHasChanged = false");
+            Serial.println("Received command: dayHasChanged = false");
         } else {
-            //Serial.print("Unknown command: ");
-            //Serial.println(receivedData);
+            Serial.print("Unknown command: ");
+            Serial.println(receivedData);
         }
     }
 }

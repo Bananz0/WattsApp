@@ -32,5 +32,4 @@ volatile char uartMessage[] = "";
 
 volatile bool batteryDecrease = false, batteryIncrease = false;
 
-volatile uint8_t hourCount = 0, remainingHours = 24;
-volatile uint32_t hourChangeStartTime = 0;
+volatile uint8_t hourCount = -2, remainingHours = 24;
