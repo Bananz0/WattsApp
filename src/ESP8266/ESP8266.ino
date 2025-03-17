@@ -25,6 +25,7 @@ ESP8266WiFiMulti wifiMulti;
 // Time zone info
 #define TZ_INFO "UTC0"
 
+const unsigned long DATA_SEND_INTERVAL = 5000; // Send data every 5 seconds
 
 // Declare InfluxDB client instance with preconfigured InfluxCloud certificate
 InfluxDBClient client(INFLUXDB_URL, INFLUXDB_ORG, INFLUXDB_BUCKET, INFLUXDB_TOKEN, InfluxDbCloud2CACert);
@@ -167,6 +168,10 @@ bool validateChecksum(String data) {
   }
 }
 
+unsigned long lastDataSendTime = 0;
+bool dataReadyToSend = false;
+String dataBuffer;
+
 void setup() {
   Serial.begin(115200);
   Serial.setTimeout(50);
@@ -204,6 +209,9 @@ void setup() {
   loadStatus.addTag("POWERSTATS", "load");
   sourcesStatus.addTag("POWERSTATS", "source");
   generalStats.addTag("POWERSTATS", "general");
+
+  lastDataSendTime = millis(); // Initialize last send time
+  WiFi.setSleepMode(WIFI_MODEM_SLEEP);
 }
 
 void processSerialData(String data) {
@@ -215,29 +223,55 @@ void processSerialData(String data) {
   bool isChecksumValid = validateChecksum(data);
 
   if (isChecksumValid) {
-    parseCSVData(data);
-    // Send the data to InfluxDB
-    if (!client.writePoint(sourcesStatus)) {
-      Serial.print("InfluxDB write failed (sources): ");
-      Serial.println(client.getLastErrorMessage());
-      return;  // Don't continue if write fails
-    }
-    if (!client.writePoint(loadStatus)) {
-      Serial.print("InfluxDB write failed (loads): ");
-      Serial.println(client.getLastErrorMessage());
-      return;  // Don't continue if write fails
-    }
-    if (!client.writePoint(generalStats)) {
-      Serial.print("InfluxDB write failed (general): ");
-      Serial.println(client.getLastErrorMessage());
-      return;  // Don't continue if write fails
-    }
-    Serial.println("Sources, Load and General Stats sent");
+    dataBuffer = data; // Stores the parsed data in a buffer
+    dataReadyToSend = true; // sets a flag to send the data
   } else {
     Serial.println("Checksum validation failed, data not sent to InfluxDB.");
   }
 }
 
+void sendDataToInfluxDB() {
+  if (dataReadyToSend) {
+    parseCSVData(dataBuffer);
+
+    // Send the data to InfluxDB
+    bool writeSuccess = true;
+
+    if (!client.writePoint(sourcesStatus)) {
+      Serial.print("InfluxDB write failed (sources): ");
+      Serial.println(client.getLastErrorMessage());
+      writeSuccess = false;
+    }
+    if (!client.writePoint(loadStatus)) {
+      Serial.print("InfluxDB write failed (loads): ");
+      Serial.println(client.getLastErrorMessage());
+      writeSuccess = false;
+    }
+    if (!client.writePoint(generalStats)) {
+      Serial.print("InfluxDB write failed (general): ");
+      Serial.println(client.getLastErrorMessage());
+      writeSuccess = false;
+    }
+
+    if (writeSuccess) {
+      Serial.println("Sources, Load and General Stats sent");
+    }
+
+    // Send WiFi status
+    sensor.clearFields();
+    sensor.addField("rssi", WiFi.RSSI());
+
+    Serial.print("Writing WiFi Status: ");
+    Serial.println(sensor.toLineProtocol());
+
+    if (!client.writePoint(sensor)) {
+      Serial.print("InfluxDB write failed (WiFi Status): ");
+      Serial.println(client.getLastErrorMessage());
+    }
+
+    dataReadyToSend = false; // Reset flag
+  }
+}
 
 void loop() {
   if (wifiMulti.run() != WL_CONNECTED) {
@@ -249,17 +283,10 @@ void loop() {
     processSerialData(data);
   }
 
-  // Send WiFi status periodically
-  sensor.clearFields();
-  sensor.addField("rssi", WiFi.RSSI());
-
-  Serial.print("Writing: ");
-  Serial.println(sensor.toLineProtocol());
-
-  if (!client.writePoint(sensor)) {
-    Serial.print("InfluxDB write failed: ");
-    Serial.println(client.getLastErrorMessage());
+  // Check if it's time to send data
+  if (millis() - lastDataSendTime >= DATA_SEND_INTERVAL && dataReadyToSend) {
+    sendDataToInfluxDB();
+    lastDataSendTime = millis();  // Update last send time
   }
-
-  delay(500);
+  delay(1); // Small delay to allow other tasks to run
 }

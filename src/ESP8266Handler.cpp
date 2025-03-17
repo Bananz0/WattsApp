@@ -43,9 +43,9 @@ void ESP8266Handler::sendDataToWifi() {
     //          loads->currentLoadStatus[1],
     //          loads->currentLoadStatus[2],
     //          //Current Requests
-    //          loads->currentLoad1Call,
-    //          loads->currentLoad2Call,
-    //          loads->currentLoad3Call,
+    //          loads->currentLoadCall[0],
+    //          loads->currentLoadCall[1],
+    //          loads->currentLoadCall[2],
     //          //Load Overicdes for when we can't supply enough power -definitiojn of over engineering.
     //          loads->loadOverride1,
     //          loads->loadOverride2,
@@ -61,7 +61,7 @@ void ESP8266Handler::sendDataToWifi() {
     String dataString = String(sources->windTurbineCapacity, 2) + "," +  //Float, 2 decimal places
                  String(sources->pvCapacity, 2) + "," +           //Float, 2 decimal places
                  String(sources->totalRenewableCapacity, 2) + "," + //Float, 2 decimal places
-                 String(hourCount) + "," +           //Int
+                 String(sources->batteryCapacity) + "," +           //Int
                  String(sources->mainsCapacity, 2) + "," +           //Float, 2 decimal places
                  String(sources->busbarVoltage, 2) + "," +         //Float, 2 decimal places
                  String(sources->busbarCurrent, 2) + "," +         //Float, 2 decimal places
@@ -70,15 +70,16 @@ void ESP8266Handler::sendDataToWifi() {
                  String(loads->currentLoadStatus[0]) + "," +        //Int (bool represented as 0 or 1)
                  String(loads->currentLoadStatus[1]) + "," +        //Int (bool represented as 0 or 1)
                  String(loads->currentLoadStatus[2]) + "," +        //Int (bool represented as 0 or 1)
-                 String(loads->currentLoad1Call) + "," +             //Int (bool represented as 0 or 1)
-                 String(loads->currentLoad2Call) + "," +             //Int (bool represented as 0 or 1)
-                 String(loads->currentLoad3Call) + "," +             //Int (bool represented as 0 or 1)
-                 String(loads->loadOverride1) + "," +              //Int (bool represented as 0 or 1)
-                 String(loads->loadOverride2) + "," +              //Int (bool represented as 0 or 1)
-                 String(loads->loadOverride3) + "," +              //Int (bool represented as 0 or 1)
-                 String(sources->loadDeficit, 2) + "," +           //Float, 2 decimal places
+                 String(loads->currentLoadCall[0]) + "," +             //Int (bool represented as 0 or 1)
+                 String(loads->currentLoadCall[1]) + "," +             //Int (bool represented as 0 or 1)
+                 String(loads->currentLoadCall[2]) + "," +             //Int (bool represented as 0 or 1)
+                 String(loads->loadOverride[0]) + "," +              //Int (bool represented as 0 or 1)
+                 String(loads->loadOverride[1]) + "," +              //Int (bool represented as 0 or 1)
+                 String(loads->loadOverride[2]) + "," +              //Int (bool represented as 0 or 1)
+                 String(sources->loadDeficit, 2) + "," +           //Float, 2 decimal place
+                 // String(sources->totalAvailableCapacity, 2) + "," +           //Float, 2 decimal places
                  String(loads->totalLoadCapacity, 2) + "," +       //Float, 2 decimal places
-                 String(dayCount)+ "," +                                    //Int
+                 String(hourCount)+ "," +                                    //Int
                  String(hourCount);                                     //Int ;
 
     bfs::Fletcher16 chk;
@@ -115,7 +116,7 @@ void ESP8266Handler::processSerialCommand() {
             //Serial.println("Received command: dayHasChanged = false");
         } else {
             //Serial.print("Unknown command: ");
-            Serial.println(receivedData);
+            //Serial.println(receivedData);
         }
     }
 }
