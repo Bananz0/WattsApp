@@ -58,30 +58,30 @@ void ESP8266Handler::sendDataToWifi() {
     //          //timeUTC->tm_mday
     //          );
 
-    String dataString = String(sources->windTurbineCapacity, 2) + "," +  //Float, 2 decimal places
-                 String(sources->pvCapacity, 2) + "," +           //Float, 2 decimal places
-                 String(sources->totalRenewableCapacity, 2) + "," + //Float, 2 decimal places
-                 String(sources->batteryCapacity) + "," +           //Int
-                 String(sources->mainsCapacity, 2) + "," +           //Float, 2 decimal places
-                 String(sources->busbarVoltage, 2) + "," +         //Float, 2 decimal places
-                 String(sources->busbarCurrent, 2) + "," +         //Float, 2 decimal places
-                 String(sources->averagePower, 2) + "," +         //Float, 2 decimal places
-                 String(sources->totalEnergy, 2) + "," +           //Float, 2 decimal places
-                 String(loads->currentLoadStatus[0]) + "," +        //Int (bool represented as 0 or 1)
-                 String(loads->currentLoadStatus[1]) + "," +        //Int (bool represented as 0 or 1)
-                 String(loads->currentLoadStatus[2]) + "," +        //Int (bool represented as 0 or 1)
-                 String(loads->currentLoadCall[0]) + "," +             //Int (bool represented as 0 or 1)
-                 String(loads->currentLoadCall[1]) + "," +             //Int (bool represented as 0 or 1)
-                 String(loads->currentLoadCall[2]) + "," +             //Int (bool represented as 0 or 1)
-                 String(loads->loadOverride[0]) + "," +              //Int (bool represented as 0 or 1)
-                 String(loads->loadOverride[1]) + "," +              //Int (bool represented as 0 or 1)
-                 String(loads->loadOverride[2]) + "," +              //Int (bool represented as 0 or 1)
-                 String(sources->loadDeficit, 2) + "," +           //Float, 2 decimal place
-                 String(loads->totalLoadCapacity, 2) + "," +       //Float, 2 decimal places
-                 String(hourCount);                                     //Int ;
+    String dataString = String(sources->windTurbineCapacity, 2) + "," + //Float, 2 decimal places
+                        String(sources->pvCapacity, 2) + "," + //Float, 2 decimal places
+                        String(sources->totalRenewableCapacity, 2) + "," + //Float, 2 decimal places
+                        String(sources->batteryCapacity) + "," + //Int
+                        String(sources->mainsCapacity, 2) + "," + //Float, 2 decimal places
+                        String(sources->busbarVoltage, 2) + "," + //Float, 2 decimal places
+                        String(sources->busbarCurrent, 2) + "," + //Float, 2 decimal places
+                        String(sources->averagePower, 2) + "," + //Float, 2 decimal places
+                        String(sources->totalEnergy, 2) + "," + //Float, 2 decimal places
+                        String(loads->currentLoadStatus[0]) + "," + //Int (bool represented as 0 or 1)
+                        String(loads->currentLoadStatus[1]) + "," + //Int (bool represented as 0 or 1)
+                        String(loads->currentLoadStatus[2]) + "," + //Int (bool represented as 0 or 1)
+                        String(loads->currentLoadCall[0]) + "," + //Int (bool represented as 0 or 1)
+                        String(loads->currentLoadCall[1]) + "," + //Int (bool represented as 0 or 1)
+                        String(loads->currentLoadCall[2]) + "," + //Int (bool represented as 0 or 1)
+                        String(loads->loadOverride[0]) + "," + //Int (bool represented as 0 or 1)
+                        String(loads->loadOverride[1]) + "," + //Int (bool represented as 0 or 1)
+                        String(loads->loadOverride[2]) + "," + //Int (bool represented as 0 or 1)
+                        String(sources->loadDeficit, 2) + "," + //Float, 2 decimal place
+                        String(loads->totalLoadCapacity, 2) + "," + //Float, 2 decimal places
+                        String(hourCount); //Int ;
 
     bfs::Fletcher16 chk;
-    const uint16_t result = chk.Compute(reinterpret_cast<const uint8_t*>(dataString.c_str()), dataString.length());
+    const uint16_t result = chk.Compute(reinterpret_cast<const uint8_t *>(dataString.c_str()), dataString.length());
     Serial.print(dataString);
     Serial.print("*");
     Serial.println(result, HEX);
@@ -105,7 +105,8 @@ void ESP8266Handler::processSerialCommand() {
     if (Serial.available() > 0) {
         String receivedData = Serial.readStringUntil('\r');
         receivedData.trim();
-        strncpy(const_cast<char *>(uartMessage), receivedData.c_str(), sizeof(uartMessage) - 1); //Sends it to UARTDebugScreen
+        strncpy(const_cast<char *>(uartMessage), receivedData.c_str(), sizeof(uartMessage) - 1);
+        //Sends it to UARTDebugScreen
         if (receivedData.equalsIgnoreCase("hour")) {
             hourHasChanged = true;
             Serial.println("Received command: dayHasChanged = true");

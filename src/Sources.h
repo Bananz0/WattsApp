@@ -17,7 +17,7 @@ public:
     AnalogueOutput *mainsHandler;
     DigitalOutput *batteryHandler;
 
-     float windTurbineCapacity,
+    float windTurbineCapacity,
             pvCapacity,
             totalRenewableCapacity,
             busbarVoltage,
@@ -35,24 +35,28 @@ public:
     float loadDeficit{0};
     bool isBatteryCharging{false}; // to monitor battery charging status for sprite
 
-    Sources(AnalogueInput *sourceHandler, AnalogueOutput *mainsHandler,DigitalOutput *batteryHandler);
+    Sources(AnalogueInput *sourceHandler, AnalogueOutput *mainsHandler, DigitalOutput *batteryHandler);
+
     ~Sources();
 
     void requestMains(float mainsCapacityIn);
+
     void requestBattery(bool requestDischarge);
+
     void chargeBattery(bool requestCharge);
 
     void readTurbineCapacity();
+
     void readPvCapacity();
+
     void readBusbarCurrent();
+
     void readBusbarVoltage();
 
     void calculateTotalAvailableCapacity();
+
     void calculateTotalEnergyAndPower();
-
-
 };
-
 
 
 #endif //SOURCES_H

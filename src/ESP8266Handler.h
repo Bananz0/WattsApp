@@ -17,17 +17,20 @@
 #include <checksum/checksum.h>
 
 class ESP8266Handler {
-  public:
+public:
     ESP8266Handler(Loads *loads, Sources *sources);
+
     ~ESP8266Handler();
 
-    void enableESP();
+    static void enableESP();
+
     void sendDataToWifi();
+
     static void processSerialCommand();
 
-    private:
-      Loads *loads;
-      Sources *sources;
+private:
+    Loads *loads;
+    Sources *sources;
 };
 
 #endif //ESP8266HANDLER_H

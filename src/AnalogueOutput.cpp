@@ -10,7 +10,8 @@ AnalogueOutput::AnalogueOutput(): scaledMainsCapacity(0) {
     pWMHandler.initializePWM();
 }
 
-void AnalogueOutput::setMainsCapacity(float mainsCapacity) { //Set Mains Capacity using PWM from 0 to 10v
+void AnalogueOutput::setMainsCapacity(float mainsCapacity) {
+    //Set Mains Capacity using PWM from 0 to 10v
     // We need to clamp the output from 0-10v and scale it down to 3.3v
     //Voltage Clamp
     if (mainsCapacity < 0.0f) {

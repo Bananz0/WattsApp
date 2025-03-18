@@ -176,7 +176,6 @@ void checkForHourChange() {
 void controlAlgrithm() {
     uint32_t currentMillis = millis();
     sources.calculateTotalAvailableCapacity();
-    float availableCapacity = sources.totalRenewableCapacity;
 
 
     //cant get the first hour to run well so i set it here.
@@ -214,132 +213,134 @@ void controlAlgrithm() {
     //This is not accurate as there is no RTC on the board but could use NTP or add the clock later
     //If the statuses change drastically >10% add 1 to the simulated day. and subtract 1 from the remaining dayCount.
 
-     sources.calculateTotalAvailableCapacity();
-     float availableCapacityG = sources.totalRenewableCapacity + sources.batteryCapacity;
-     float neededCapacity = 0;
+    sources.calculateTotalAvailableCapacity();
+    float availableCapacityG = sources.totalRenewableCapacity + sources.batteryCapacity;
+    float neededCapacity = 0;
 
-     // Finds the needed capacity from the loads to request the mains if necessary
-     for (int loadCount = 0; loadCount < 3; loadCount++) {
-         if (!loads.loadOverride[loadCount] && loads.currentLoadCall[loadCount]) {
-             if (loadCount != 0 || (loadCount == 0 && (hourCount >= 8 && hourCount <= 22))) {
-                 neededCapacity += loads.currentLoadCapacity[loadCount];
-             }
-         }
-     }
+    // Finds the needed capacity from the loads to request the mains if necessary
+    for (int loadCount = 0; loadCount < 3; loadCount++) {
+        if (!loads.loadOverride[loadCount] && loads.currentLoadCall[loadCount]) {
+            if (loadCount != 0 || (loadCount == 0 && (hourCount >= 8 && hourCount <= 22))) {
+                neededCapacity += loads.currentLoadCapacity[loadCount];
+            }
+        }
+    }
 
-     // **Step 1: Check if battery can be used**
-     if (neededCapacity > availableCapacityG && sources.batteryCapacity > 0) {
-         sources.requestBattery(true);
-         neededCapacity -= 1;
-         availableCapacityG -= 1;
-     } else {
-         sources.requestBattery(false); //turn of the battery if its not needed
-     }
+    // **Step 1: Check if battery can be used**
+    if (neededCapacity > availableCapacityG && sources.batteryCapacity > 0) {
+        sources.requestBattery(true);
+        neededCapacity -= 1;
+        availableCapacityG -= 1;
+    } else {
+        sources.requestBattery(false); //turn of the battery if its not needed
+    }
 
     //Check if mains is needed after battery request
-     float mainsRequest = 0;
+    float mainsRequest = 0;
 
-     if (neededCapacity > availableCapacityG + 0.001f) {
-         mainsRequest = neededCapacity - availableCapacityG;
+    if (neededCapacity > availableCapacityG + 0.001f) {
+        mainsRequest = neededCapacity - availableCapacityG;
 
-         // Clamp mains request
-         if (mainsRequest > 2) {
-             mainsRequest = 2;
-         }
-     } else {
-         mainsRequest = 0; //reduce the main capacity if reneweables and battery are avialble
-     }
+        // Clamp mains request
+        if (mainsRequest > 2) {
+            mainsRequest = 2;
+        }
+    } else {
+        mainsRequest = 0; //reduce the main capacity if reneweables and battery are avialble
+    }
 
-     sources.requestMains(mainsRequest);
-     availableCapacityG = sources.totalRenewableCapacity + mainsRequest;
+    sources.requestMains(mainsRequest);
+    availableCapacityG = sources.totalRenewableCapacity + mainsRequest;
 
-     //Load calculations
-     for (int loadCoumt = 0; loadCoumt < 3; loadCoumt++) {
-         bool shouldTurnOn = false;
+    //Load calculations
+    for (int loadCoumt = 0; loadCoumt < 3; loadCoumt++) {
+        bool shouldTurnOn = false;
 
-         // Decide if it should be running
-         if (!loads.loadOverride[loadCoumt] && loads.currentLoadCall[loadCoumt]) {
-             //Additional check for Load 0's time restriction:
-             if (loadCoumt != 0 || (loadCoumt == 0 && (hourCount >= 8 && hourCount <= 22))) {
-                 // Check if there is sufficient power before turning on the load:
-                 if (availableCapacityG >= loads.currentLoadCapacity[loadCoumt]) {
-                     shouldTurnOn = true;
-                     availableCapacityG -= loads.currentLoadCapacity[loadCoumt];
-                 } else {
-                     shouldTurnOn = false; // Not enough capacity to turn on, overide it
-                     loads.loadOverride[loadCoumt] = true;
-                 }
-             } else {
-                 shouldTurnOn = false; // Outside of load0's time window.
-             }
-         } else {
-             shouldTurnOn = false; // There is an overide or no load call. Leave it off
-         }
+        // Decide if it should be running
+        if (!loads.loadOverride[loadCoumt] && loads.currentLoadCall[loadCoumt]) {
+            //Additional check for Load 0's time restriction:
+            if (loadCoumt != 0 || (loadCoumt == 0 && (hourCount >= 8 && hourCount <= 22))) {
+                // Check if there is sufficient power before turning on the load:
+                if (availableCapacityG >= loads.currentLoadCapacity[loadCoumt]) {
+                    shouldTurnOn = true;
+                    availableCapacityG -= loads.currentLoadCapacity[loadCoumt];
+                } else {
+                    shouldTurnOn = false; // Not enough capacity to turn on, overide it
+                    loads.loadOverride[loadCoumt] = true;
+                }
+            } else {
+                shouldTurnOn = false; // Outside of load0's time window.
+            }
+        } else {
+            shouldTurnOn = false; // There is an overide or no load call. Leave it off
+        }
 
-         // switch the load on or off.
-         if (shouldTurnOn) {
-             loads.turnLoadOn(loadCoumt + 1);
-         } else {
-             loads.turnLoadOff(loadCoumt + 1);
-             // reset the load override
-             loads.loadOverride[loadCoumt] = false;
-         }
-     }
+        // switch the load on or off.
+        if (shouldTurnOn) {
+            loads.turnLoadOn(loadCoumt + 1);
+        } else {
+            loads.turnLoadOff(loadCoumt + 1);
+            // reset the load override
+            loads.loadOverride[loadCoumt] = false;
+        }
+    }
 
-     //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
-     //And check that only t he renewable is used by adding the capacity to the cap buffer
-     //Charge battery if there is available surplus capacity and we do not request for mains in load
-     if (sources.totalRenewableCapacity >= 1) {
-         sources.chargeBattery(true); //Charges it by 1A
-     }
-     if (sources.totalRenewableCapacity <= 0.9f) {
-         sources.chargeBattery(false);
-     }
+    //Charge battery if there is available surplus capacity and since we can only charge at 1A per hour
+    //And check that only t he renewable is used by adding the capacity to the cap buffer
+    //Charge battery if there is available surplus capacity and we do not request for mains in load
+    if (sources.totalRenewableCapacity >= 1) {
+        sources.chargeBattery(true); //Charges it by 1A
+    }
+    if (sources.totalRenewableCapacity <= 0.9f) {
+        sources.chargeBattery(false);
+    }
 
-     // tried to implement loadshedding logic according to the emergency scenario nwhich I was unfortgunately unaware of before review day and that did cost us hefty marks
-     if (neededCapacity > availableCapacityG) {
-         float deficit = neededCapacity - availableCapacityG;
+    // tried to implement loadshedding logic according to the emergency scenario nwhich I was unfortgunately unaware of before review day and that did cost us hefty marks
+    if (neededCapacity > availableCapacityG) {
+        // Array to store the houses lost PER unit of load capacity shed.
+        float housesLostPerCapacity[3] = {0.0f};
+        //Calculate houses lost per capacity for each load if its active and not overridden
+        for (int i = 0; i < 3; i++) {
+            if (loads.currentLoadCall[i] && !loads.loadOverride[i]) {
+                switch (i) {
+                    case 0: // Pumps (Load 1)
+                        housesLostPerCapacity[i] = 4.0f * hourCount / loads.currentLoadCapacity[i];
+                    //4 * t / loads.currentLoadCapacity[i];
+                        break;
+                    case 1: // Lifting Equipment (Load 2)
+                        housesLostPerCapacity[i] = 3.0f * hourCount / loads.currentLoadCapacity[i];
+                    // 3 * t / loads.currentLoadCapacity[i];
+                        break;
+                    case 2: // Lighting (Load 3)
+                        housesLostPerCapacity[i] = 1.0f * hourCount / loads.currentLoadCapacity[i];
+                    // 1 * t / loads.currentLoadCapacity[i];
+                        break;
+                    default:
+                        break;
+                }
+            } else {
+                housesLostPerCapacity[i] = 99.0f; // Set to a high value so it wont get picked
+            }
+        }
 
-         // Array to store the houses lost PER unit of load capacity shed.
-         float housesLostPerCapacity[3] = {0.0f};
+        //Find the maximum losses from the array to turn off in the loadshed
+        int loadToShed = 0;
+        float minLoss = 98.0f; // Start with a high value
 
-         //Calculate houses lost per capacity for each load if its active and not overridden
-         for(int i = 0; i < 3; i++){
-             if (loads.currentLoadCall[i] && !loads.loadOverride[i]){
-                  switch(i) {
-                     case 0:  // Pumps (Load 1)
-                         housesLostPerCapacity[i] = 4.0f * hourCount / loads.currentLoadCapacity[i];  //4 * t / loads.currentLoadCapacity[i];
-                         break;
-                     case 1:  // Lifting Equipment (Load 2)
-                         housesLostPerCapacity[i] = 3.0f * hourCount / loads.currentLoadCapacity[i]; // 3 * t / loads.currentLoadCapacity[i];
-                         break;
-                     case 2:  // Lighting (Load 3)
-                         housesLostPerCapacity[i] = 1.0f * hourCount / loads.currentLoadCapacity[i]; // 1 * t / loads.currentLoadCapacity[i];
-                         break;
-                 }
-             } else {
-                 housesLostPerCapacity[i] = 99.0f;  // Set to a high value so it wont get picked
-             }
-         }
+        //Iterate throught array
+        for (int i = 0; i < 3; i++) {
+            //Check if current index is active and less than
+            if (housesLostPerCapacity[i] < minLoss) {
+                //set the load number that wil be shedded
+                loadToShed = i;
+                //set a new minimum
+                minLoss = housesLostPerCapacity[i];
+            }
+        }
 
-         //Find the maximum losses from the array to turn off in the loadshed
-         int loadToShed = 0;
-         float minLoss = 98.0f;  // Start with a high value
-
-         //Iterate throught array
-         for(int i = 0; i < 3; i++){
-             //Check if current index is active and less than
-             if (housesLostPerCapacity[i] < minLoss){
-                 //set the load number that wil be shedded
-                 loadToShed = i;
-                 //set a new minimum
-                 minLoss = housesLostPerCapacity[i];
-             }
-         }
-
-         loads.loadOverride[loadToShed] = true;
-         loads.turnLoadOff(loadToShed + 1);
-     }
+        loads.loadOverride[loadToShed] = true;
+        loads.turnLoadOff(loadToShed + 1);
+    }
 }
 
 void updateInfluxDB() {
